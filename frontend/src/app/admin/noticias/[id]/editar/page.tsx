@@ -88,6 +88,8 @@ export default function EditArticle() {
       setImagePreview(URL.createObjectURL(file));
       setExistingImageUrl(null);
     }
+  };
+
   const handleAdImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
