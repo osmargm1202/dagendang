@@ -23,7 +23,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
-  const categories = ['editorial', 'nacional', 'economia', 'empresas', 'mercados', 'turismo', 'opinion'];
+  const categories = ['editorial', 'economia', 'empresas', 'mercados', 'opinion'];
   const categoryEntries: MetadataRoute.Sitemap = categories.map((slug) => ({
     url: `${BASE_URL}/categoria/${slug}`,
     lastModified: new Date(),

@@ -33,11 +33,9 @@ export default function SiteHeader() {
         <nav className="hidden md:flex gap-6 font-sans font-semibold text-xs tracking-widest items-center">
           <Link href="/" className="hover:text-gray-300 transition-colors">INICIO</Link>
           <Link href="/categoria/editorial" className="hover:text-gray-300 transition-colors">EDITORIAL</Link>
-          <Link href="/categoria/nacional" className="hover:text-gray-300 transition-colors">NACIONAL</Link>
           <Link href="/categoria/economia" className="hover:text-gray-300 transition-colors">ECONOMÍA</Link>
           <Link href="/categoria/empresas" className="hover:text-gray-300 transition-colors">EMPRESAS</Link>
           <Link href="/categoria/mercados" className="hover:text-gray-300 transition-colors">MERCADOS</Link>
-          <Link href="/categoria/turismo" className="hover:text-gray-300 transition-colors">TURISMO</Link>
           <Link href="/categoria/opinion" className="hover:text-gray-300 transition-colors">OPINIÓN</Link>
           
           {isLoggedIn ? (

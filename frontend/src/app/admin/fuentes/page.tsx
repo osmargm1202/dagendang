@@ -132,11 +132,9 @@ export default function AdminSources() {
                    onChange={e => setNewSource({...newSource, category: e.target.value})}
                  >
                     <option value="editorial">Editorial</option>
-                    <option value="nacional">Nacional</option>
                     <option value="economia">Economía</option>
                     <option value="empresas">Empresas</option>
                     <option value="mercados">Mercados</option>
-                    <option value="turismo">Turismo</option>
                     <option value="opinion">Opinión</option>
                  </select>
                </div>
