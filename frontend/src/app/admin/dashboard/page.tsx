@@ -80,6 +80,7 @@ export default function AdminDashboard() {
             </div>
             <div className="flex items-center gap-6">
               <Link href="/admin/fuentes" className="text-sm hover:underline font-medium">Fuentes IA</Link>
+              <Link href="/admin/publicidad" className="text-sm hover:underline font-medium">Publicidad</Link>
               <Link href="/admin/configuracion" className="text-sm hover:underline font-medium">Configuración</Link>
               <span className="text-sm border-r border-blue-400 pr-4">
                 {user.full_name} ({user.role})

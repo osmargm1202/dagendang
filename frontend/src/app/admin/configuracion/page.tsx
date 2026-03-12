@@ -71,6 +71,8 @@ export default function AdminSettings() {
           <Link href="/admin/dashboard" className="font-bold text-xl">La Agenda CMS</Link>
           <div className="flex gap-4 items-center">
              <Link href="/admin/dashboard" className="text-sm hover:underline">Escritorio</Link>
+             <Link href="/admin/fuentes" className="text-sm hover:underline">Fuentes IA</Link>
+             <Link href="/admin/publicidad" className="text-sm hover:underline">Publicidad</Link>
              <button onClick={() => { localStorage.removeItem("admin_token"); router.push("/admin"); }} className="text-sm bg-dr-red px-3 py-1 rounded">Salir</button>
           </div>
         </div>

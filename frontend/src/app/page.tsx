@@ -1,5 +1,5 @@
-import Image from "next/image";
 import Link from "next/link";
+import AdBanner from "@/app/components/AdBanner";
 
 // Always fetch fresh data dynamically
 export const dynamic = 'force-dynamic';
@@ -50,10 +50,8 @@ export default async function Home() {
       {/* Columna Principal - Noticias */}
       <div className="lg:col-span-3 space-y-8">
         
-        {/* Banner Superior Principal (Placeholder Publicidad) */}
-        <div className="w-full bg-gray-200 h-32 flex items-center justify-center border border-gray-300 text-gray-500 font-mono text-sm">
-          [ ESPACIO PUBLICITARIO PREMIUM - 728x90 ]
-        </div>
+        {/* Banner Superior Principal */}
+        <AdBanner position="header" className="mb-2" />
 
         {/* Noticia Principal */}
         {mainArticle ? (
@@ -61,7 +59,7 @@ export default async function Home() {
             <article>
               <div className="w-full aspect-video bg-gray-300 mb-4 relative overflow-hidden flex items-center justify-center">
                  {mainArticle.image_url ? (
-                   <img src={`https://diariodigital.delioserver.duckdns.org${mainArticle.image_url}`} alt={mainArticle.title} className="w-full h-full object-cover" />
+                   <img src={mainArticle.image_url.startsWith('http') ? mainArticle.image_url : `https://diariodigital.delioserver.duckdns.org${mainArticle.image_url}`} alt={mainArticle.title} className="w-full h-full object-cover" />
                  ) : (
                    <span className="text-gray-400">Sin Imagen</span>
                  )}
@@ -99,7 +97,7 @@ export default async function Home() {
                 <article>
                   <div className="w-full aspect-video bg-gray-200 mb-3 overflow-hidden flex items-center justify-center">
                     {article.image_url ? (
-                      <img src={`https://diariodigital.delioserver.duckdns.org${article.image_url}`} alt={article.title} className="w-full h-full object-cover" />
+                      <img src={article.image_url.startsWith('http') ? article.image_url : `https://diariodigital.delioserver.duckdns.org${article.image_url}`} alt={article.title} className="w-full h-full object-cover" />
                     ) : (
                       <span className="text-gray-400 text-sm">Sin Imagen</span>
                     )}
@@ -194,9 +192,7 @@ export default async function Home() {
         </div>
 
         {/* Publicidad Lateral */}
-        <div className="w-full bg-gray-200 aspect-[300/600] flex items-center justify-center border border-gray-300 text-gray-500 font-mono text-sm text-center px-4">
-          [ ESPACIO PUBLICITARIO LATERAL - 300x600 ]
-        </div>
+        <AdBanner position="sidebar_top" />
 
       </aside>
     </div>

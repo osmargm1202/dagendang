@@ -12,6 +12,7 @@ export default function NewArticle() {
   const [author, setAuthor] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
+  const [externalImageUrl, setExternalImageUrl] = useState<string | null>(null);
   const [isPremium, setIsPremium] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -72,6 +73,10 @@ export default function NewArticle() {
         setTitle(data.title);
         setContent(data.content);
         if (data.author) setAuthor(data.author);
+        if (data.image_url) {
+          setExternalImageUrl(data.image_url);
+          setImagePreview(data.image_url);
+        }
         setIsAiLoading(false);
       } else {
         const errorData = await res.json();
@@ -117,6 +122,7 @@ export default function NewArticle() {
     if (file) {
       setImageFile(file);
       setImagePreview(URL.createObjectURL(file));
+      setExternalImageUrl(null); // Clear external URL if user uploads a file
     }
   };
 
@@ -138,6 +144,8 @@ export default function NewArticle() {
         if (!uploadRes.ok) throw new Error("Error al subir la imagen principal.");
         const uploadData = await uploadRes.json();
         uploadedImageUrl = uploadData.url;
+      } else if (externalImageUrl) {
+        uploadedImageUrl = externalImageUrl;
       }
 
       const res = await fetch("/api/articles", {

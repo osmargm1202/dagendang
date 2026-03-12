@@ -6,7 +6,7 @@ class UserBase(BaseModel):
     full_name: Optional[str] = None
     role: str = "editor"
     gemini_api_key: Optional[str] = None
-    gemini_model: str = "gemini-flash-lite-latest"
+    gemini_model: Optional[str] = "gemini-flash-lite-latest"
     is_active: bool = True
 
 class UserCreate(UserBase):

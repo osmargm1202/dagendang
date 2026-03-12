@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import PremiumContentWrapper from "@/app/components/PremiumContentWrapper";
+import AdBanner from "@/app/components/AdBanner";
 
 // Always fetch fresh data dynamically
 export const dynamic = 'force-dynamic';
@@ -98,10 +99,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
             isPremium={article.is_premium} 
         />
 
-        {/* Ad Placeholder Central */}
-        <div className="w-full bg-gray-100 h-32 flex items-center justify-center border border-gray-300 text-gray-500 font-mono text-sm mt-12 mb-8">
-          [ ESPACIO PUBLICITARIO - 728x90 ]
-        </div>
+        {/* Publicidad Central */}
+        <AdBanner position="content_middle" className="mt-12 mb-8" />
       </div>
 
       {/* Sidebar Derecha - Indicadores y Publicidad */}
@@ -173,9 +172,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
         </div>
 
         {/* Publicidad Lateral */}
-        <div className="w-full bg-gray-200 aspect-[300/600] flex items-center justify-center border border-gray-300 text-gray-500 font-mono text-sm text-center px-4">
-          [ ESPACIO PUBLICITARIO LATERAL - 300x600 ]
-        </div>
+        <AdBanner position="sidebar_top" />
 
       </aside>
     </div>

@@ -40,6 +40,7 @@ class NewsCandidate(BaseModel):
     original_published_at: Optional[str] = None
     source_name: str
     category: str
+    image_url: Optional[str] = None
 
 class AIPreviewResponse(BaseModel):
     suggestions: List[NewsCandidate]

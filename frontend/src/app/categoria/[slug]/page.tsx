@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import AdBanner from "@/app/components/AdBanner";
 
 // Always fetch fresh data dynamically
 export const dynamic = 'force-dynamic';
@@ -26,6 +27,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 py-8">
+      <AdBanner position="header" className="mb-10" />
       {/* Breadcrumb & Header */}
       <header className="mb-10 text-center">
         <h1 className="text-4xl md:text-5xl font-serif font-black tracking-widest text-dr-blue uppercase border-b-2 border-dr-red pb-4 inline-block">
@@ -42,7 +44,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
               <article>
                 <div className="w-full aspect-video bg-gray-200 mb-3 overflow-hidden flex items-center justify-center rounded-sm shadow-sm">
                   {article.image_url ? (
-                     <img src={`https://diariodigital.delioserver.duckdns.org${article.image_url}`} alt={article.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                     <img src={article.image_url.startsWith('http') ? article.image_url : `https://diariodigital.delioserver.duckdns.org${article.image_url}`} alt={article.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   ) : (
                     <span className="text-gray-400 text-sm">Sin Imagen</span>
                   )}

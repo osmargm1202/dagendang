@@ -94,13 +94,28 @@ async def fetch_rss_candidates(url: str, source_name: str, category: str):
                     link = link_elem.text.strip() if link_elem is not None and link_elem.text else ""
                     pub_date = pub_elem.text.strip() if pub_elem is not None and pub_elem.text else ""
                     
+                    # Try to find an image in standard RSS tags
+                    image_url = None
+                    enclosure = item.find("enclosure")
+                    if enclosure is not None:
+                        image_url = enclosure.get("url")
+                    
+                    if not image_url:
+                         # Try media:content or media:thumbnail (namespaced)
+                         for media_tag in ["{http://search.yahoo.com/mrss/}content", "{http://search.yahoo.com/mrss/}thumbnail"]:
+                             media = item.find(media_tag)
+                             if media is not None:
+                                 image_url = media.get("url")
+                                 break
+
                     if title and link:
                         candidates.append(NewsCandidate(
                             title=title,
                             source_url=link,
                             original_published_at=pub_date,
                             source_name=source_name,
-                            category=category
+                            category=category,
+                            image_url=image_url
                         ))
     except Exception as e:
         print(f"Error fetching suggestions from {url}: {e}")
@@ -152,8 +167,9 @@ async def generate_article_with_ai(req: AIArticleGenerateRequest, db: Session = 
     if not current_user.gemini_api_key:
         raise HTTPException(status_code=400, detail="Gemini API Key is not configured in your profile.")
 
-    # 1. Fetch content from source URL
+    # 1. Fetch content and image from source URL
     content_to_rewrite = ""
+    extracted_image_url = None
     try:
         async with httpx.AsyncClient(follow_redirects=True, verify=False) as client:
             resp = await client.get(req.source_url, timeout=15.0)
@@ -161,16 +177,37 @@ async def generate_article_with_ai(req: AIArticleGenerateRequest, db: Session = 
                 html = resp.text
                 from bs4 import BeautifulSoup
                 soup = BeautifulSoup(html, 'html.parser')
+                
+                # Image Extraction
+                from urllib.parse import urljoin
+                
+                # Try multiple common meta tags for images
+                og_image = soup.find("meta", attrs={"property": "og:image"}) or soup.find("meta", attrs={"name": "og:image"})
+                twitter_image = soup.find("meta", attrs={"name": "twitter:image"}) or soup.find("meta", attrs={"property": "twitter:image"})
+                image_src = soup.find("link", attrs={"rel": "image_src"})
+                
+                raw_image_url = None
+                if og_image:
+                    raw_image_url = og_image.get("content")
+                elif twitter_image:
+                    raw_image_url = twitter_image.get("content")
+                elif image_src:
+                    raw_image_url = image_src.get("href")
+                
+                if raw_image_url:
+                    # Convert relative to absolute URL
+                    extracted_image_url = urljoin(req.source_url, raw_image_url)
+
+                # Content Extraction
                 for script in soup(["script", "style"]):
                     script.extract()
                 content_to_rewrite = soup.get_text(separator=' ', strip=True)
-                # Reduced to 3000 chars to speed up Gemini 3.1 Pro generation
-                content_to_rewrite = content_to_rewrite[:3000]
+                content_to_rewrite = content_to_rewrite[:3000] 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch original news content: {str(e)}")
 
-    if not content_to_rewrite:
-         raise HTTPException(status_code=400, detail="Could not extract content from the source URL.")
+    if not content_to_rewrite or len(content_to_rewrite) < 100:
+         raise HTTPException(status_code=400, detail="El contenido de la fuente es demasiado corto o inválido.")
 
     # 2. Configure Gemini with new SDK and use user preference
     try:
@@ -228,11 +265,18 @@ async def generate_article_with_ai(req: AIArticleGenerateRequest, db: Session = 
                 title=result_dict.get("title", "Título no generado"),
                 content=result_dict.get("content", "Contenido no generado"),
                 author=result_dict.get("author", "IA La Agenda"),
-                image_url=None
+                image_url=extracted_image_url # Use the extracted image from HTML
             )
         
         # Structured output worked perfectly
-        return response.parsed
+        result = response.parsed
+        
+        # Priority for the real image extracted from HTML
+        if extracted_image_url:
+            result.image_url = extracted_image_url
+            
+        print(f"AI Generation ({model_id}): Title='{result.title[:50]}...', Image='{result.image_url}'")
+        return result
         
     except Exception as e:
         error_msg = str(e)

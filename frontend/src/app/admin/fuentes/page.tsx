@@ -82,6 +82,7 @@ export default function AdminSources() {
           <Link href="/admin/dashboard" className="font-bold text-xl">La Agenda CMS</Link>
           <div className="flex gap-4 items-center">
              <Link href="/admin/dashboard" className="text-sm hover:underline">Escritorio</Link>
+             <Link href="/admin/publicidad" className="text-sm hover:underline">Publicidad</Link>
              <Link href="/admin/configuracion" className="text-sm hover:underline">Configuración</Link>
           </div>
         </div>
