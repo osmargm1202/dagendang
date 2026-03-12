@@ -47,12 +47,12 @@ export default async function AdBanner({ position, className = "" }: AdBannerPro
     : `https://diariodigital.delioserver.duckdns.org${ad.image_url}`;
 
   return (
-    <div className={`w-full overflow-hidden border border-border shadow-sm rounded-sm relative group ${className}`}>
+    <div className={`w-full overflow-hidden border border-border shadow-sm relative group ${className}`}>
       <Link href={ad.link_url} target="_blank" rel="noopener noreferrer" className="block">
         <img 
           src={imageUrl} 
           alt={ad.title} 
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.01]"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
         <div className="absolute top-0 right-0 bg-black/50 text-[10px] text-white px-1 font-sans">
             Publicidad

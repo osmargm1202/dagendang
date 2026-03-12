@@ -187,11 +187,11 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
               rel="noopener noreferrer"
               className="block group"
             >
-              <div className="relative w-full aspect-[16/5] bg-muted rounded-sm overflow-hidden shadow-sm border border-border">
+              <div className="relative w-full aspect-[16/5] bg-muted overflow-hidden shadow-sm border border-border">
                 <img 
                   src={article.ad_image_url.startsWith('http') ? article.ad_image_url : `https://diariodigital.delioserver.duckdns.org${article.ad_image_url}`} 
                   alt="Publicidad" 
-                  className="w-full h-full object-cover group-hover:scale-[1.01] transition-transform duration-500" 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
                 />
                 <div className="absolute top-0 right-0 bg-black/50 text-white text-[10px] px-1 font-sans">
                   Publicidad
