@@ -127,6 +127,12 @@ export default function NewArticle() {
       setImagePreview(URL.createObjectURL(file));
       setExternalImageUrl(null); // Clear external URL if user uploads a file
     }
+  const handleAdImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setAdImageFile(file);
+      setAdImagePreview(URL.createObjectURL(file));
+    }
   };
 
   const submitArticle = async (status: string) => {
