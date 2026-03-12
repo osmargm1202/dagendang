@@ -136,8 +136,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
       {/* Columna Principal - Artículo */}
       <div className="lg:col-span-3">
         {/* Breadcrumb */}
-        <nav className="text-sm text-gray-500 mb-6" aria-label="Breadcrumb">
-          <Link href="/" className="hover:text-dr-blue transition-colors">Volver al Inicio</Link>
+        <nav className="text-sm text-muted-foreground mb-6" aria-label="Breadcrumb">
+          <Link href="/" className="hover:text-dr-blue transition-colors text-muted-foreground">Volver al Inicio</Link>
           <span className="mx-2">&gt;</span>
           <span className="text-dr-red font-semibold uppercase">{article.type}</span>
           {article.is_premium && (
@@ -147,24 +147,24 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
 
         {/* Main Article Image */}
         {article.image_url ? (
-          <div className="w-full aspect-video bg-gray-200 mb-8 rounded-sm shadow-sm overflow-hidden">
+          <div className="w-full aspect-video bg-muted mb-8 rounded-sm shadow-sm overflow-hidden border border-border">
             <img src={article.image_url.startsWith('http') ? article.image_url : `https://diariodigital.delioserver.duckdns.org${article.image_url}`} alt={article.title} className="w-full h-full object-cover" />
           </div>
         ) : (
-          <div className="w-full aspect-video bg-gray-200 mb-8 rounded-sm shadow-sm flex items-center justify-center">
-              <span className="text-gray-400">Sin Imagen</span>
+          <div className="w-full aspect-video bg-muted mb-8 rounded-sm shadow-sm flex items-center justify-center border border-border">
+              <span className="text-muted-foreground">Sin Imagen</span>
           </div>
         )}
 
         {/* Header */}
         <header className="mb-8">
           <span className="text-dr-red font-bold uppercase tracking-wider">{article.type}</span>
-          <h1 className="text-4xl md:text-5xl font-serif font-bold mt-4 leading-tight text-gray-900 border-b border-gray-200 pb-6 mb-6">
+          <h1 className="text-4xl md:text-5xl font-serif font-bold mt-4 leading-tight text-foreground border-b border-border pb-6 mb-6">
             {article.title}
           </h1>
-          <div className="flex items-center justify-between text-gray-600 text-sm">
+          <div className="flex items-center justify-between text-muted-foreground text-sm">
             <div>
-              <span className="font-semibold text-gray-800">Por {article.author || "Redacción"}</span>
+              <span className="font-semibold text-foreground/80">Por {article.author || "Redacción"}</span>
             </div>
             <time dateTime={article.published_at}>
               {new Date(article.published_at).toLocaleDateString('es-DO', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute:'2-digit' })}
@@ -186,68 +186,68 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
       <aside className="space-y-8">
         
         {/* Tasa de Cambio */}
-        <div className="bg-white border border-gray-200 rounded shadow-sm p-5 mt-10 lg:mt-0">
-          <h3 className="font-bold text-lg border-b border-gray-200 pb-2 mb-4 text-dr-blue tracking-wide">TASA DE CAMBIO OFICIAL</h3>
+        <div className="bg-card border border-border rounded shadow-sm p-5 mt-10 lg:mt-0">
+          <h3 className="font-bold text-lg border-b border-border pb-2 mb-4 text-dr-blue tracking-wide">TASA DE CAMBIO OFICIAL</h3>
           
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
-                <span className="font-bold text-gray-800">USD</span>
-                <span className="text-xs text-gray-500">Dólar</span>
+                <span className="font-bold text-foreground">USD</span>
+                <span className="text-xs text-muted-foreground">Dólar</span>
               </div>
               <div className="text-right">
-                <div className="text-sm text-gray-500">Compra: <span className="font-bold text-gray-800">RD$ {rates?.usd_buy?.toFixed(2) || "58.70"}</span></div>
-                <div className="text-sm text-gray-500">Venta: <span className="font-bold text-dr-red">RD$ {rates?.usd_sell?.toFixed(2) || "59.20"}</span></div>
+                <div className="text-sm text-muted-foreground">Compra: <span className="font-bold text-foreground">RD$ {rates?.usd_buy?.toFixed(2) || "58.70"}</span></div>
+                <div className="text-sm text-muted-foreground">Venta: <span className="font-bold text-dr-red">RD$ {rates?.usd_sell?.toFixed(2) || "59.20"}</span></div>
               </div>
             </div>
 
-            <hr className="border-gray-100" />
+            <hr className="border-border/50" />
 
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
-                <span className="font-bold text-gray-800">EUR</span>
-                <span className="text-xs text-gray-500">Euro</span>
+                <span className="font-bold text-foreground">EUR</span>
+                <span className="text-xs text-muted-foreground">Euro</span>
               </div>
               <div className="text-right">
-                <div className="text-sm text-gray-500">Compra: <span className="font-bold text-gray-800">RD$ {rates?.eur_buy?.toFixed(2) || "63.40"}</span></div>
-                <div className="text-sm text-gray-500">Venta: <span className="font-bold text-dr-red">RD$ {rates?.eur_sell?.toFixed(2) || "64.10"}</span></div>
+                <div className="text-sm text-muted-foreground">Compra: <span className="font-bold text-foreground">RD$ {rates?.eur_buy?.toFixed(2) || "63.40"}</span></div>
+                <div className="text-sm text-muted-foreground">Venta: <span className="font-bold text-dr-red">RD$ {rates?.eur_sell?.toFixed(2) || "64.10"}</span></div>
               </div>
             </div>
           </div>
-          <p className="text-xs text-center text-gray-400 mt-4">Fuente: Banco Central de la R.D.</p>
+          <p className="text-xs text-center text-muted-foreground mt-4">Fuente: Banco Central de la R.D.</p>
         </div>
 
         {/* Combustibles */}
-        <div className="bg-white border border-gray-200 rounded shadow-sm p-5">
-          <h3 className="font-bold text-lg border-b border-gray-200 pb-2 mb-4 text-dr-blue tracking-wide">COMBUSTIBLES</h3>
+        <div className="bg-card border border-border rounded shadow-sm p-5">
+          <h3 className="font-bold text-lg border-b border-border pb-2 mb-4 text-dr-blue tracking-wide">COMBUSTIBLES</h3>
           
           <ul className="space-y-3 text-sm">
             <li className="flex justify-between">
-              <span className="text-gray-600">Gasolina Premium</span>
-              <span className="font-bold">RD$ {fuel?.gasoline_premium?.toFixed(2) || "290.10"}</span>
+              <span className="text-muted-foreground">Gasolina Premium</span>
+              <span className="font-bold text-foreground">RD$ {fuel?.gasoline_premium?.toFixed(2) || "290.10"}</span>
             </li>
             <li className="flex justify-between">
-              <span className="text-gray-600">Gasolina Regular</span>
-              <span className="font-bold">RD$ {fuel?.gasoline_regular?.toFixed(2) || "272.50"}</span>
+              <span className="text-muted-foreground">Gasolina Regular</span>
+              <span className="font-bold text-foreground">RD$ {fuel?.gasoline_regular?.toFixed(2) || "272.50"}</span>
             </li>
             <li className="flex justify-between">
-              <span className="text-gray-600">Gasoil Óptimo</span>
-              <span className="font-bold">RD$ {fuel?.diesel_optimum?.toFixed(2) || "239.10"}</span>
+              <span className="text-muted-foreground">Gasoil Óptimo</span>
+              <span className="font-bold text-foreground">RD$ {fuel?.diesel_optimum?.toFixed(2) || "239.10"}</span>
             </li>
             <li className="flex justify-between">
-              <span className="text-gray-600">Gasoil Regular</span>
-              <span className="font-bold">RD$ {fuel?.diesel_regular?.toFixed(2) || "221.60"}</span>
+              <span className="text-muted-foreground">Gasoil Regular</span>
+              <span className="font-bold text-foreground">RD$ {fuel?.diesel_regular?.toFixed(2) || "221.60"}</span>
             </li>
-            <li className="flex justify-between mt-2 pt-2 border-t border-gray-100">
-              <span className="text-gray-600">Gas Licuado (GLP)</span>
-              <span className="font-bold">RD$ {fuel?.glp?.toFixed(2) || "132.60"}</span>
+            <li className="flex justify-between mt-2 pt-2 border-t border-border">
+              <span className="text-muted-foreground">Gas Licuado (GLP)</span>
+              <span className="font-bold text-foreground">RD$ {fuel?.glp?.toFixed(2) || "132.60"}</span>
             </li>
             <li className="flex justify-between">
-              <span className="text-gray-600">Gas Natural Vehicular</span>
-              <span className="font-bold">RD$ {fuel?.gas_natural?.toFixed(2) || "43.90"}</span>
+              <span className="text-muted-foreground">Gas Natural Vehicular</span>
+              <span className="font-bold text-foreground">RD$ {fuel?.gas_natural?.toFixed(2) || "43.90"}</span>
             </li>
           </ul>
-           <p className="text-xs text-center text-gray-400 mt-4">Actualizado semanalmente (MICM)</p>
+           <p className="text-xs text-center text-muted-foreground mt-4">Actualizado semanalmente (MICM)</p>
         </div>
 
         {/* Publicidad Lateral */}

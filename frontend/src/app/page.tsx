@@ -89,17 +89,17 @@ export default async function Home() {
                  ) : (
                    <span className="text-gray-400">Sin Imagen</span>
                  )}
-                 <div className="absolute inset-0 bg-dr-blue/10 group-hover:bg-transparent transition duration-300"></div>
+                  <div className="absolute inset-0 bg-dr-blue/10 group-hover:bg-transparent transition duration-300"></div>
               </div>
               <span className="text-dr-red font-bold uppercase text-xs tracking-wider">{mainArticle.type}</span>
-              <h2 className="text-4xl md:text-5xl font-serif font-bold mt-3 leading-tight text-gray-900 group-hover:text-dr-blue transition-colors">
+              <h2 className="text-4xl md:text-5xl font-serif font-bold mt-3 leading-tight text-foreground group-hover:text-dr-blue transition-colors">
                 {mainArticle.title}
               </h2>
-              <p className="mt-4 text-gray-600 text-lg leading-relaxed">
+              <p className="mt-4 text-muted-foreground text-lg leading-relaxed">
                 {mainArticle.content.substring(0, 150)}...
               </p>
-              <div className="mt-4 text-sm text-gray-500 flex items-center gap-2">
-                <span className="font-semibold text-gray-700">Por {mainArticle.author || "Redacción"}</span>
+              <div className="mt-4 text-sm text-muted-foreground flex items-center gap-2">
+                <span className="font-semibold text-foreground/80">Por {mainArticle.author || "Redacción"}</span>
                 <span>&bull;</span>
                 <span>{new Date(mainArticle.published_at).toLocaleDateString()}</span>
               </div>
@@ -107,13 +107,13 @@ export default async function Home() {
           </Link>
         ) : (
           <article className="group cursor-pointer">
-            <div className="w-full aspect-video bg-gray-300 mb-4 relative overflow-hidden flex items-center justify-center text-gray-500">
+            <div className="w-full aspect-video bg-muted mb-4 relative overflow-hidden flex items-center justify-center text-muted-foreground">
                No hay noticias publicadas
             </div>
           </article>
         )}
 
-        <hr className="border-gray-200" />
+        <hr className="border-border" />
 
         {/* Grid de Noticias Secundarias */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -121,7 +121,7 @@ export default async function Home() {
              secondaryArticles.map((article: any) => (
               <Link href={`/noticias/${article.id}`} key={article.id} className="group cursor-pointer block">
                 <article>
-                  <div className="w-full aspect-video bg-gray-200 mb-3 overflow-hidden flex items-center justify-center">
+                  <div className="w-full aspect-video bg-muted mb-3 overflow-hidden flex items-center justify-center">
                     {article.image_url ? (
                       <img src={article.image_url.startsWith('http') ? article.image_url : `https://diariodigital.delioserver.duckdns.org${article.image_url}`} alt={article.title} className="w-full h-full object-cover" />
                     ) : (
@@ -153,68 +153,68 @@ export default async function Home() {
       <aside className="space-y-8">
         
         {/* Tasa de Cambio */}
-        <div className="bg-white border border-gray-200 rounded shadow-sm p-5">
-          <h3 className="font-bold text-lg border-b border-gray-200 pb-2 mb-4 text-dr-blue tracking-wide">TASA DE CAMBIO OFICIAL</h3>
+        <div className="bg-card border border-border rounded shadow-sm p-5">
+          <h3 className="font-bold text-lg border-b border-border pb-2 mb-4 text-dr-blue tracking-wide">TASA DE CAMBIO OFICIAL</h3>
           
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
-                <span className="font-bold text-gray-800">USD</span>
-                <span className="text-xs text-gray-500">Dólar</span>
+                <span className="font-bold text-foreground">USD</span>
+                <span className="text-xs text-muted-foreground">Dólar</span>
               </div>
               <div className="text-right">
-                <div className="text-sm text-gray-500">Compra: <span className="font-bold text-gray-800">RD$ {rates?.usd_buy?.toFixed(2) || "58.70"}</span></div>
-                <div className="text-sm text-gray-500">Venta: <span className="font-bold text-dr-red">RD$ {rates?.usd_sell?.toFixed(2) || "59.20"}</span></div>
+                <div className="text-sm text-muted-foreground">Compra: <span className="font-bold text-foreground">RD$ {rates?.usd_buy?.toFixed(2) || "58.70"}</span></div>
+                <div className="text-sm text-muted-foreground">Venta: <span className="font-bold text-dr-red">RD$ {rates?.usd_sell?.toFixed(2) || "59.20"}</span></div>
               </div>
             </div>
 
-            <hr className="border-gray-100" />
+            <hr className="border-border/50" />
 
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
-                <span className="font-bold text-gray-800">EUR</span>
-                <span className="text-xs text-gray-500">Euro</span>
+                <span className="font-bold text-foreground">EUR</span>
+                <span className="text-xs text-muted-foreground">Euro</span>
               </div>
               <div className="text-right">
-                <div className="text-sm text-gray-500">Compra: <span className="font-bold text-gray-800">RD$ {rates?.eur_buy?.toFixed(2) || "63.40"}</span></div>
-                <div className="text-sm text-gray-500">Venta: <span className="font-bold text-dr-red">RD$ {rates?.eur_sell?.toFixed(2) || "64.10"}</span></div>
+                <div className="text-sm text-muted-foreground">Compra: <span className="font-bold text-foreground">RD$ {rates?.eur_buy?.toFixed(2) || "63.40"}</span></div>
+                <div className="text-sm text-muted-foreground">Venta: <span className="font-bold text-dr-red">RD$ {rates?.eur_sell?.toFixed(2) || "64.10"}</span></div>
               </div>
             </div>
           </div>
-          <p className="text-xs text-center text-gray-400 mt-4">Fuente: Banco Central de la R.D.</p>
+          <p className="text-xs text-center text-muted-foreground mt-4">Fuente: Banco Central de la R.D.</p>
         </div>
 
         {/* Combustibles */}
-        <div className="bg-white border border-gray-200 rounded shadow-sm p-5">
-          <h3 className="font-bold text-lg border-b border-gray-200 pb-2 mb-4 text-dr-blue tracking-wide">COMBUSTIBLES</h3>
+        <div className="bg-card border border-border rounded shadow-sm p-5">
+          <h3 className="font-bold text-lg border-b border-border pb-2 mb-4 text-dr-blue tracking-wide">COMBUSTIBLES</h3>
           
           <ul className="space-y-3 text-sm">
             <li className="flex justify-between">
-              <span className="text-gray-600">Gasolina Premium</span>
-              <span className="font-bold">RD$ {fuel?.gasoline_premium?.toFixed(2) || "290.10"}</span>
+              <span className="text-muted-foreground">Gasolina Premium</span>
+              <span className="font-bold text-foreground">RD$ {fuel?.gasoline_premium?.toFixed(2) || "290.10"}</span>
             </li>
             <li className="flex justify-between">
-              <span className="text-gray-600">Gasolina Regular</span>
-              <span className="font-bold">RD$ {fuel?.gasoline_regular?.toFixed(2) || "272.50"}</span>
+              <span className="text-muted-foreground">Gasolina Regular</span>
+              <span className="font-bold text-foreground">RD$ {fuel?.gasoline_regular?.toFixed(2) || "272.50"}</span>
             </li>
             <li className="flex justify-between">
-              <span className="text-gray-600">Gasoil Óptimo</span>
-              <span className="font-bold">RD$ {fuel?.diesel_optimum?.toFixed(2) || "239.10"}</span>
+              <span className="text-muted-foreground">Gasoil Óptimo</span>
+              <span className="font-bold text-foreground">RD$ {fuel?.diesel_optimum?.toFixed(2) || "239.10"}</span>
             </li>
             <li className="flex justify-between">
-              <span className="text-gray-600">Gasoil Regular</span>
-              <span className="font-bold">RD$ {fuel?.diesel_regular?.toFixed(2) || "221.60"}</span>
+              <span className="text-muted-foreground">Gasoil Regular</span>
+              <span className="font-bold text-foreground">RD$ {fuel?.diesel_regular?.toFixed(2) || "221.60"}</span>
             </li>
-            <li className="flex justify-between mt-2 pt-2 border-t border-gray-100">
-              <span className="text-gray-600">Gas Licuado (GLP)</span>
-              <span className="font-bold">RD$ {fuel?.glp?.toFixed(2) || "132.60"}</span>
+            <li className="flex justify-between mt-2 pt-2 border-t border-border">
+              <span className="text-muted-foreground">Gas Licuado (GLP)</span>
+              <span className="font-bold text-foreground">RD$ {fuel?.glp?.toFixed(2) || "132.60"}</span>
             </li>
             <li className="flex justify-between">
-              <span className="text-gray-600">Gas Natural Vehicular</span>
-              <span className="font-bold">RD$ {fuel?.gas_natural?.toFixed(2) || "43.90"}</span>
+              <span className="text-muted-foreground">Gas Natural Vehicular</span>
+              <span className="font-bold text-foreground">RD$ {fuel?.gas_natural?.toFixed(2) || "43.90"}</span>
             </li>
           </ul>
-           <p className="text-xs text-center text-gray-400 mt-4">Actualizado semanalmente (MICM)</p>
+           <p className="text-xs text-center text-muted-foreground mt-4">Actualizado semanalmente (MICM)</p>
         </div>
 
         {/* Publicidad Lateral */}

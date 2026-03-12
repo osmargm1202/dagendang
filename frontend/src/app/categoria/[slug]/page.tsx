@@ -53,10 +53,10 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
       <AdBanner position="header" className="mb-10" />
       {/* Breadcrumb & Header */}
       <header className="mb-10 text-center">
-        <h1 className="text-4xl md:text-5xl font-serif font-black tracking-widest text-dr-blue uppercase border-b-2 border-dr-red pb-4 inline-block">
+        <h1 className="text-4xl md:text-5xl font-serif font-black tracking-widest text-dr-blue dark:text-blue-400 uppercase border-b-2 border-dr-red pb-4 inline-block">
           {categoryName}
         </h1>
-        <p className="mt-4 text-gray-500 font-sans tracking-wide">Últimas noticias en {categoryName}</p>
+        <p className="mt-4 text-muted-foreground font-sans tracking-wide">Últimas noticias en {categoryName}</p>
       </header>
 
       {/* Grid de Noticias */}
@@ -69,21 +69,21 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
                   {article.image_url ? (
                      <img src={article.image_url.startsWith('http') ? article.image_url : `https://diariodigital.delioserver.duckdns.org${article.image_url}`} alt={article.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   ) : (
-                    <span className="text-gray-400 text-sm">Sin Imagen</span>
+                    <span className="text-muted-foreground text-sm">Sin Imagen</span>
                   )}
                 </div>
                 <span className="text-dr-red font-bold uppercase text-xs tracking-wider">{article.type}</span>
-                <h3 className="text-xl font-serif font-bold mt-2 leading-snug text-gray-900 group-hover:text-dr-blue transition-colors">
+                <h3 className="text-xl font-serif font-bold mt-2 leading-snug text-foreground group-hover:text-dr-blue transition-colors">
                   {article.title}
                 </h3>
-                <div className="mt-2 text-xs text-gray-500 flex items-center gap-2">
+                <div className="mt-2 text-xs text-muted-foreground flex items-center gap-2">
                   <span>{new Date(article.published_at).toLocaleDateString()}</span>
                 </div>
               </article>
             </Link>
           ))
         ) : (
-          <div className="col-span-full text-center py-20 text-gray-500 text-lg">
+          <div className="col-span-full text-center py-20 text-muted-foreground text-lg">
             No hay noticias publicadas en esta categoría aún.
           </div>
         )}
