@@ -193,7 +193,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
                   alt="Publicidad" 
                   className="w-full h-full object-cover group-hover:scale-[1.01] transition-transform duration-500" 
                 />
-                <div className="absolute top-2 right-2 bg-black/50 text-white text-[10px] px-1.5 py-0.5 rounded-sm font-bold uppercase tracking-widest backdrop-blur-sm">
+                <div className="absolute top-0 right-0 bg-black/50 text-white text-[10px] px-1 font-sans">
                   Publicidad
                 </div>
               </div>

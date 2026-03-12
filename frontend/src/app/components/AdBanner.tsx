@@ -54,7 +54,7 @@ export default async function AdBanner({ position, className = "" }: AdBannerPro
           alt={ad.title} 
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.01]"
         />
-        <div className="absolute top-2 right-2 bg-black/50 text-white text-[10px] px-1.5 py-0.5 rounded-sm font-bold uppercase tracking-widest backdrop-blur-sm">
+        <div className="absolute top-0 right-0 bg-black/50 text-[10px] text-white px-1 font-sans">
             Publicidad
         </div>
       </Link>
