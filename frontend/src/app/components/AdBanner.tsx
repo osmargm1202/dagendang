@@ -36,7 +36,7 @@ export default async function AdBanner({ position, className = "" }: AdBannerPro
     }
 
     return (
-      <div className={`w-full bg-gray-100 flex items-center justify-center border border-gray-200 text-gray-400 font-mono text-xs text-center px-4 ${aspectClass} ${className}`}>
+      <div className={`w-full bg-muted flex items-center justify-center border border-border text-muted-foreground font-mono text-xs text-center px-4 rounded-sm ${aspectClass} ${className}`}>
         [ ESPACIO DISPONIBLE - {dimensions} ]
       </div>
     );
@@ -47,14 +47,14 @@ export default async function AdBanner({ position, className = "" }: AdBannerPro
     : `https://diariodigital.delioserver.duckdns.org${ad.image_url}`;
 
   return (
-    <div className={`w-full overflow-hidden border border-gray-200 shadow-sm relative group ${className}`}>
-      <Link href={ad.link_url} target="_blank" rel="noopener noreferrer">
+    <div className={`w-full overflow-hidden border border-border shadow-sm rounded-sm relative group ${className}`}>
+      <Link href={ad.link_url} target="_blank" rel="noopener noreferrer" className="block">
         <img 
           src={imageUrl} 
           alt={ad.title} 
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.01]"
         />
-        <div className="absolute top-0 right-0 bg-black/50 text-[10px] text-white px-1 font-sans">
+        <div className="absolute top-2 right-2 bg-black/50 text-white text-[10px] px-1.5 py-0.5 rounded-sm font-bold uppercase tracking-widest backdrop-blur-sm">
             Publicidad
         </div>
       </Link>
