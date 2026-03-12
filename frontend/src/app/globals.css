@@ -9,6 +9,8 @@
   --border: #e5e7eb; /* gray-200 */
   --card: #ffffff;
   --card-foreground: #111827;
+  --primary: #002D62; /* dr-blue */
+  --primary-foreground: #ffffff;
 }
 
 .dark {
@@ -20,6 +22,8 @@
   --border: #374151; /* gray-700 */
   --card: #111827; /* gray-900 */
   --card-foreground: #f9fafb;
+  --primary: #60a5fa; /* blue-400 para mejor contraste en fondo negro */
+  --primary-foreground: #000000;
 }
 
 @theme inline {
@@ -31,6 +35,8 @@
   --color-border: var(--border);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
   --color-dr-blue: #002D62;
   --color-dr-red: #C1121F;
   --color-dr-white: #FFFFFF;
@@ -48,6 +54,8 @@
     --border: #374151;
     --card: #111827;
     --card-foreground: #f9fafb;
+    --primary: #60a5fa;
+    --primary-foreground: #000000;
   }
 }
 

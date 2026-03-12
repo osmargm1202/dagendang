@@ -92,7 +92,7 @@ export default async function Home() {
                   <div className="absolute inset-0 bg-dr-blue/10 group-hover:bg-transparent transition duration-300"></div>
               </div>
               <span className="text-dr-red font-bold uppercase text-xs tracking-wider">{mainArticle.type}</span>
-              <h2 className="text-4xl md:text-5xl font-serif font-bold mt-3 leading-tight text-foreground group-hover:text-dr-blue transition-colors">
+              <h2 className="text-4xl md:text-5xl font-serif font-bold mt-3 leading-tight text-foreground group-hover:text-dr-red transition-colors">
                 {mainArticle.title}
               </h2>
               <p className="mt-4 text-muted-foreground text-lg leading-relaxed">
@@ -128,7 +128,7 @@ export default async function Home() {
                       <span className="text-gray-400 text-sm">Sin Imagen</span>
                     )}
                   </div>
-                  <span className="text-dr-blue font-bold uppercase text-xs tracking-wider">{article.type}</span>
+                  <span className="text-primary font-bold uppercase text-xs tracking-wider">{article.type}</span>
                   <h3 className="text-xl font-serif font-bold mt-2 leading-snug group-hover:text-dr-red transition-colors">
                     {article.title}
                   </h3>
@@ -139,7 +139,7 @@ export default async function Home() {
              [1, 2, 3, 4].map((i) => (
               <article key={i} className="group cursor-pointer">
                 <div className="w-full aspect-video bg-gray-200 mb-3"></div>
-                <span className="text-dr-blue font-bold uppercase text-xs tracking-wider">MERCADOS</span>
+                <span className="text-primary font-bold uppercase text-xs tracking-wider">MERCADOS</span>
                 <h3 className="text-xl font-serif font-bold mt-2 leading-snug group-hover:text-dr-red transition-colors">
                   Exportaciones dominicanas hacia EE.UU. crecen un 14% este semestre
                 </h3>
@@ -154,7 +154,7 @@ export default async function Home() {
         
         {/* Tasa de Cambio */}
         <div className="bg-card border border-border rounded shadow-sm p-5">
-          <h3 className="font-bold text-lg border-b border-border pb-2 mb-4 text-dr-blue tracking-wide">TASA DE CAMBIO OFICIAL</h3>
+          <h3 className="font-bold text-lg border-b border-border pb-2 mb-4 text-primary tracking-wide uppercase">TASA DE CAMBIO OFICIAL</h3>
           
           <div className="space-y-4">
             <div className="flex justify-between items-center">
@@ -186,7 +186,7 @@ export default async function Home() {
 
         {/* Combustibles */}
         <div className="bg-card border border-border rounded shadow-sm p-5">
-          <h3 className="font-bold text-lg border-b border-border pb-2 mb-4 text-dr-blue tracking-wide">COMBUSTIBLES</h3>
+          <h3 className="font-bold text-lg border-b border-border pb-2 mb-4 text-primary tracking-wide uppercase">COMBUSTIBLES</h3>
           
           <ul className="space-y-3 text-sm">
             <li className="flex justify-between">

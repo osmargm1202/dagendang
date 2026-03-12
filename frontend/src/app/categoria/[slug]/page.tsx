@@ -73,7 +73,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
                   )}
                 </div>
                 <span className="text-dr-red font-bold uppercase text-xs tracking-wider">{article.type}</span>
-                <h3 className="text-xl font-serif font-bold mt-2 leading-snug text-foreground group-hover:text-dr-blue transition-colors">
+                <h3 className="text-xl font-serif font-bold mt-2 leading-snug text-foreground group-hover:text-dr-red transition-colors">
                   {article.title}
                 </h3>
                 <div className="mt-2 text-xs text-muted-foreground flex items-center gap-2">

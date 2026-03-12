@@ -187,7 +187,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
         
         {/* Tasa de Cambio */}
         <div className="bg-card border border-border rounded shadow-sm p-5 mt-10 lg:mt-0">
-          <h3 className="font-bold text-lg border-b border-border pb-2 mb-4 text-dr-blue tracking-wide">TASA DE CAMBIO OFICIAL</h3>
+          <h3 className="font-bold text-lg border-b border-border pb-2 mb-4 text-primary tracking-wide uppercase">TASA DE CAMBIO OFICIAL</h3>
           
           <div className="space-y-4">
             <div className="flex justify-between items-center">
@@ -219,7 +219,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
 
         {/* Combustibles */}
         <div className="bg-card border border-border rounded shadow-sm p-5">
-          <h3 className="font-bold text-lg border-b border-border pb-2 mb-4 text-dr-blue tracking-wide">COMBUSTIBLES</h3>
+          <h3 className="font-bold text-lg border-b border-border pb-2 mb-4 text-primary tracking-wide uppercase">COMBUSTIBLES</h3>
           
           <ul className="space-y-3 text-sm">
             <li className="flex justify-between">
