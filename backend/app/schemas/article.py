@@ -11,6 +11,8 @@ class ArticleBase(BaseModel):
     image_url: Optional[str] = None
     status: str = "published"
     is_premium: Optional[bool] = False
+    ad_image_url: Optional[str] = None
+    ad_link: Optional[str] = None
     is_active: bool = True
 
 class ArticleCreate(ArticleBase):

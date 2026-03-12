@@ -26,5 +26,7 @@ class Article(Base):
     image_url = Column(String(500), nullable=True)
     status = Column(String(50), default="published")
     is_premium = Column(Boolean, default=False)
+    ad_image_url = Column(String(500), nullable=True)
+    ad_link = Column(String(500), nullable=True)
     published_at = Column(DateTime, default=get_dr_time)
     is_active = Column(Boolean, default=True)

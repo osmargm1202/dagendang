@@ -178,8 +178,35 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
             isPremium={article.is_premium} 
         />
 
-        {/* Publicidad Central */}
-        <AdBanner position="content_middle" className="mt-12 mb-8" />
+        {/* Publicidad del Artículo (Si existe) */}
+        {article.ad_image_url ? (
+          <div className="mt-12 mb-8 border-t border-border pt-8">
+            <Link 
+              href={article.ad_link || "#"} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="block group"
+            >
+              <div className="relative w-full aspect-[16/5] bg-muted rounded-sm overflow-hidden shadow-sm border border-border">
+                <img 
+                  src={article.ad_image_url.startsWith('http') ? article.ad_image_url : `https://diariodigital.delioserver.duckdns.org${article.ad_image_url}`} 
+                  alt="Publicidad" 
+                  className="w-full h-full object-cover group-hover:scale-[1.01] transition-transform duration-500" 
+                />
+                <div className="absolute top-2 right-2 bg-black/50 text-white text-[10px] px-1.5 py-0.5 rounded-sm font-bold uppercase tracking-widest backdrop-blur-sm">
+                  Publicidad
+                </div>
+              </div>
+            </Link>
+          </div>
+        ) : (
+          <div className="mt-12 mb-8 border-t border-border pt-8">
+            <AdBanner position="content_bottom" className="" />
+          </div>
+        )}
+
+        {/* Publicidad Central (General) */}
+        <AdBanner position="content_middle" className="mb-8" />
       </div>
 
       {/* Sidebar Derecha - Indicadores y Publicidad */}
