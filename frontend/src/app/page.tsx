@@ -1,5 +1,31 @@
 import Link from "next/link";
 import AdBanner from "@/app/components/AdBanner";
+import type { Metadata } from 'next';
+
+const BASE_URL = 'https://diariodigital.delioserver.duckdns.org';
+
+export const metadata: Metadata = {
+  title: 'La Agenda | Diario Digital Económico de la República Dominicana',
+  description: 'El portal líder en información económica, tasa de cambio y precios de combustibles en República Dominicana.',
+  alternates: {
+    canonical: BASE_URL,
+  },
+  openGraph: {
+    title: 'La Agenda | Diario Digital Económico',
+    description: 'Información económica, tasas de cambio y combustibles al instante.',
+    url: BASE_URL,
+    siteName: 'La Agenda',
+    images: [
+      {
+        url: `${BASE_URL}/og-main.png`, // Placeholder for future OG image
+        width: 1200,
+        height: 630,
+      },
+    ],
+    locale: 'es_DO',
+    type: 'website',
+  },
+};
 
 // Always fetch fresh data dynamically
 export const dynamic = 'force-dynamic';

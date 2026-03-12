@@ -2,6 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import PremiumContentWrapper from "@/app/components/PremiumContentWrapper";
 import AdBanner from "@/app/components/AdBanner";
+import type { Metadata, ResolvingMetadata } from 'next';
+
+const BASE_URL = 'https://diariodigital.delioserver.duckdns.org';
 
 // Always fetch fresh data dynamically
 export const dynamic = 'force-dynamic';
@@ -42,6 +45,52 @@ async function getFuelPrices() {
   }
 }
 
+export async function generateMetadata(
+  { params }: { params: Promise<{ id: string }> },
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const { id } = await params;
+  const article = await getArticle(id);
+
+  if (!article) return { title: 'Nota no encontrada | La Agenda' };
+
+  const snippet = article.content.substring(0, 160).replace(/\s+/g, ' ').trim() + '...';
+  const imageUrl = article.image_url?.startsWith('http') 
+    ? article.image_url 
+    : `${BASE_URL}${article.image_url}`;
+
+  return {
+    title: `${article.title} | La Agenda`,
+    description: snippet,
+    alternates: {
+      canonical: `${BASE_URL}/noticias/${id}`,
+    },
+    openGraph: {
+      title: article.title,
+      description: snippet,
+      url: `${BASE_URL}/noticias/${id}`,
+      siteName: 'La Agenda',
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+        },
+      ],
+      locale: 'es_DO',
+      type: 'article',
+      publishedTime: article.published_at,
+      authors: [article.author || 'La Agenda'],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: article.title,
+      description: snippet,
+      images: [imageUrl],
+    },
+  };
+}
+
 export default async function ArticlePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const article = await getArticle(id);
@@ -54,6 +103,36 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
+      {/* JSON-LD Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "NewsArticle",
+            "headline": article.title,
+            "image": [
+              article.image_url?.startsWith('http') ? article.image_url : `${BASE_URL}${article.image_url}`
+            ],
+            "datePublished": article.published_at,
+            "dateModified": article.published_at,
+            "author": [{
+                "@type": "Person",
+                "name": article.author || "La Agenda",
+                "url": BASE_URL
+              }],
+            "publisher": {
+              "@type": "Organization",
+              "name": "La Agenda",
+              "logo": {
+                "@type": "ImageObject",
+                "url": `${BASE_URL}/logo.png`
+              }
+            },
+            "description": article.content.substring(0, 160) + "..."
+          })
+        }}
+      />
       {/* Columna Principal - Artículo */}
       <div className="lg:col-span-3">
         {/* Breadcrumb */}

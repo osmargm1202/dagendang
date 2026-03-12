@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import AdBanner from "@/app/components/AdBanner";
+import type { Metadata } from 'next';
+
+const BASE_URL = 'https://diariodigital.delioserver.duckdns.org';
 
 // Always fetch fresh data dynamically
 export const dynamic = 'force-dynamic';
@@ -17,6 +20,26 @@ async function getCategoryArticles(slug: string) {
     console.error("Error fetching articles:", error);
     return [];
   }
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const categoryName = slug.charAt(0).toUpperCase() + slug.slice(1);
+  
+  return {
+    title: `${categoryName} | La Agenda`,
+    description: `Noticias de última hora e información económica sobre ${categoryName} en República Dominicana.`,
+    alternates: {
+      canonical: `${BASE_URL}/categoria/${slug}`,
+    },
+    openGraph: {
+      title: `${categoryName} | La Agenda`,
+      description: `Sigue las últimas noticias de ${categoryName}.`,
+      url: `${BASE_URL}/categoria/${slug}`,
+      locale: 'es_DO',
+      type: 'website',
+    }
+  };
 }
 
 export default async function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
