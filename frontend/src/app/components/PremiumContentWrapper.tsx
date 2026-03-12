@@ -6,9 +6,16 @@ import Link from "next/link";
 interface PremiumContentWrapperProps {
   content: string;
   isPremium: boolean;
+  adImageUrl?: string | null;
+  adLink?: string | null;
 }
 
-export default function PremiumContentWrapper({ content, isPremium }: PremiumContentWrapperProps) {
+export default function PremiumContentWrapper({ 
+  content, 
+  isPremium, 
+  adImageUrl, 
+  adLink 
+}: PremiumContentWrapperProps) {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [isChecking, setIsChecking] = useState(isPremium);
 
@@ -20,7 +27,6 @@ export default function PremiumContentWrapper({ content, isPremium }: PremiumCon
 
     const token = localStorage.getItem("user_token") || localStorage.getItem("admin_token");
     if (token) {
-      // In a real app, we would verify the token role here
       setIsAuthorized(true);
     } else {
       setIsAuthorized(false);
@@ -28,8 +34,7 @@ export default function PremiumContentWrapper({ content, isPremium }: PremiumCon
     setIsChecking(false);
   }, [isPremium]);
 
-  const paragraphs = content.split('\n');
-  const teaserParagraphs = paragraphs.slice(0, 2);
+  const paragraphs = content.split('\n').filter(p => p.trim() !== '');
 
   if (isChecking) {
       return (
@@ -41,7 +46,31 @@ export default function PremiumContentWrapper({ content, isPremium }: PremiumCon
       );
   }
 
+  // Define the Ad Component for internal use
+  const AdComponent = adImageUrl ? (
+    <div className="my-10 overflow-hidden">
+      <a 
+        href={adLink || "#"} 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="block group"
+      >
+        <div className="relative w-full aspect-[16/5] bg-muted overflow-hidden shadow-sm border border-border">
+          <img 
+            src={adImageUrl.startsWith('http') ? adImageUrl : `https://diariodigital.delioserver.duckdns.org${adImageUrl}`} 
+            alt="Publicidad" 
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+          />
+          <div className="absolute top-0 right-0 bg-black/50 text-white text-[10px] px-1 font-sans">
+            Publicidad
+          </div>
+        </div>
+      </a>
+    </div>
+  ) : null;
+
   if (isPremium && !isAuthorized) {
+    const teaserParagraphs = paragraphs.slice(0, 2);
     return (
       <div className="relative">
         <div className="prose prose-lg max-w-none text-foreground leading-relaxed mb-4 opacity-70">
@@ -72,11 +101,20 @@ export default function PremiumContentWrapper({ content, isPremium }: PremiumCon
     );
   }
 
+  // Ad insertion logic for non-premium articles
+  const insertIndex = paragraphs.length > 6 ? 3 : (paragraphs.length >= 3 ? 2 : -1);
+
   return (
     <article className="prose prose-lg max-w-none text-foreground leading-relaxed">
       {paragraphs.map((paragraph, i) => (
-        <p key={i} className="mb-6">{paragraph}</p>
+        <div key={i}>
+          <p className="mb-6">{paragraph}</p>
+          {/* Only insert ad if NOT premium and at the calculated index */}
+          {!isPremium && i === insertIndex && AdComponent}
+        </div>
       ))}
+      {/* If article is too short for mid-insertion, append to bottom if not premium */}
+      {!isPremium && insertIndex === -1 && AdComponent}
     </article>
   );
 }

@@ -172,41 +172,20 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
           </div>
         </header>
 
-        {/* Article Content with Premium logic */}
+        {/* Article Content with Premium logic and In-Content Ads */}
         <PremiumContentWrapper 
             content={article.content} 
             isPremium={article.is_premium} 
+            adImageUrl={article.ad_image_url}
+            adLink={article.ad_link}
         />
 
-        {/* Publicidad del Artículo (Si existe) */}
-        {article.ad_image_url ? (
-          <div className="mt-12 mb-8 border-t border-border pt-8">
-            <Link 
-              href={article.ad_link || "#"} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="block group"
-            >
-              <div className="relative w-full aspect-[16/5] bg-muted overflow-hidden shadow-sm border border-border">
-                <img 
-                  src={article.ad_image_url.startsWith('http') ? article.ad_image_url : `https://diariodigital.delioserver.duckdns.org${article.ad_image_url}`} 
-                  alt="Publicidad" 
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                />
-                <div className="absolute top-0 right-0 bg-black/50 text-white text-[10px] px-1 font-sans">
-                  Publicidad
-                </div>
-              </div>
-            </Link>
-          </div>
-        ) : (
-          <div className="mt-12 mb-8 border-t border-border pt-8">
-            <AdBanner position="content_bottom" className="" />
+        {/* Publicidad Central (Solo para noticias no premium) */}
+        {!article.is_premium && (
+          <div className="mt-8">
+            <AdBanner position="content_middle" className="mb-8" />
           </div>
         )}
-
-        {/* Publicidad Central (General) */}
-        <AdBanner position="content_middle" className="mb-8" />
       </div>
 
       {/* Sidebar Derecha - Indicadores y Publicidad */}
