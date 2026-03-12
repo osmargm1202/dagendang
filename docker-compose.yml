@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: diario_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-diario_digital}
+      TZ: America/Santo_Domingo
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    container_name: diario_backend
+    restart: always
+    ports:
+      - "8080:8000"
+    volumes:
+      - ./backend:/app
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-diario_digital}
+      - TZ=America/Santo_Domingo
+    depends_on:
+      - db
+    # In development, we use reload, no need to specify command here as it's in Dockerfile
+    # uncomment below command if you want to override the CMD from Dockerfile
+    # command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build: ./frontend
+    container_name: diario_frontend
+    restart: always
+    ports:
+      - "3550:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8080
+      - TZ=America/Santo_Domingo
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
