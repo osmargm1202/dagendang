@@ -3,6 +3,7 @@ import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import SiteHeader from "./components/SiteHeader";
 import SiteFooter from "./components/SiteFooter";
+import { ThemeProvider } from "./components/ThemeProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -29,15 +30,17 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body
-        className={`${inter.variable} ${playfair.variable} font-sans antialiased bg-dr-white text-gray-900 min-h-screen flex flex-col`}
+        className={`${inter.variable} ${playfair.variable} font-sans antialiased bg-dr-white text-gray-900 dark:bg-background dark:text-foreground min-h-screen flex flex-col transition-colors duration-300`}
       >
-        <SiteHeader />
-        
-        <main className="flex-1 w-full flex justify-center">
-          {children}
-        </main>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <SiteHeader />
+          
+          <main className="flex-1 w-full flex justify-center">
+            {children}
+          </main>
 
-        <SiteFooter />
+          <SiteFooter />
+        </ThemeProvider>
       </body>
     </html>
   );

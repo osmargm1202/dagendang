@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import ThemeToggle from "./ThemeToggle";
 
 export default function SiteHeader() {
   const pathname = usePathname();
@@ -38,6 +39,10 @@ export default function SiteHeader() {
           <Link href="/categoria/mercados" className="hover:text-gray-300 transition-colors">MERCADOS</Link>
           <Link href="/categoria/opinion" className="hover:text-gray-300 transition-colors">OPINIÓN</Link>
           
+          <div className="ml-2 border-l border-blue-400 pl-4 h-6 flex items-center">
+            <ThemeToggle />
+          </div>
+
           {isLoggedIn ? (
             <div className="flex items-center gap-4 border-l border-blue-400 pl-6 ml-2">
                <button 
