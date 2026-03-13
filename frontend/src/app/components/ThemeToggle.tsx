@@ -24,8 +24,22 @@ export default function ThemeToggle() {
   };
 
   const getIcon = () => {
-    if (theme === "system") return "🌓";
-    return resolvedTheme === "dark" ? "🌙" : "☀️";
+    if (theme === "system") return (
+      <svg className="w-5 h-5 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v18m0-18a9 9 0 110 18m0-18a9 9 0 000 18" />
+        <path d="M12 3a9 9 0 000 18V3z" fill="currentColor" fillOpacity="0.3" stroke="none" />
+      </svg>
+    );
+    return resolvedTheme === "dark" ? (
+      <svg className="w-5 h-5 text-yellow-200 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+      </svg>
+    ) : (
+      <svg className="w-5 h-5 text-orange-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l.707.707M6.343 6.343l.707-.707" />
+        <circle cx="12" cy="12" r="4" strokeWidth={2} />
+      </svg>
+    );
   };
 
   const getLabel = () => {
@@ -36,10 +50,12 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="group flex items-center justify-center p-2 rounded-full border border-blue-400/30 hover:border-white/50 hover:bg-white/10 transition-all duration-500 relative overflow-hidden max-w-[40px] hover:max-w-[120px] gap-0 hover:gap-2 px-3"
+      className="group flex items-center justify-center p-2 rounded-full border border-blue-400/30 hover:border-white/50 hover:bg-white/10 transition-all duration-500 relative overflow-hidden max-w-[40px] hover:max-w-[120px] gap-0 hover:gap-2 px-3 min-h-[40px]"
       title={`Cambiar Tema (Actual: ${getLabel()})`}
     >
-      <span className="text-xl leading-none transition-transform group-active:scale-90 flex-shrink-0">{getIcon()}</span>
+      <div className="transition-transform group-active:scale-90 flex-shrink-0 flex items-center justify-center">
+        {getIcon()}
+      </div>
       <span className="max-w-0 overflow-hidden group-hover:max-w-[80px] text-[10px] font-bold tracking-tighter uppercase opacity-0 group-hover:opacity-100 transition-all duration-500 whitespace-nowrap">
         {getLabel()}
       </span>

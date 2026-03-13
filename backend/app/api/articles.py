@@ -13,13 +13,37 @@ router = APIRouter()
 from typing import List, Optional
 
 @router.get("", response_model=List[ArticleResponse])
-def get_articles(db: Session = Depends(get_db), skip: int = 0, limit: int = 10, status: Optional[str] = None, type: Optional[str] = None):
+def get_articles(
+    db: Session = Depends(get_db), 
+    skip: int = 0, 
+    limit: int = 10, 
+    status: Optional[str] = None, 
+    type: Optional[str] = None,
+    search: Optional[str] = None,
+    published_before: Optional[str] = None,
+    published_after: Optional[str] = None
+):
     query = db.query(Article)
     if status is not None:
         query = query.filter(Article.status == status)
     if type is not None:
         query = query.filter(Article.type == type)
-    articles = query.order_by(Article.published_at.desc()).offset(skip).limit(limit).all()
+    if published_before:
+        query = query.filter(Article.published_at < published_before)
+    if published_after:
+        query = query.filter(Article.published_at > published_after)
+    if search:
+        search_filter = f"%{search}%"
+        query = query.filter(
+            (Article.title.ilike(search_filter)) | 
+            (Article.content.ilike(search_filter))
+        )
+    
+    if published_after:
+        articles = query.order_by(Article.published_at.asc()).offset(skip).limit(limit).all()
+    else:
+        articles = query.order_by(Article.published_at.desc()).offset(skip).limit(limit).all()
+    
     return articles
 
 @router.post("", response_model=ArticleResponse)

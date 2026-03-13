@@ -52,6 +52,12 @@ export default function RegisterPage() {
       if (loginRes.ok) {
         const loginData = await loginRes.json();
         localStorage.setItem("user_token", loginData.access_token);
+        
+        // If user is admin (unlikely during public reg but good for consistency), store as admin_token
+        if (loginData.role === "admin") {
+          localStorage.setItem("admin_token", loginData.access_token);
+        }
+        
         router.push("/");
       } else {
         router.push("/login");

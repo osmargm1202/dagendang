@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import AdminHeader from "../../components/AdminHeader";
 
 export default function AdminSettings() {
   const [user, setUser] = useState<any>(null);
@@ -65,21 +65,11 @@ export default function AdminSettings() {
   if (!user) return <div className="p-10 text-center">Cargando...</div>;
 
   return (
-    <div className="w-full min-h-screen bg-gray-50 uppercase-none">
-      <nav className="bg-dr-blue text-white shadow-md">
-        <div className="max-w-7xl mx-auto px-4 h-16 flex justify-between items-center">
-          <Link href="/admin/dashboard" className="font-bold text-xl">La Agenda CMS</Link>
-          <div className="flex gap-4 items-center">
-             <Link href="/admin/dashboard" className="text-sm hover:underline">Escritorio</Link>
-             <Link href="/admin/fuentes" className="text-sm hover:underline">Fuentes IA</Link>
-             <Link href="/admin/publicidad" className="text-sm hover:underline">Publicidad</Link>
-             <button onClick={() => { localStorage.removeItem("admin_token"); router.push("/admin"); }} className="text-sm bg-dr-red px-3 py-1 rounded">Salir</button>
-          </div>
-        </div>
-      </nav>
+    <div className="w-full min-h-screen bg-gray-50 uppercase-none pb-20">
+      <AdminHeader user={user} currentTitle="Configuración" />
 
-      <main className="max-w-3xl mx-auto py-12 px-4">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Configuración del Sistema</h1>
+      <main className="max-w-3xl mx-auto py-8 md:py-12 px-4">
+        <h1 className="text-2xl md:text-3xl font-black text-gray-900 mb-8 tracking-tight">Configuración del Sistema</h1>
         
         <div className="bg-white p-8 rounded-lg shadow border border-gray-200">
           <h2 className="text-xl font-bold text-dr-blue mb-6 border-b pb-2">Integración con Google Gemini</h2>

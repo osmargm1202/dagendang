@@ -1,12 +1,18 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function SiteFooter() {
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   
   // Hide the public footer in the CMS admin area
-  if (pathname.startsWith("/admin")) {
+  if (!mounted || pathname.startsWith("/admin")) {
     return null;
   }
 

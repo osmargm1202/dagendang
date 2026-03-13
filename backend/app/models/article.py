@@ -14,6 +14,7 @@ class ArticleType(enum.Enum):
     finanzas = "finanzas"
     empresas = "empresas"
     nacional = "nacional"
+    economia = "economia"
 
 class Article(Base):
     __tablename__ = "articles"

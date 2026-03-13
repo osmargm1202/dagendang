@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import PremiumContentWrapper from "@/app/components/PremiumContentWrapper";
 import AdBanner from "@/app/components/AdBanner";
+import SocialShare from "@/app/components/SocialShare";
 import type { Metadata, ResolvingMetadata } from 'next';
 
 const BASE_URL = 'https://diariodigital.delioserver.duckdns.org';
@@ -42,6 +43,38 @@ async function getFuelPrices() {
   } catch (error) {
     console.error("Error fetching fuel prices:", error);
     return null;
+  }
+}
+
+async function getRelatedArticles(type: string, excludeId: string) {
+  try {
+    const res = await fetch(`http://backend:8000/api/articles/?type=${type}&limit=4`, { cache: 'no-store' });
+    if (!res.ok) return [];
+    const articles = await res.json();
+    return Array.isArray(articles) ? articles.filter((a: any) => a.id.toString() !== excludeId).slice(0, 3) : [];
+  } catch (error) {
+    console.error("Error fetching related articles:", error);
+    return [];
+  }
+}
+
+async function getAdjacentNavigation(publishedAt: string) {
+  try {
+    // Next article (published AFTER current)
+    const nextRes = await fetch(`http://backend:8000/api/articles/?status=published&published_after=${encodeURIComponent(publishedAt)}&limit=1`, { cache: 'no-store' });
+    const nextList = nextRes.ok ? await nextRes.json() : [];
+    
+    // Previous article (published BEFORE current)
+    const prevRes = await fetch(`http://backend:8000/api/articles/?status=published&published_before=${encodeURIComponent(publishedAt)}&limit=1`, { cache: 'no-store' });
+    const prevList = prevRes.ok ? await prevRes.json() : [];
+
+    return {
+      next: nextList.length > 0 ? nextList[0] : null,
+      prev: prevList.length > 0 ? prevList[0] : null
+    };
+  } catch (error) {
+    console.error("Error fetching navigation articles:", error);
+    return { next: null, prev: null };
   }
 }
 
@@ -100,6 +133,12 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
   if (!article) {
     notFound();
   }
+
+  const relatedArticles = await getRelatedArticles(article.type, id);
+  const navigation = await getAdjacentNavigation(article.published_at);
+  const articleUrl = `${BASE_URL}/noticias/${id}`;
+  const encodedTitle = encodeURIComponent(article.title);
+  const encodedUrl = encodeURIComponent(articleUrl);
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -180,10 +219,63 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
             adLink={article.ad_link}
         />
 
+        <SocialShare title={article.title} url={articleUrl} />
+
         {/* Publicidad Central (Solo para noticias no premium) */}
         {!article.is_premium && (
           <div className="mt-8">
             <AdBanner position="content_middle" className="mb-8" />
+          </div>
+        )}
+
+        {/* RELATED NEWS SECTION */}
+        {relatedArticles.length > 0 && (
+          <div className="mt-16 pt-12 border-t border-border">
+            <div className="flex justify-between items-center mb-8">
+              <h3 className="text-xl font-black text-foreground flex items-center gap-3 tracking-tighter uppercase">
+                <span className="w-8 h-1 bg-dr-red"></span>
+                Noticias Relacionadas
+              </h3>
+              
+              {/* Navigation Arrows */}
+              <div className="flex gap-2">
+                {navigation.prev && (
+                  <Link 
+                    href={`/noticias/${navigation.prev.id}`} 
+                    className="p-2 border border-border hover:bg-dr-blue hover:text-white transition-colors rounded-sm"
+                    title="Anterior"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7"/></svg>
+                  </Link>
+                )}
+                {navigation.next && (
+                  <Link 
+                    href={`/noticias/${navigation.next.id}`} 
+                    className="p-2 border border-border hover:bg-dr-blue hover:text-white transition-colors rounded-sm"
+                    title="Siguiente"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7"/></svg>
+                  </Link>
+                )}
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {relatedArticles.map((rel: any) => (
+                <Link key={rel.id} href={`/noticias/${rel.id}`} className="group space-y-3">
+                  <div className="aspect-video bg-muted overflow-hidden rounded-sm border border-border">
+                    <img 
+                      src={rel.image_url?.startsWith('http') ? rel.image_url : `${BASE_URL}${rel.image_url}`} 
+                      alt={rel.title} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+                  <span className="block text-[10px] font-bold text-dr-red uppercase tracking-widest">{rel.type}</span>
+                  <h4 className="font-bold text-sm leading-snug group-hover:text-dr-blue transition-colors line-clamp-2">
+                    {rel.title}
+                  </h4>
+                </Link>
+              ))}
+            </div>
           </div>
         )}
       </div>

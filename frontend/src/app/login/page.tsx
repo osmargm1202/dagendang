@@ -36,6 +36,11 @@ export default function LoginPage() {
       const data = await res.json();
       localStorage.setItem("user_token", data.access_token);
       
+      // If user is admin, also store as admin_token for CMS access
+      if (data.role === "admin") {
+        localStorage.setItem("admin_token", data.access_token);
+      }
+      
       router.push("/");
       
     } catch (err: any) {

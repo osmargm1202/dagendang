@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import AdminHeader from "../../components/AdminHeader";
 
 export default function AdminAdsPage() {
     const [user, setUser] = useState<any>(null);
     const [ads, setAds] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
+    const [isAddingNew, setIsAddingNew] = useState(false);
     
     // Form state for new/edit ad
     const [title, setTitle] = useState("");
@@ -101,7 +102,7 @@ export default function AdminAdsPage() {
             if (res.ok) {
                 resetForm();
                 fetchAds();
-                alert(editingId ? "Anuncio actualizado" : "Anuncio creado");
+                setIsAddingNew(false);
             } else {
                 alert("Error al guardar el anuncio.");
             }
@@ -119,6 +120,7 @@ export default function AdminAdsPage() {
         setLinkUrl(ad.link_url);
         setPosition(ad.position);
         setIsActive(ad.is_active);
+        setIsAddingNew(true);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
@@ -150,186 +152,163 @@ export default function AdminAdsPage() {
     if (isLoading || !user) return <div className="p-10 text-center">Cargando...</div>;
 
     return (
-        <div className="w-full min-h-screen bg-gray-50">
-            {/* Nav */}
-            <nav className="bg-dr-blue text-white shadow-md">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between h-16 items-center">
-                        <Link href="/admin/dashboard" className="flex-shrink-0 font-bold text-xl hover:text-white/80 transition-colors">
-                            La Agenda CMS
-                        </Link>
-                        <div className="flex items-center gap-6">
-                            <Link href="/admin/dashboard" className="text-sm hover:underline font-medium opacity-80 hover:opacity-100">Noticias</Link>
-                            <Link href="/admin/fuentes" className="text-sm hover:underline font-medium opacity-80 hover:opacity-100">Fuentes IA</Link>
-                            <Link href="/admin/publicidad" className="text-sm border-b-2 border-white pb-1 font-bold">Publicidad</Link>
-                            <Link href="/admin/configuracion" className="text-sm hover:underline font-medium opacity-80 hover:opacity-100">Configuración</Link>
-                        </div>
-                    </div>
-                </div>
-            </nav>
+        <div className="w-full min-h-screen bg-gray-50 pb-20">
+            <AdminHeader user={user} currentTitle="Publicidad" />
 
-            <main className="max-w-7xl mx-auto py-10 px-4">
+            <main className="max-w-7xl mx-auto py-6 md:py-10 px-4">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 border-b border-gray-200 pb-6">
+                    <h1 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight">Gestión de Publicidad</h1>
+                    {!isAddingNew && (
+                        <button 
+                            onClick={() => { resetForm(); setIsAddingNew(true); }}
+                            className="w-full md:w-auto bg-dr-blue text-white px-6 py-3 rounded-sm shadow-lg hover:bg-blue-900 transition-all font-bold text-center text-sm md:text-base uppercase tracking-widest"
+                        >
+                            + Nuevo Anuncio
+                        </button>
+                    )}
+                </div>
+
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     
                     {/* Formulario */}
-                    <div className="lg:col-span-1">
-                        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 sticky top-10">
-                            <h2 className="text-xl font-bold mb-6 text-gray-900 border-b pb-3">
-                                {editingId ? "Editar Anuncio" : "Nuevo Anuncio"}
-                            </h2>
-                            <form onSubmit={handleSubmit} className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-1">Título Interno (Referencia)</label>
-                                    <input 
-                                        type="text" 
-                                        className="w-full px-3 py-2 border rounded-md focus:ring-dr-blue focus:border-dr-blue" 
-                                        placeholder="Ej: Patrocinio Banco Popular"
-                                        value={title}
-                                        onChange={(e) => setTitle(e.target.value)}
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-1">URL de Destino (Link)</label>
-                                    <input 
-                                        type="url" 
-                                        className="w-full px-3 py-2 border rounded-md focus:ring-dr-blue focus:border-dr-blue" 
-                                        placeholder="https://..."
-                                        value={linkUrl}
-                                        onChange={(e) => setLinkUrl(e.target.value)}
-                                        required
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-1">Posición</label>
-                                    <select 
-                                        className="w-full px-3 py-2 border rounded-md focus:ring-dr-blue focus:border-dr-blue"
-                                        value={position}
-                                        onChange={(e) => setPosition(e.target.value)}
-                                    >
-                                        <option value="header">Superior (728x90)</option>
-                                        <option value="sidebar_top">Lateral Superior (300x250/600)</option>
-                                        <option value="sidebar_bottom">Lateral Inferior</option>
-                                        <option value="content_middle">Dentro de Artículo</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-1">Imagen del Anuncio</label>
-                                    <input 
-                                        type="file" 
-                                        accept="image/*"
-                                        className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-dr-blue/10 file:text-dr-blue hover:file:bg-dr-blue/20"
-                                        onChange={handleImageUpload}
-                                    />
-                                    {imageUrl && (
-                                        <div className="mt-2 p-2 border rounded bg-gray-50">
-                                            <p className="text-[10px] text-gray-400 break-all mb-1">{imageUrl}</p>
-                                            <img src={imageUrl.startsWith('http') ? imageUrl : `https://diariodigital.delioserver.duckdns.org${imageUrl}`} className="max-h-32 mx-auto" alt="Preview"/>
-                                        </div>
-                                    )}
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <input 
-                                        type="checkbox" 
-                                        id="is_active" 
-                                        className="rounded text-dr-blue"
-                                        checked={isActive}
-                                        onChange={(e) => setIsActive(e.target.checked)}
-                                    />
-                                    <label htmlFor="is_active" className="text-sm font-medium text-gray-700">Anuncio Activo</label>
-                                </div>
-                                <div className="pt-4 flex gap-2">
-                                    <button 
-                                        type="submit" 
-                                        disabled={isSaving}
-                                        className="flex-grow bg-dr-red text-white py-2 rounded font-bold hover:bg-dr-red/90 disabled:bg-gray-400 transition-colors"
-                                    >
-                                        {isSaving ? "Guardando..." : editingId ? "Actualizar Anuncio" : "Publicar Anuncio"}
+                    {isAddingNew && (
+                        <div className="lg:col-span-1">
+                            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 sticky top-20 animate-in fade-in slide-in-from-top-4">
+                                <div className="flex justify-between items-center mb-6 border-b pb-3">
+                                    <h2 className="text-xl font-bold text-gray-900">
+                                        {editingId ? "Editar Anuncio" : "Nuevo Anuncio"}
+                                    </h2>
+                                    <button onClick={() => setIsAddingNew(false)} className="text-gray-400 hover:text-gray-600">
+                                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"/></svg>
                                     </button>
-                                    {editingId && (
+                                </div>
+                                <form onSubmit={handleSubmit} className="space-y-4">
+                                    <div>
+                                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Título Interno (Referencia)</label>
+                                        <input 
+                                            type="text" 
+                                            className="w-full px-4 py-2.5 border border-gray-300 rounded focus:ring-2 focus:ring-dr-blue outline-none" 
+                                            placeholder="Ej: Patrocinio Banco Popular"
+                                            value={title}
+                                            onChange={(e) => setTitle(e.target.value)}
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">URL de Destino (Link)</label>
+                                        <input 
+                                            type="url" 
+                                            className="w-full px-4 py-2.5 border border-gray-300 rounded focus:ring-2 focus:ring-dr-blue outline-none" 
+                                            placeholder="https://..."
+                                            value={linkUrl}
+                                            onChange={(e) => setLinkUrl(e.target.value)}
+                                            required
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Posición</label>
+                                        <select 
+                                            className="w-full px-4 py-2.5 border border-gray-300 rounded focus:ring-2 focus:ring-dr-blue outline-none bg-white font-bold"
+                                            value={position}
+                                            onChange={(e) => setPosition(e.target.value)}
+                                        >
+                                            <option value="header">Superior (728x90)</option>
+                                            <option value="sidebar_top">Lateral Superior (300x250/600)</option>
+                                            <option value="sidebar_bottom">Lateral Inferior</option>
+                                            <option value="content_middle">Dentro de Artículo</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Imagen del Anuncio</label>
+                                        <input 
+                                            type="file" 
+                                            accept="image/*"
+                                            className="w-full text-xs text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-sm file:border-0 file:text-[10px] file:font-black file:uppercase file:tracking-widest file:bg-dr-blue/10 file:text-dr-blue hover:file:bg-dr-blue/20"
+                                            onChange={handleImageUpload}
+                                        />
+                                        {imageUrl && (
+                                            <div className="mt-4 p-3 border rounded-sm bg-gray-50 shadow-inner">
+                                                <p className="text-[10px] text-gray-400 break-all mb-2 font-mono">{imageUrl}</p>
+                                                <img src={imageUrl.startsWith('http') ? imageUrl : `https://diariodigital.delioserver.duckdns.org${imageUrl}`} className="max-h-40 mx-auto rounded shadow-sm" alt="Preview"/>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="flex items-center gap-3 p-3 bg-blue-50/50 rounded-sm border border-blue-100">
+                                        <input 
+                                            type="checkbox" 
+                                            id="is_active" 
+                                            className="w-5 h-5 rounded text-dr-blue focus:ring-dr-blue border-gray-300"
+                                            checked={isActive}
+                                            onChange={(e) => setIsActive(e.target.checked)}
+                                        />
+                                        <label htmlFor="is_active" className="text-sm font-bold text-gray-700 cursor-pointer uppercase tracking-tight">Anuncio Activo</label>
+                                    </div>
+                                    <div className="pt-4 flex gap-3">
+                                        <button 
+                                            type="submit" 
+                                            disabled={isSaving}
+                                            className="flex-grow bg-dr-red text-white py-3 rounded-sm font-black uppercase text-xs tracking-widest shadow-lg hover:bg-red-700 transition-all disabled:grayscale active:scale-95"
+                                        >
+                                            {isSaving ? "Guardando..." : editingId ? "Actualizar" : "Publicar"}
+                                        </button>
                                         <button 
                                             type="button" 
-                                            onClick={resetForm}
-                                            className="px-4 py-2 border rounded text-gray-500 hover:bg-gray-50"
+                                            onClick={() => { resetForm(); setIsAddingNew(false); }}
+                                            className="px-6 py-3 border border-gray-300 rounded font-bold text-gray-500 hover:bg-gray-50 text-xs uppercase"
                                         >
-                                            Cancelar
+                                            Cerrar
                                         </button>
-                                    )}
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-
-                    {/* Tabla de Resultados */}
-                    <div className="lg:col-span-2">
-                        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-                            <div className="px-6 py-4 border-b">
-                                <h2 className="text-xl font-bold text-gray-900">Anuncios en Rotación</h2>
+                                    </div>
+                                </form>
                             </div>
-                            <div className="overflow-x-auto">
-                                <table className="min-w-full divide-y divide-gray-200">
-                                    <thead className="bg-gray-50">
-                                        <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Vista</th>
-                                            <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Referencia / Destino</th>
-                                            <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Posición</th>
-                                            <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Estado</th>
-                                            <th className="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase">Acciones</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white divide-y divide-gray-200">
-                                        {ads.map((ad) => (
-                                            <tr key={ad.id} className="hover:bg-gray-50">
-                                                <td className="px-6 py-4">
-                                                    <div className="w-20 h-10 bg-gray-100 rounded overflow-hidden border">
-                                                        <img src={ad.image_url.startsWith('http') ? ad.image_url : `https://diariodigital.delioserver.duckdns.org${ad.image_url}`} className="w-full h-full object-cover" alt=""/>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="text-sm font-bold text-gray-900">{ad.title}</div>
-                                                    <div className="text-xs text-dr-blue truncate max-w-[200px]">{ad.link_url}</div>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    <span className="text-xs font-medium px-2 py-1 bg-gray-100 rounded text-gray-600 uppercase tracking-tighter">
-                                                        {ad.position}
-                                                    </span>
-                                                </td>
-                                                <td className="px-6 py-4">
-                                                    {ad.is_active ? (
-                                                        <span className="text-xs font-bold text-green-600 flex items-center gap-1">
-                                                            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Activo
-                                                        </span>
-                                                    ) : (
-                                                        <span className="text-xs font-bold text-gray-400">Pausado</span>
-                                                    )}
-                                                </td>
-                                                <td className="px-6 py-4 text-right text-sm font-medium">
-                                                    <button 
-                                                        onClick={() => handleEdit(ad)}
-                                                        className="text-dr-blue hover:text-blue-900 mr-4"
-                                                    >
-                                                        Editar
-                                                    </button>
-                                                    <button 
-                                                        onClick={() => handleDelete(ad.id)}
-                                                        className="text-dr-red hover:text-red-900"
-                                                    >
-                                                        Eliminar
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                        {ads.length === 0 && (
-                                            <tr>
-                                                <td colSpan={5} className="px-6 py-10 text-center text-gray-400">No hay anuncios configurados.</td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table>
+                        </div>
+                    )}
+
+                    {/* Tabla de Resultados / Cards */}
+                    <div className={isAddingNew ? "lg:col-span-2" : "lg:col-span-3"}>
+                        <div className="space-y-6">
+                            {/* Listado de Anuncios */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {ads.map((ad) => (
+                                    <div key={ad.id} className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow group">
+                                        <div className="aspect-[21/9] bg-gray-100 relative group overflow-hidden">
+                                            <img 
+                                                src={ad.image_url.startsWith('http') ? ad.image_url : `https://diariodigital.delioserver.duckdns.org${ad.image_url}`} 
+                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+                                                alt={ad.title}
+                                            />
+                                            <div className="absolute top-3 right-3 flex gap-2">
+                                                <span className={`px-2 py-1 rounded-sm text-[9px] font-black uppercase tracking-widest shadow-sm ${ad.is_active ? 'bg-green-500 text-white' : 'bg-gray-400 text-white'}`}>
+                                                    {ad.is_active ? 'Activo' : 'Pausado'}
+                                                </span>
+                                            </div>
+                                            <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity gap-4">
+                                                <button onClick={() => handleEdit(ad)} className="bg-white text-dr-blue p-2 rounded-full shadow hover:scale-110 transition-transform"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>
+                                                <button onClick={() => handleDelete(ad.id)} className="bg-dr-red text-white p-2 rounded-full shadow hover:scale-110 transition-transform"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                                            </div>
+                                        </div>
+                                        <div className="p-4">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <h3 className="font-bold text-gray-900 truncate pr-4">{ad.title}</h3>
+                                                <span className="text-[10px] font-black text-dr-blue uppercase opacity-60 tracking-tighter whitespace-nowrap">{ad.position}</span>
+                                            </div>
+                                            <p className="text-[10px] text-gray-400 font-mono truncate mb-4">{ad.link_url}</p>
+                                            <div className="flex gap-2">
+                                                <button onClick={() => handleEdit(ad)} className="flex-grow py-2 bg-blue-50 text-dr-blue text-[10px] font-black uppercase tracking-widest rounded hover:bg-blue-100 transition-colors">Editar</button>
+                                                <button onClick={() => handleDelete(ad.id)} className="px-4 py-2 bg-red-50 text-dr-red text-[10px] font-black uppercase tracking-widest rounded hover:bg-red-100 transition-colors"><svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                                {ads.length === 0 && (
+                                    <div className="col-span-full py-20 bg-white border border-gray-200 border-dashed rounded-lg text-center">
+                                        <p className="text-gray-400 font-bold uppercase tracking-widest">No hay anuncios configurados</p>
+                                        <button onClick={() => setIsAddingNew(true)} className="mt-4 text-dr-blue font-black hover:underline text-xs">+ CREAR PRIMER ANUNCIO</button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
-
                 </div>
             </main>
         </div>
