@@ -8,6 +8,7 @@ class UserBase(BaseModel):
     gemini_api_key: Optional[str] = None
     gemini_model: Optional[str] = "gemini-flash-lite-latest"
     is_active: bool = True
+    is_premium: bool = False
 
 class UserCreate(UserBase):
     password: str

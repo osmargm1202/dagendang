@@ -12,3 +12,4 @@ class User(Base):
     gemini_api_key = Column(String(255), nullable=True) # Only for admin/dashboard configuration
     gemini_model = Column(String(50), default="gemini-flash-lite-latest")
     is_active = Column(Boolean, default=True)
+    is_premium = Column(Boolean, default=False)

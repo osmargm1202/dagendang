@@ -18,8 +18,29 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "La Agenda - Medio Digital Económico de RD",
-  description: "Portal económico confiable con tasa oficial, precios de combustibles y análisis de alto valor.",
+  title: {
+    default: "La Agenda - Medio Digital Económico de RD",
+    template: "%s | La Agenda"
+  },
+  description: "Portal económico confiable con tasa oficial, precios de combustibles y análisis de alto valor en la República Dominicana.",
+  keywords: ["economía", "República Dominicana", "tasa de cambio", "dólar RD", "combustibles RD", "noticias económicas", "diario digital"],
+  authors: [{ name: "La Agenda" }],
+  creator: "La Agenda",
+  publisher: "La Agenda",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    google: 'google-site-verification-id', // User can replace this later
+  },
 };
 
 export default function RootLayout({

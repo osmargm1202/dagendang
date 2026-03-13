@@ -1,6 +1,8 @@
 import Link from "next/link";
 import AdBanner from "@/app/components/AdBanner";
+import AdGuard from "@/app/components/AdGuard";
 import type { Metadata } from 'next';
+import NewsGrid from "@/app/components/NewsGrid";
 
 const BASE_URL = 'https://diariodigital.delioserver.duckdns.org';
 
@@ -63,21 +65,38 @@ async function getArticles() {
   }
 }
 
+async function getArticlesCount() {
+  try {
+    const res = await fetch('http://backend:8000/api/articles/count?status=published', { cache: 'no-store' });
+    if (!res.ok) return 0;
+    const data = await res.json();
+    return data.total;
+  } catch (error) {
+    console.error("Error fetching articles count:", error);
+    return 0;
+  }
+}
+
+
 export default async function Home() {
   const rates = await getExchangeRates();
   const fuel = await getFuelPrices();
   const articles = await getArticles();
+  const totalArticles = await getArticlesCount();
   
   const mainArticle = articles.length > 0 ? articles[0] : null;
-  const secondaryArticles = articles.length > 1 ? articles.slice(1, 5) : [];
+  const secondaryArticles = articles.length > 1 ? articles.slice(1) : [];
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-4 gap-8">
-      {/* Columna Principal - Noticias */}
-      <div className="lg:col-span-3 space-y-8">
-        
-        {/* Banner Superior Principal */}
-        <AdBanner position="header" className="mb-2" />
+    <div className="w-full max-w-7xl mx-auto px-4 py-8">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        {/* Columna Principal - Noticias */}
+        <div className="lg:col-span-3 space-y-8">
+          
+          {/* Banner Superior Principal - Alineado con noticias */}
+          <AdGuard>
+            <AdBanner position="header" className="mb-2" />
+          </AdGuard>
 
         {/* Noticia Principal */}
         {mainArticle ? (
@@ -115,38 +134,12 @@ export default async function Home() {
 
         <hr className="border-border" />
 
-        {/* Grid de Noticias Secundarias */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-           {secondaryArticles.length > 0 ? (
-             secondaryArticles.map((article: any) => (
-              <Link href={`/noticias/${article.id}`} key={article.id} className="group cursor-pointer block">
-                <article>
-                  <div className="w-full aspect-video bg-muted mb-3 overflow-hidden flex items-center justify-center">
-                    {article.image_url ? (
-                      <img src={article.image_url.startsWith('http') ? article.image_url : `https://diariodigital.delioserver.duckdns.org${article.image_url}`} alt={article.title} className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-gray-400 text-sm">Sin Imagen</span>
-                    )}
-                  </div>
-                  <span className="text-primary font-bold uppercase text-xs tracking-wider">{article.type}</span>
-                  <h3 className="text-xl font-serif font-bold mt-2 leading-snug group-hover:text-dr-red transition-colors">
-                    {article.title}
-                  </h3>
-                </article>
-              </Link>
-             ))
-           ) : (
-             [1, 2, 3, 4].map((i) => (
-              <article key={i} className="group cursor-pointer">
-                <div className="w-full aspect-video bg-gray-200 mb-3"></div>
-                <span className="text-primary font-bold uppercase text-xs tracking-wider">MERCADOS</span>
-                <h3 className="text-xl font-serif font-bold mt-2 leading-snug group-hover:text-dr-red transition-colors">
-                  Exportaciones dominicanas hacia EE.UU. crecen un 14% este semestre
-                </h3>
-              </article>
-             ))
-           )}
-        </div>
+        {/* Grid de Noticias Secundarias con Paginación Dynamica */}
+        <NewsGrid 
+          initialArticles={secondaryArticles} 
+          totalArticles={totalArticles} 
+          pageSize={10} 
+        />
       </div>
 
       {/* Sidebar Derecha - Indicadores y Publicidad */}
@@ -218,9 +211,12 @@ export default async function Home() {
         </div>
 
         {/* Publicidad Lateral */}
-        <AdBanner position="sidebar_top" />
+        <AdGuard>
+          <AdBanner position="sidebar_top" />
+        </AdGuard>
 
       </aside>
     </div>
+  </div>
   );
 }

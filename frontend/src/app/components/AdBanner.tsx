@@ -1,32 +1,63 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
+
+interface Ad {
+  id: string;
+  title: string;
+  image_url: string;
+  link_url: string;
+  position: string;
+  rotation_seconds: number;
+}
 
 interface AdBannerProps {
   position: string;
   className?: string;
 }
 
-async function getAdForPosition(position: string) {
-  try {
-    // We use the interior network URL for server-side fetch
-    const res = await fetch(`http://backend:8000/api/ads?position=${position}&active_only=true`, { cache: 'no-store' });
-    if (!res.ok) return null;
-    const ads = await res.json();
-    if (ads.length === 0) return null;
-    
-    // For now, let's just pick the first one. 
-    // In the future we could implement rotation or random selection.
-    return ads[0];
-  } catch (error) {
-    console.error(`Error fetching ad for ${position}:`, error);
-    return null;
+export default function AdBanner({ position, className = "" }: AdBannerProps) {
+  const [ads, setAds] = useState<Ad[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAds = async () => {
+      try {
+        const res = await fetch(`/api/ads?position=${position}&active_only=true`);
+        if (res.ok) {
+          const data = await res.json();
+          setAds(data);
+        }
+      } catch (error) {
+        console.error(`Error fetching ads for ${position}:`, error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAds();
+  }, [position]);
+
+  useEffect(() => {
+    if (ads.length <= 1) return;
+
+    const currentAd = ads[currentIndex];
+    const intervalTime = (currentAd.rotation_seconds || 5) * 1000;
+
+    const interval = setInterval(() => {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % ads.length);
+    }, intervalTime);
+
+    return () => clearInterval(interval);
+  }, [ads, currentIndex]);
+
+  if (loading) {
+     return <div className={`w-full bg-muted animate-pulse rounded-sm ${position.includes("sidebar") ? "aspect-[300/600]" : "h-32"} ${className}`} />;
   }
-}
 
-export default async function AdBanner({ position, className = "" }: AdBannerProps) {
-  const ad = await getAdForPosition(position);
-
-  if (!ad) {
-    // Placeholder if no ad is found, keeping same dimensions
+  if (ads.length === 0) {
     let dimensions = "728x90";
     let aspectClass = "h-32";
     
@@ -42,20 +73,28 @@ export default async function AdBanner({ position, className = "" }: AdBannerPro
     );
   }
 
+  const ad = ads[currentIndex];
   const imageUrl = ad.image_url.startsWith('http') 
     ? ad.image_url 
     : `https://diariodigital.delioserver.duckdns.org${ad.image_url}`;
 
+  // Strict dimensions for header to prevent layout shift
+  const isHeader = position === 'header';
+  const containerClasses = isHeader 
+    ? "w-full aspect-[4/1] md:aspect-[728/90] mx-auto" 
+    : "w-full";
+
   return (
-    <div className={`w-full overflow-hidden border border-border shadow-sm relative group ${className}`}>
-      <Link href={ad.link_url} target="_blank" rel="noopener noreferrer" className="block">
+    <div className={`overflow-hidden border border-border shadow-sm relative group transition-all duration-1000 ${containerClasses} ${className}`}>
+      <Link href={ad.link_url} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
         <img 
+          key={ad.id}
           src={imageUrl} 
           alt={ad.title} 
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105 animate-in fade-in zoom-in-95 duration-700"
         />
         <div className="absolute top-0 right-0 bg-black/50 text-[10px] text-white px-1 font-sans">
-            Publicidad
+            Publicidad {ads.length > 1 && `(${currentIndex + 1}/${ads.length})`}
         </div>
       </Link>
     </div>

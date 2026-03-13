@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import PremiumContentWrapper from "@/app/components/PremiumContentWrapper";
 import AdBanner from "@/app/components/AdBanner";
+import AdGuard from "@/app/components/AdGuard";
 import SocialShare from "@/app/components/SocialShare";
 import type { Metadata, ResolvingMetadata } from 'next';
 
@@ -223,9 +224,11 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
 
         {/* Publicidad Central (Solo para noticias no premium) */}
         {!article.is_premium && (
-          <div className="mt-8">
-            <AdBanner position="content_middle" className="mb-8" />
-          </div>
+          <AdGuard>
+            <div className="mt-8">
+              <AdBanner position="content_middle" className="mb-8" />
+            </div>
+          </AdGuard>
         )}
 
         {/* RELATED NEWS SECTION */}
@@ -349,7 +352,9 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
         </div>
 
         {/* Publicidad Lateral */}
-        <AdBanner position="sidebar_top" />
+        <AdGuard>
+          <AdBanner position="sidebar_top" />
+        </AdGuard>
 
       </aside>
     </div>

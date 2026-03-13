@@ -6,8 +6,9 @@ import Link from "next/link";
 import AdminHeader from "../../components/AdminHeader";
 
 export default function AdminDashboard() {
-  const [user, setUser] = useState<{ full_name: string; email: string; role: string } | null>(null);
+  const [user, setUser] = useState<{ full_name: string; email: string; role: string; is_premium: boolean } | null>(null);
   const [articles, setArticles] = useState<any[]>([]);
+  const [isPremium, setIsPremium] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -27,7 +28,10 @@ export default function AdminDashboard() {
       if (!res.ok) throw new Error("Invalid token");
       return res.json();
     })
-    .then(data => setUser(data))
+    .then(data => {
+      setUser(data);
+      setIsPremium(data.is_premium);
+    })
     .catch(() => {
       localStorage.removeItem("admin_token");
       router.push("/admin");
@@ -40,6 +44,35 @@ export default function AdminDashboard() {
     .catch(err => console.error(err));
 
   }, [router]);
+
+  const togglePremium = async () => {
+    console.log("Toggle Premium clicked");
+    const token = localStorage.getItem("admin_token");
+    if (!token) {
+        console.error("No admin token found");
+        return;
+    }
+    try {
+      console.log("Sending POST /api/subscriptions/toggle-premium");
+      const res = await fetch("/api/subscriptions/toggle-premium", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      console.log("Response status:", res.status);
+      if (res.ok) {
+        const data = await res.json();
+        console.log("New premium status:", data.is_premium);
+        setIsPremium(data.is_premium);
+      } else {
+        const errorText = await res.text();
+        console.error("API Error:", errorText);
+      }
+    } catch (err) {
+      console.error("Fetch error:", err);
+    }
+  };
 
   const handleDelete = async (id: number) => {
     if (!confirm("¿Estás seguro de que deseas eliminar permanentemente esta noticia?")) return;
@@ -72,7 +105,18 @@ export default function AdminDashboard() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto py-6 md:py-10 px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 border-b border-gray-200 pb-6">
-          <h1 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight">Noticias Publicadas</h1>
+          <div className="flex items-center gap-6">
+            <h1 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight">Noticias Publicadas</h1>
+            <div className="flex items-center gap-2 bg-white border border-gray-200 px-4 py-2 rounded-full shadow-sm">
+              <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Modo Premium</span>
+              <button 
+                onClick={togglePremium}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${isPremium ? 'bg-dr-blue' : 'bg-gray-200'}`}
+              >
+                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isPremium ? 'translate-x-6' : 'translate-x-1'}`} />
+              </button>
+            </div>
+          </div>
           <Link href="/admin/noticias/nuevo" className="w-full md:w-auto bg-dr-blue text-white px-6 py-3 rounded-sm shadow-lg hover:bg-blue-900 transition-all font-bold text-center text-sm md:text-base uppercase tracking-widest">
             + Nuevo Artículo
           </Link>
@@ -83,11 +127,16 @@ export default function AdminDashboard() {
             <div key={article.id} className="bg-white p-5 rounded-lg border border-gray-200 shadow-sm">
               <div className="flex justify-between items-start mb-3">
                 <span className="text-[10px] font-bold text-dr-red uppercase tracking-wider">{article.type}</span>
-                <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${article.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                  {article.status === 'published' ? 'Publicado' : 'Borrador'}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${article.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                    {article.status === 'published' ? 'Publicado' : 'Borrador'}
+                  </span>
+                  {article.is_premium && <span className="text-xs" title="Contenido Premium">💎</span>}
+                </div>
               </div>
-              <h3 className="font-bold text-gray-900 mb-2 leading-tight">{article.title}</h3>
+              <h3 className="font-bold text-gray-900 mb-2 leading-tight">
+                {article.title}
+              </h3>
               <div className="flex items-center justify-between text-[11px] text-gray-500 mb-4 pb-4 border-b border-gray-100">
                 <span>{article.author || 'Redacción'}</span>
                 <span>{new Date(article.published_at).toLocaleDateString('es-DO')}</span>
@@ -133,7 +182,9 @@ export default function AdminDashboard() {
                 {Array.isArray(articles) && articles.map((article) => (
                   <tr key={article.id} className="hover:bg-blue-50/50 transition-colors">
                     <td className="px-6 py-5">
-                      <div className="text-sm font-bold text-gray-900 max-w-xs truncate">{article.title}</div>
+                      <div className="text-sm font-bold text-gray-900 max-w-xs truncate">
+                        {article.title}
+                      </div>
                     </td>
                     <td className="px-6 py-5">
                       <span className="text-[10px] text-dr-red font-bold uppercase tracking-wider">
@@ -147,9 +198,12 @@ export default function AdminDashboard() {
                       {new Date(article.published_at).toLocaleDateString('es-DO')}
                     </td>
                     <td className="px-6 py-5">
-                      <span className={`px-3 py-1 inline-flex text-[9px] font-black uppercase tracking-tighter rounded-full ${article.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
-                        {article.status === 'published' ? 'Publicado' : 'Borrador'}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className={`px-3 py-1 inline-flex text-[9px] font-black uppercase tracking-tighter rounded-full ${article.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                          {article.status === 'published' ? 'Publicado' : 'Borrador'}
+                        </span>
+                        {article.is_premium && <span title="Contenido Premium">💎</span>}
+                      </div>
                     </td>
                     <td className="px-6 py-5 text-right space-x-3">
                       <Link href={`/noticias/${article.id}`} className="text-blue-400 hover:text-dr-blue transition-colors" target="_blank">

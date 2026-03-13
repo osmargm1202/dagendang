@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from app.db.database import get_db
 from app.models.article import Article
 from app.schemas.article import ArticleCreate, ArticleResponse
@@ -10,7 +10,25 @@ from app.models.user import User
 
 router = APIRouter()
 
-from typing import List, Optional
+@router.get("/count")
+def get_articles_count(
+    db: Session = Depends(get_db),
+    status: Optional[str] = None,
+    type: Optional[str] = None,
+    search: Optional[str] = None
+):
+    query = db.query(Article)
+    if status is not None:
+        query = query.filter(Article.status == status)
+    if type is not None:
+        query = query.filter(Article.type == type)
+    if search:
+        search_filter = f"%{search}%"
+        query = query.filter(
+            (Article.title.ilike(search_filter)) | 
+            (Article.content.ilike(search_filter))
+        )
+    return {"total": query.count()}
 
 @router.get("", response_model=List[ArticleResponse])
 def get_articles(

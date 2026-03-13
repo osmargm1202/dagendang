@@ -20,12 +20,12 @@ export default function NewArticle() {
   const [isPremium, setIsPremium] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // AI Scrawl states
   const [showAIModal, setShowAIModal] = useState(false);
   const [aiSuggestions, setAiSuggestions] = useState<any[]>([]);
   const [isAiLoading, setIsAiLoading] = useState(false);
-  
+
   const router = useRouter();
 
   const handleFetchAISuggestions = async (forceAllSources = false) => {
@@ -38,9 +38,9 @@ export default function NewArticle() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({ 
-          category: forceAllSources ? null : type, 
-          limit: 20 
+        body: JSON.stringify({
+          category: forceAllSources ? null : type,
+          limit: 20
         })
       });
       if (res.ok) {
@@ -106,18 +106,18 @@ export default function NewArticle() {
         Authorization: `Bearer ${token}`
       }
     })
-    .then(res => {
-      if (!res.ok) throw new Error("Invalid token");
-      return res.json();
-    })
-    .then(data => {
-      setUser(data);
-      setAuthor(data.full_name || "Redacción");
-    })
-    .catch(() => {
-      localStorage.removeItem("admin_token");
-      router.push("/admin");
-    });
+      .then(res => {
+        if (!res.ok) throw new Error("Invalid token");
+        return res.json();
+      })
+      .then(data => {
+        setUser(data);
+        setAuthor(data.full_name || "Redacción");
+      })
+      .catch(() => {
+        localStorage.removeItem("admin_token");
+        router.push("/admin");
+      });
 
   }, [router]);
 
@@ -214,8 +214,10 @@ export default function NewArticle() {
 
       <main className="max-w-7xl mx-auto py-6 md:py-10 px-4 sm:px-6 lg:px-8">
         <div className="mb-8 border-b border-border pb-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">Crear Nuevo Artículo</h1>
-          <button 
+          <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">
+            Crear Nuevo Artículo
+          </h1>
+          <button
             type="button"
             onClick={() => handleFetchAISuggestions()}
             disabled={isAiLoading}
@@ -232,7 +234,7 @@ export default function NewArticle() {
             Generar con IA (Scrawl)
           </button>
         </div>
-        
+
         {error && (
           <div className="bg-dr-red/10 border-l-4 border-dr-red p-4 mb-6 rounded-r-md">
             <p className="text-sm text-dr-red font-medium">{error}</p>
@@ -240,7 +242,7 @@ export default function NewArticle() {
         )}
 
         <div className="flex flex-col lg:flex-row gap-8">
-          
+
           {/* Main Editor Section (Left/Center) */}
           <div className="flex-grow lg:w-2/3 space-y-6">
             <div className="bg-card shadow sm:rounded-lg border border-border p-8">
@@ -278,7 +280,7 @@ export default function NewArticle() {
           <div className="w-full lg:w-1/3 space-y-6">
             <div className="bg-card shadow sm:rounded-lg border border-border p-6">
               <h3 className="text-lg font-bold text-foreground border-b border-border pb-3 mb-4">Configuración de Publicación</h3>
-              
+
               <div className="space-y-5">
 
                 <div>
@@ -304,10 +306,10 @@ export default function NewArticle() {
                         <p className="text-xs text-muted-foreground">PNG, JPG, WEBP hasta 5MB</p>
                       </div>
                     )}
-                    <input 
-                      type="file" 
-                      accept="image/*" 
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                       onChange={handleImageChange}
                     />
                   </div>
@@ -349,14 +351,14 @@ export default function NewArticle() {
                     onChange={(e) => setIsPremium(e.target.checked)}
                   />
                   <label htmlFor="is_premium" className="text-sm font-bold text-foreground cursor-pointer">
-                    💎 Contenido Premium (Suscripción)
+                    💎 Contenido Premium
                   </label>
                 </div>
 
                 {/* Sección de Publicidad */}
                 <div className="pt-6 border-t border-border">
                   <h4 className="text-sm font-bold text-dr-blue uppercase tracking-wider mb-4">Publicidad del Artículo</h4>
-                  
+
                   <div className="space-y-4">
                     <div>
                       <label className="block text-xs font-medium text-muted-foreground mb-1 uppercase">Imagen Publicitaria</label>
@@ -370,16 +372,16 @@ export default function NewArticle() {
                           </div>
                         ) : (
                           <div className="space-y-1 text-center py-2">
-                             <svg className="mx-auto h-8 w-8 text-muted-foreground" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                             </svg>
-                             <p className="text-[10px] text-muted-foreground font-bold uppercase">Banner (Ej. 1200x400)</p>
+                            <svg className="mx-auto h-8 w-8 text-muted-foreground" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                              <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                            <p className="text-[10px] text-muted-foreground font-bold uppercase">Banner (Ej. 1200x400)</p>
                           </div>
                         )}
-                        <input 
-                          type="file" 
-                          accept="image/*" 
-                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                           onChange={handleAdImageChange}
                         />
                       </div>
@@ -439,59 +441,59 @@ export default function NewArticle() {
                 Noticias Candidatas ({type})
               </h2>
               <div className="flex items-center gap-4">
-                <button 
+                <button
                   onClick={() => handleFetchAISuggestions(true)}
                   className="text-xs bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 px-3 py-1.5 rounded-full font-bold hover:brightness-110 transition-colors"
                 >
                   🔍 Buscar en todas las fuentes
                 </button>
-                <button 
+                <button
                   onClick={() => setShowAIModal(false)}
                   className="text-muted-foreground hover:text-foreground"
                 >
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
             </div>
-          </div>
-            
+
             <div className="p-6 overflow-y-auto flex-grow space-y-4">
-               <p className="text-sm text-muted-foreground mb-4 bg-dr-blue/5 p-3 rounded-md border border-dr-blue/10">
-                 He encontrado estas noticias recientes de tus fuentes configuradas. Selecciona una para que **Gemini** redacte un artículo original para <strong>La Agenda</strong>.
-               </p>
-               
-               {aiSuggestions.length > 0 ? aiSuggestions.map((suggestion, idx) => (
-                 <div key={idx} className="p-4 border border-border rounded-lg hover:border-dr-blue hover:shadow-md transition-all group flex justify-between items-center bg-background">
-                    <div className="flex-grow pr-4">
-                       <h3 className="font-bold text-foreground group-hover:text-dr-blue transition-colors mb-1">{suggestion.title}</h3>
-                       <div className="flex items-center gap-3 text-xs">
-                          <span className="font-bold text-dr-red uppercase">{suggestion.source_name}</span>
-                          <span className="text-border">|</span>
-                          <span className="text-muted-foreground">{suggestion.original_published_at}</span>
-                       </div>
+              <p className="text-sm text-muted-foreground mb-4 bg-dr-blue/5 p-3 rounded-md border border-dr-blue/10">
+                He encontrado estas noticias recientes de tus fuentes configuradas. Selecciona una para que **Gemini** redacte un artículo original para <strong>La Agenda</strong>.
+              </p>
+
+              {aiSuggestions.length > 0 ? aiSuggestions.map((suggestion, idx) => (
+                <div key={idx} className="p-4 border border-border rounded-lg hover:border-dr-blue hover:shadow-md transition-all group flex justify-between items-center bg-background">
+                  <div className="flex-grow pr-4">
+                    <h3 className="font-bold text-foreground group-hover:text-dr-blue transition-colors mb-1">{suggestion.title}</h3>
+                    <div className="flex items-center gap-3 text-xs">
+                      <span className="font-bold text-dr-red uppercase">{suggestion.source_name}</span>
+                      <span className="text-border">|</span>
+                      <span className="text-muted-foreground">{suggestion.original_published_at}</span>
                     </div>
-                    <button 
-                      onClick={() => handleAIGenerate(suggestion.source_url)}
-                      className="bg-dr-blue text-white px-4 py-2 rounded font-bold text-sm whitespace-nowrap hover:brightness-110"
-                    >
-                      Redactar con IA
-                    </button>
-                 </div>
-               )) : (
-                 <div className="text-center py-20 text-muted-foreground">
-                    <svg className="h-12 w-12 mx-auto text-muted-foreground mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                    </svg>
-                    No se encontraron noticias nuevas en esta categoría hoy.
-                    <button 
-                      onClick={() => handleFetchAISuggestions(true)}
-                      className="mt-6 block mx-auto bg-dr-blue text-white px-6 py-2 rounded-md font-bold"
-                    >
-                      Intentar en todas las fuentes
-                    </button>
-                 </div>
-               )}
+                  </div>
+                  <button
+                    onClick={() => handleAIGenerate(suggestion.source_url)}
+                    className="bg-dr-blue text-white px-4 py-2 rounded font-bold text-sm whitespace-nowrap hover:brightness-110"
+                  >
+                    Redactar con IA
+                  </button>
+                </div>
+              )) : (
+                <div className="text-center py-20 text-muted-foreground">
+                  <svg className="h-12 w-12 mx-auto text-muted-foreground mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
+                  No se encontraron noticias nuevas en esta categoría hoy.
+                  <button
+                    onClick={() => handleFetchAISuggestions(true)}
+                    className="mt-6 block mx-auto bg-dr-blue text-white px-6 py-2 rounded-md font-bold"
+                  >
+                    Intentar en todas las fuentes
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>

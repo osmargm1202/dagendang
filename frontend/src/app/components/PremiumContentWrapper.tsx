@@ -18,22 +18,37 @@ export default function PremiumContentWrapper({
 }: PremiumContentWrapperProps) {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [isChecking, setIsChecking] = useState(isPremium);
+  const [isUserPremium, setIsUserPremium] = useState(false);
 
   useEffect(() => {
-    if (!isPremium) {
-      setIsAuthorized(true);
-      return;
-    }
+    const checkAuth = async () => {
+      if (!isPremium) {
+        setIsAuthorized(true);
+        // Even if not premium article, we need to know if USER is premium to hide ads
+      }
 
-    const token = localStorage.getItem("user_token") || localStorage.getItem("admin_token");
-    if (token) {
-      setIsAuthorized(true);
-    } else {
-      setIsAuthorized(false);
-    }
-    setIsChecking(false);
+      const token = localStorage.getItem("user_token") || localStorage.getItem("admin_token");
+      if (token) {
+        try {
+          const res = await fetch("/api/auth/me", {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          if (res.ok) {
+            const userData = await res.json();
+            setIsUserPremium(userData.is_premium);
+            setIsAuthorized(true);
+          }
+        } catch (error) {
+          console.error("Error checking user premium status:", error);
+        }
+      }
+      setIsChecking(false);
+    };
+
+    checkAuth();
   }, [isPremium]);
-
   const paragraphs = content.split('\n').filter(p => p.trim() !== '');
 
   if (isChecking) {
@@ -88,7 +103,7 @@ export default function PremiumContentWrapper({
                     Este análisis es exclusivo para nuestros suscriptores premium. Únete hoy para acceder a toda nuestra base de datos económica.
                 </p>
                 <div className="space-y-3">
-                    <Link href="/registro" className="block w-full py-3 bg-dr-blue text-white font-bold rounded-sm hover:bg-dr-blue/90 transition shadow-lg uppercase tracking-widest text-xs">
+                    <Link href="/pago" className="block w-full py-3 bg-dr-blue text-white font-bold rounded-sm hover:bg-dr-blue/90 transition shadow-lg uppercase tracking-widest text-xs">
                         Suscribirse Ahora
                     </Link>
                     <Link href="/login" className="block w-full py-3 bg-accent text-dr-blue border border-border font-bold rounded-sm hover:bg-muted transition text-xs">
@@ -101,20 +116,21 @@ export default function PremiumContentWrapper({
     );
   }
 
-  // Ad insertion logic for non-premium articles
+  // Ad insertion logic for non-premium articles and non-premium users
   const insertIndex = paragraphs.length > 6 ? 3 : (paragraphs.length >= 3 ? 2 : -1);
+  const showAds = !isPremium && !isUserPremium && !isChecking;
 
   return (
     <article className="prose prose-lg max-w-none text-foreground leading-relaxed">
       {paragraphs.map((paragraph, i) => (
         <div key={i}>
           <p className="mb-6">{paragraph}</p>
-          {/* Only insert ad if NOT premium and at the calculated index */}
-          {!isPremium && i === insertIndex && AdComponent}
+          {/* Only insert ad if NEITHER the article OR the USER is premium and at the calculated index AND we finished checking */}
+          {showAds && i === insertIndex && AdComponent}
         </div>
       ))}
-      {/* If article is too short for mid-insertion, append to bottom if not premium */}
-      {!isPremium && insertIndex === -1 && AdComponent}
+      {/* If article is too short for mid-insertion, append to bottom if not premium and user not premium */}
+      {showAds && insertIndex === -1 && AdComponent}
     </article>
   );
 }

@@ -17,6 +17,7 @@ export default function AdminAdsPage() {
     const [linkUrl, setLinkUrl] = useState("");
     const [position, setPosition] = useState("header");
     const [isActive, setIsActive] = useState(true);
+    const [rotationSeconds, setRotationSeconds] = useState(5);
     const [editingId, setEditingId] = useState<string | null>(null);
 
     const router = useRouter();
@@ -83,7 +84,8 @@ export default function AdminAdsPage() {
             image_url: imageUrl,
             link_url: linkUrl,
             position,
-            is_active: isActive
+            is_active: isActive,
+            rotation_seconds: rotationSeconds
         };
 
         try {
@@ -120,6 +122,7 @@ export default function AdminAdsPage() {
         setLinkUrl(ad.link_url);
         setPosition(ad.position);
         setIsActive(ad.is_active);
+        setRotationSeconds(ad.rotation_seconds || 5);
         setIsAddingNew(true);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -147,6 +150,7 @@ export default function AdminAdsPage() {
         setLinkUrl("");
         setPosition("header");
         setIsActive(true);
+        setRotationSeconds(5);
     };
 
     if (isLoading || !user) return <div className="p-10 text-center">Cargando...</div>;
@@ -217,6 +221,21 @@ export default function AdminAdsPage() {
                                             <option value="sidebar_bottom">Lateral Inferior</option>
                                             <option value="content_middle">Dentro de Artículo</option>
                                         </select>
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Segundos de Rotación</label>
+                                        <div className="flex items-center gap-3">
+                                            <input 
+                                                type="number" 
+                                                min="1"
+                                                className="w-full px-4 py-2.5 border border-gray-300 rounded focus:ring-2 focus:ring-dr-blue outline-none" 
+                                                value={rotationSeconds}
+                                                onChange={(e) => setRotationSeconds(parseInt(e.target.value))}
+                                                required
+                                            />
+                                            <span className="text-xs font-bold text-gray-400 uppercase">Segs</span>
+                                        </div>
+                                        <p className="text-[10px] text-gray-400 mt-1 italic">* Tiempo que se muestra cada anuncio en el carrusel.</p>
                                     </div>
                                     <div>
                                         <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Imagen del Anuncio</label>

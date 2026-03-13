@@ -38,47 +38,47 @@ export default function EditArticle() {
         Authorization: `Bearer ${token}`
       }
     })
-    .then(res => {
-      if (!res.ok) throw new Error("Invalid token");
-      return res.json();
-    })
-    .then(data => {
-      setUser(data);
-      // Fetch existing article data
-      return fetch(`/api/articles/${id}`);
-    })
-    .then(res => {
-      if (!res.ok) throw new Error("Artículo no encontrado");
-      return res.json();
-    })
-    .then(article => {
-      setTitle(article.title);
-      setContent(article.content);
-      setType(article.type);
-      setAuthor(article.author);
-      setIsPremium(article.is_premium || false);
-      if (article.image_url) {
-        setExistingImageUrl(article.image_url);
-        setImagePreview(article.image_url.startsWith('http') ? article.image_url : `https://diariodigital.delioserver.duckdns.org${article.image_url}`);
-      }
-      if (article.ad_image_url) {
-        setExistingAdImageUrl(article.ad_image_url);
-        setAdImagePreview(article.ad_image_url.startsWith('http') ? article.ad_image_url : `https://diariodigital.delioserver.duckdns.org${article.ad_image_url}`);
-      }
-      if (article.ad_link) {
-        setAdLink(article.ad_link);
-      }
-      setIsFetching(false);
-    })
-    .catch((err) => {
-      if (err.message === "Invalid token") {
-        localStorage.removeItem("admin_token");
-        router.push("/admin");
-      } else {
-        setError("Error al cargar el artículo. Puede que no exista.");
+      .then(res => {
+        if (!res.ok) throw new Error("Invalid token");
+        return res.json();
+      })
+      .then(data => {
+        setUser(data);
+        // Fetch existing article data
+        return fetch(`/api/articles/${id}`);
+      })
+      .then(res => {
+        if (!res.ok) throw new Error("Artículo no encontrado");
+        return res.json();
+      })
+      .then(article => {
+        setTitle(article.title);
+        setContent(article.content);
+        setType(article.type);
+        setAuthor(article.author);
+        setIsPremium(article.is_premium || false);
+        if (article.image_url) {
+          setExistingImageUrl(article.image_url);
+          setImagePreview(article.image_url.startsWith('http') ? article.image_url : `https://diariodigital.delioserver.duckdns.org${article.image_url}`);
+        }
+        if (article.ad_image_url) {
+          setExistingAdImageUrl(article.ad_image_url);
+          setAdImagePreview(article.ad_image_url.startsWith('http') ? article.ad_image_url : `https://diariodigital.delioserver.duckdns.org${article.ad_image_url}`);
+        }
+        if (article.ad_link) {
+          setAdLink(article.ad_link);
+        }
         setIsFetching(false);
-      }
-    });
+      })
+      .catch((err) => {
+        if (err.message === "Invalid token") {
+          localStorage.removeItem("admin_token");
+          router.push("/admin");
+        } else {
+          setError("Error al cargar el artículo. Puede que no exista.");
+          setIsFetching(false);
+        }
+      });
 
   }, [router, id]);
 
@@ -174,9 +174,11 @@ export default function EditArticle() {
 
       <main className="max-w-7xl mx-auto py-6 md:py-10 px-4 sm:px-6 lg:px-8">
         <div className="mb-8 border-b border-border pb-5">
-          <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">Editar Noticia</h1>
+          <h1 className="text-2xl md:text-3xl font-black text-foreground tracking-tight">
+            Editar Noticia
+          </h1>
         </div>
-        
+
         {error && (
           <div className="bg-dr-red/10 border-l-4 border-dr-red p-4 mb-6 rounded-r-md">
             <p className="text-sm text-dr-red font-medium">{error}</p>
@@ -184,7 +186,7 @@ export default function EditArticle() {
         )}
 
         <div className="flex flex-col lg:flex-row gap-8">
-          
+
           {/* Main Editor Section (Left/Center) */}
           <div className="flex-grow lg:w-2/3 space-y-6">
             <div className="bg-card shadow sm:rounded-lg border border-border p-8">
@@ -222,7 +224,7 @@ export default function EditArticle() {
           <div className="w-full lg:w-1/3 space-y-6">
             <div className="bg-card shadow sm:rounded-lg border border-border p-6">
               <h3 className="text-lg font-bold text-foreground border-b border-border pb-3 mb-4">Configuración de Publicación</h3>
-              
+
               <div className="space-y-5">
 
                 <div>
@@ -248,10 +250,10 @@ export default function EditArticle() {
                         <p className="text-xs text-muted-foreground">PNG, JPG, WEBP hasta 5MB</p>
                       </div>
                     )}
-                    <input 
-                      type="file" 
-                      accept="image/*" 
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                       onChange={handleImageChange}
                     />
                   </div>
@@ -293,14 +295,14 @@ export default function EditArticle() {
                     onChange={(e) => setIsPremium(e.target.checked)}
                   />
                   <label htmlFor="is_premium" className="text-sm font-bold text-foreground cursor-pointer">
-                    💎 Contenido Premium (Suscripción)
+                    💎 Contenido Premium
                   </label>
                 </div>
 
                 {/* Sección de Publicidad */}
                 <div className="pt-6 border-t border-border">
                   <h4 className="text-sm font-bold text-dr-blue uppercase tracking-wider mb-4">Publicidad del Artículo</h4>
-                  
+
                   <div className="space-y-4">
                     <div>
                       <label className="block text-xs font-medium text-muted-foreground mb-1 uppercase">Imagen Publicitaria</label>
@@ -314,16 +316,16 @@ export default function EditArticle() {
                           </div>
                         ) : (
                           <div className="space-y-1 text-center py-2">
-                             <svg className="mx-auto h-8 w-8 text-muted-foreground" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                             </svg>
-                             <p className="text-[10px] text-muted-foreground font-bold uppercase">Banner (Ej. 1200x400)</p>
+                            <svg className="mx-auto h-8 w-8 text-muted-foreground" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                              <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                            <p className="text-[10px] text-muted-foreground font-bold uppercase">Banner (Ej. 1200x400)</p>
                           </div>
                         )}
-                        <input 
-                          type="file" 
-                          accept="image/*" 
-                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                           onChange={handleAdImageChange}
                         />
                       </div>
