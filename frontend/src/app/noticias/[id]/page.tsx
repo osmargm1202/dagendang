@@ -4,6 +4,7 @@ import PremiumContentWrapper from "@/app/components/PremiumContentWrapper";
 import AdBanner from "@/app/components/AdBanner";
 import AdGuard from "@/app/components/AdGuard";
 import SocialShare from "@/app/components/SocialShare";
+import CommentsSection from "@/app/components/CommentsSection";
 import type { Metadata, ResolvingMetadata } from 'next';
 
 const BASE_URL = 'https://diariodigital.delioserver.duckdns.org';
@@ -151,11 +152,17 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
             "@context": "https://schema.org",
             "@type": "NewsArticle",
             "headline": article.title,
+            "description": article.content.substring(0, 160).replace(/\s+/g, ' ').trim() + "...",
             "image": [
               article.image_url?.startsWith('http') ? article.image_url : `${BASE_URL}${article.image_url}`
             ],
             "datePublished": article.published_at,
             "dateModified": article.published_at,
+            "mainEntityOfPage": {
+              "@type": "WebPage",
+              "@id": articleUrl
+            },
+            "articleSection": article.type,
             "author": [{
               "@type": "Person",
               "name": article.author || "La Agenda",
@@ -168,8 +175,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
                 "@type": "ImageObject",
                 "url": `${BASE_URL}/logo.png`
               }
-            },
-            "description": article.content.substring(0, 160) + "..."
+            }
           })
         }}
       />
@@ -221,6 +227,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
         />
 
         <SocialShare title={article.title} url={articleUrl} />
+
+        <CommentsSection articleId={article.id} />
 
         {/* Publicidad Central (Solo para noticias no premium) */}
         {!article.is_premium && (

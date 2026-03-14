@@ -34,22 +34,24 @@ export default function NewsGrid({ mainArticle, initialArticles, totalArticles, 
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Calculate total pages accounting for page 1 (4 items) and subsequent pages (pageSize/6 items)
-  // Total of secondary articles = totalArticles - 1 (featured)
-  // First page takes 4. Remaining = (totalArticles - 1) - 4 = totalArticles - 5
+  // Calculate total pages:
+  // Page 1: 1 featured + 4 secondary (Total 5)
+  // Remaining items = totalArticles - 5
   // totalPages = 1 + Math.ceil(Math.max(0, totalArticles - 5) / pageSize)
   const totalPages = 1 + Math.ceil(Math.max(0, totalArticles - 5) / pageSize);
 
   const fetchArticles = async (page: number, append = false) => {
     setLoading(true);
     try {
-      // Offset calculation:
-      // Page 1: skip 1 (featured article), limit 4 (passed as initialArticles)
-      // Page 2: skip 1 + 4 = 5, limit 6
-      // Page 3: skip 1 + 4 + 6 = 11, limit 6
-      // Formula: skip = 5 + (page - 2) * pageSize for page > 1
+      // Offset calculation for "La Agenda":
+      // Page 1: skip 1 (featured), limit 4 (already passed in initialArticles)
+      // Page 2: skip 5 (1 featured + 4 from page 1), limit 8
+      // Page 3: skip 13 (5 + 8), limit 8
+      // General formula for page > 1: skip = 5 + (page - 2) * pageSize
       const skip = page === 1 ? 1 : 5 + (page - 2) * pageSize;
-      const res = await fetch(`/api/articles/?status=published&skip=${skip}&limit=${pageSize}`);
+      const limit = page === 1 ? 4 : pageSize;
+      
+      const res = await fetch(`/api/articles/?status=published&skip=${skip}&limit=${limit}`);
       const data = await res.json();
       
       if (append) {
@@ -65,8 +67,13 @@ export default function NewsGrid({ mainArticle, initialArticles, totalArticles, 
   };
 
   const handlePageChange = (newPage: number) => {
-    setCurrentPage(newPage);
-    fetchArticles(newPage, false);
+    if (newPage === 1) {
+      setArticles(initialArticles);
+      setCurrentPage(1);
+    } else {
+      setCurrentPage(newPage);
+      fetchArticles(newPage, false);
+    }
     // Scroll to top of grid
     document.getElementById('news-grid-start')?.scrollIntoView({ behavior: 'smooth' });
   };

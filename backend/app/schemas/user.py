@@ -13,8 +13,8 @@ class UserBase(BaseModel):
     image_prompt_template: Optional[str] = None
     is_active: bool = True
     is_premium: bool = False
-    backup_limit_gb: int = 10
-    backup_frequency_hours: int = 2
+    backup_limit_gb: Optional[int] = 10
+    backup_frequency_hours: Optional[int] = 2
 
 class UserCreate(UserBase):
     password: str
@@ -33,6 +33,7 @@ class UserUpdate(BaseModel):
 
 class UserResponse(UserBase):
     id: int
+    is_verified: bool = True
 
     class Config:
         from_attributes = True

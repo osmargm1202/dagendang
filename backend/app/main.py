@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from app.api import articles, economy, auth, upload, ai, ads, subscriptions, backups
+from app.api import articles, economy, auth, upload, ai, ads, subscriptions, backups, comments, users
 import os
 
 app = FastAPI(title="La Agenda API")
@@ -109,6 +109,8 @@ app.include_router(ai.router, prefix="/api/ai", tags=["AI Intelligence"])
 app.include_router(ads.router, prefix="/api/ads", tags=["Advertisements"])
 app.include_router(subscriptions.router, prefix="/api/subscriptions", tags=["Subscriptions"])
 app.include_router(backups.router, prefix="/api/backups", tags=["Backups"])
+app.include_router(comments.router, prefix="/api/comments", tags=["Comments"])
+app.include_router(users.router, prefix="/api/users", tags=["User Management"])
 
 @app.get("/")
 def read_root():

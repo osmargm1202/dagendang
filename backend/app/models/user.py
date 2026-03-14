@@ -19,3 +19,5 @@ class User(Base):
     backup_frequency_hours = Column(Integer, default=2)
     is_active = Column(Boolean, default=True)
     is_premium = Column(Boolean, default=False)
+    is_verified = Column(Boolean, default=False)
+    verification_token = Column(String(255), nullable=True)

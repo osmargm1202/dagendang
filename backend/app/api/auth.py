@@ -29,25 +29,55 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     }
 
 @router.post("/register", response_model=UserResponse)
-def register_user(user: UserCreate, db: Session = Depends(get_db)):
+async def register_user(user: UserCreate, db: Session = Depends(get_db)):
     """
     Public registration for new readers/subscribers.
+    Generates a verification token and sends a confirmation email.
     """
+    import uuid
+    from fastapi import BackgroundTasks
+    from app.core.email import send_verification_email
+
     db_user = db.query(User).filter(User.email == user.email).first()
     if db_user:
         raise HTTPException(status_code=400, detail="Email already registered")
     
+    token = str(uuid.uuid4())
     hashed_password = get_password_hash(user.password)
     new_user = User(
         email=user.email,
         full_name=user.full_name,
         hashed_password=hashed_password,
-        role="subscriber"
+        role="subscriber",
+        is_verified=False,
+        verification_token=token
     )
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+    
+    # Send email in the background to not block the response
+    # (Note: In a more complex app, we'd use a task queue like Celery)
+    import asyncio
+    asyncio.create_task(send_verification_email(new_user.email, token))
+    
     return new_user
+
+@router.get("/verify/{token}")
+async def verify_account(token: str, db: Session = Depends(get_db)):
+    """
+    Verfies a user account using the token sent by email.
+    """
+    user = db.query(User).filter(User.verification_token == token).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Token de verificación inválido o expirado.")
+    
+    user.is_verified = True
+    user.verification_token = None # Clear token after verification
+    db.add(user)
+    db.commit()
+    
+    return {"detail": "¡Cuenta verificada con éxito! Ya puedes iniciar sesión y participar."}
 
 @router.post("/register-initial-admin", response_model=UserResponse)
 def create_initial_admin(user: UserCreate, db: Session = Depends(get_db)):

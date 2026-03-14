@@ -10,6 +10,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const router = useRouter();
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -36,32 +37,7 @@ export default function RegisterPage() {
         throw new Error(data.detail || "Error al registrarse");
       }
 
-      // Auto login
-      const loginFormData = new URLSearchParams();
-      loginFormData.append("username", email);
-      loginFormData.append("password", password);
-
-      const loginRes = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: loginFormData,
-      });
-
-      if (loginRes.ok) {
-        const loginData = await loginRes.json();
-        localStorage.setItem("user_token", loginData.access_token);
-        
-        // If user is admin (unlikely during public reg but good for consistency), store as admin_token
-        if (loginData.role === "admin") {
-          localStorage.setItem("admin_token", loginData.access_token);
-        }
-        
-        router.push("/");
-      } else {
-        router.push("/login");
-      }
+      setIsSuccess(true);
       
     } catch (err: any) {
       setError(err.message || "Error al conectar con el servidor.");
@@ -69,6 +45,32 @@ export default function RegisterPage() {
       setIsLoading(false);
     }
   };
+
+  if (isSuccess) {
+    return (
+      <div className="w-full min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-lg border border-emerald-100 text-center">
+          <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg className="w-10 h-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900">¡Casi listo!</h2>
+          <p className="mt-4 text-gray-600">
+            Hemos enviado un correo de verificación a <strong>{email}</strong>.
+          </p>
+          <p className="mt-2 text-sm text-gray-500">
+            Por favor, revisa tu bandeja de entrada (y la carpeta de spam) y haz clic en el enlace para activar tu cuenta.
+          </p>
+          <div className="mt-8">
+            <Link href="/login" className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-sm font-bold rounded-sm text-white bg-dr-blue hover:bg-dr-blue/90 transition-all uppercase tracking-widest">
+              Ir al Inicio de Sesión
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">

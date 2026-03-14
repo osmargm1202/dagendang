@@ -4,4 +4,5 @@ from app.models.economy import ExchangeRate, FuelPrice
 from app.models.user import User
 from app.models.ai import NewsSource
 from app.models.ad import Advertisement
+from app.models.comment import Comment
 from app.db.database import Base
