@@ -279,6 +279,15 @@ async def fetch_rss_candidates(url: str, source_name: str, category: str):
 # Format: { "category_limit": { "timestamp": float, "data": List[NewsCandidate] } }
 _SUGGESTIONS_CACHE = {}
 _CACHE_TTL_SECONDS = 600 # 10 minutes
+MAX_CACHED_SUGGESTIONS = 500
+
+def _prune_suggestions_cache():
+    """Ensures the global cache doesn't grow indefinitely."""
+    if len(_SUGGESTIONS_CACHE) > 50: # Number of unique search keys (category+limit combos)
+        # Sort by timestamp (delete oldest)
+        sorted_keys = sorted(_SUGGESTIONS_CACHE.keys(), key=lambda k: _SUGGESTIONS_CACHE[k]["timestamp"])
+        for k in sorted_keys[:10]:
+            del _SUGGESTIONS_CACHE[k]
 
 @router.post("/suggest", response_model=AIPreviewResponse)
 async def get_ai_suggestions(req: AISuggestionRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
@@ -325,12 +334,17 @@ async def get_ai_suggestions(req: AISuggestionRequest, db: Session = Depends(get
                 suggestions.append(c)
     
     # Update cache
+    _prune_suggestions_cache()
+    
+    # Store candidates and maintain a limit of 500 per entry to avoid huge memory usage
+    final_suggestions = suggestions[:req.limit]
+    
     _SUGGESTIONS_CACHE[cache_key] = {
         "timestamp": now,
-        "data": suggestions[:req.limit]
+        "data": suggestions[:500] # Cache up to 500 for potential reuse with different limits
     }
     
-    return {"suggestions": suggestions[:req.limit]}
+    return {"suggestions": final_suggestions}
 
 @router.post("/generate", response_model=AIArticleGenerateResponse)
 async def generate_article_with_ai(req: AIArticleGenerateRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):

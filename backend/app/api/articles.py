@@ -11,44 +11,7 @@ from app.schemas.category import CategoryCreate, CategoryResponse
 
 from app.models.user import User
 from app.core.security import get_current_user
-import os
-from pathlib import Path
 
-MAX_ARTICLES = 500
-
-def _delete_local_file(url: str):
-    """Auxiliary to delete local files from uploads folder"""
-    if not url or not url.startswith("/uploads/"):
-        return
-    # Remove leading slash and resolve path
-    relative_path = url.lstrip("/")
-    file_path = Path(relative_path)
-    try:
-        if file_path.exists():
-            os.remove(file_path)
-            print(f"DEBUG Cleanup: Deleted file {file_path}")
-    except Exception as e:
-        print(f"DEBUG Cleanup: Error deleting file {file_path}: {e}")
-
-def _cleanup_old_articles(db: Session):
-    """Keeps the article count below MAX_ARTICLES by deleting the oldest ones."""
-    total = db.query(Article).count()
-    if total <= MAX_ARTICLES:
-        return
-    
-    to_delete_count = total - MAX_ARTICLES
-    # Order by published_at ASC to get the oldest
-    old_articles = db.query(Article).order_by(Article.published_at.asc()).limit(to_delete_count).all()
-    
-    for art in old_articles:
-        _delete_local_file(art.image_url)
-        _delete_local_file(art.ad_image_url)
-        # Delete associated comments manually to avoid FK violations
-        db.query(Comment).filter(Comment.article_id == art.id).delete()
-        db.delete(art)
-    
-    db.commit()
-    print(f"DEBUG Cleanup: Deleted {to_delete_count} old articles to maintain limit of {MAX_ARTICLES}")
 
 router = APIRouter()
 
@@ -160,9 +123,6 @@ def create_article(article: ArticleCreate, db: Session = Depends(get_db), curren
     db.add(db_article)
     db.commit()
     db.refresh(db_article)
-    
-    # Run cleanup to maintain limit (500 articles)
-    _cleanup_old_articles(db)
     
     return db_article
 
