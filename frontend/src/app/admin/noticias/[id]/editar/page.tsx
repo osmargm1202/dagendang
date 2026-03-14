@@ -23,6 +23,7 @@ export default function EditArticle() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
+  const [categories, setCategories] = useState<{slug: string, name: string}[]>([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -79,6 +80,12 @@ export default function EditArticle() {
           setIsFetching(false);
         }
       });
+
+    // Fetch categories
+    fetch("/api/articles/categories")
+      .then(res => res.json())
+      .then(data => setCategories(data))
+      .catch(err => console.error("Error fetching categories:", err));
 
   }, [router, id]);
 
@@ -267,11 +274,9 @@ export default function EditArticle() {
                     value={type}
                     onChange={(e) => setType(e.target.value)}
                   >
-                    <option value="editorial">Editorial</option>
-                    <option value="economia">Economía</option>
-                    <option value="empresas">Empresas</option>
-                    <option value="mercados">Mercados</option>
-                    <option value="opinion">Opinión</option>
+                    {categories.map(cat => (
+                      <option key={cat.slug} value={cat.slug}>{cat.name}</option>
+                    ))}
                   </select>
                 </div>
 

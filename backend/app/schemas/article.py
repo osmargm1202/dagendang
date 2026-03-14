@@ -1,13 +1,12 @@
 from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
-from app.models.article import ArticleType
 
 class ArticleBase(BaseModel):
     title: str
     content: str
     author: Optional[str] = None
-    type: ArticleType
+    type: str
     image_url: Optional[str] = None
     status: str = "published"
     is_premium: Optional[bool] = False

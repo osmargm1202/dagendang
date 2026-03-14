@@ -23,6 +23,7 @@ services:
       - "8080:8000"
     volumes:
       - ./backend:/app
+      - ./backups:/app/backups
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-diario_digital}
       - TZ=America/Santo_Domingo

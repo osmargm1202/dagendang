@@ -1,14 +1,61 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from typing import List, Optional
 from app.db.database import get_db
 from app.models.article import Article
+from app.models.category import Category
 from app.schemas.article import ArticleCreate, ArticleResponse
+from app.schemas.category import CategoryCreate, CategoryResponse
 
 from app.core.security import get_current_user
 from app.models.user import User
 
 router = APIRouter()
+
+@router.get("/categories", response_model=List[CategoryResponse])
+def get_categories(db: Session = Depends(get_db), include_inactive: bool = False):
+    query = db.query(Category)
+    if not include_inactive:
+        query = query.filter(Category.is_active == True)
+    return query.order_by(Category.order.asc(), Category.name.asc()).all()
+
+@router.post("/categories", response_model=CategoryResponse)
+def create_category(category: CategoryCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    db_category = Category(**category.model_dump())
+    db.add(db_category)
+    db.commit()
+    db.refresh(db_category)
+    return db_category
+
+@router.put("/categories/{category_id}", response_model=CategoryResponse)
+def update_category(category_id: int, category_update: CategoryCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    db_category = db.query(Category).filter(Category.id == category_id).first()
+    if db_category is None:
+        raise HTTPException(status_code=404, detail="Category not found")
+    
+    update_data = category_update.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_category, key, value)
+        
+    db.commit()
+    db.refresh(db_category)
+    return db_category
+
+@router.delete("/categories/{category_id}")
+def delete_category(category_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    db_category = db.query(Category).filter(Category.id == category_id).first()
+    if db_category is None:
+        raise HTTPException(status_code=404, detail="Category not found")
+    
+    # Check if category is in use
+    article_count = db.query(Article).filter(Article.type == db_category.slug).count()
+    if article_count > 0:
+        raise HTTPException(status_code=400, detail=f"No se puede eliminar: La categoría está en uso por {article_count} artículos.")
+    
+    db.delete(db_category)
+    db.commit()
+    return {"detail": "Category deleted successfully"}
 
 @router.get("/count")
 def get_articles_count(
@@ -25,8 +72,8 @@ def get_articles_count(
     if search:
         search_filter = f"%{search}%"
         query = query.filter(
-            (Article.title.ilike(search_filter)) | 
-            (Article.content.ilike(search_filter))
+            (func.unaccent(Article.title).ilike(func.unaccent(search_filter))) | 
+            (func.unaccent(Article.content).ilike(func.unaccent(search_filter)))
         )
     return {"total": query.count()}
 
@@ -53,8 +100,8 @@ def get_articles(
     if search:
         search_filter = f"%{search}%"
         query = query.filter(
-            (Article.title.ilike(search_filter)) | 
-            (Article.content.ilike(search_filter))
+            (func.unaccent(Article.title).ilike(func.unaccent(search_filter))) | 
+            (func.unaccent(Article.content).ilike(func.unaccent(search_filter)))
         )
     
     if published_after:

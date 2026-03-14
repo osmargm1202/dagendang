@@ -9,6 +9,8 @@ class UserBase(BaseModel):
     gemini_model: Optional[str] = "gemini-flash-lite-latest"
     is_active: bool = True
     is_premium: bool = False
+    backup_limit_gb: int = 10
+    backup_frequency_hours: int = 2
 
 class UserCreate(UserBase):
     password: str
@@ -18,6 +20,8 @@ class UserUpdate(BaseModel):
     gemini_api_key: Optional[str] = None
     gemini_model: Optional[str] = None
     is_active: Optional[bool] = None
+    backup_limit_gb: Optional[int] = None
+    backup_frequency_hours: Optional[int] = None
 
 class UserResponse(UserBase):
     id: int

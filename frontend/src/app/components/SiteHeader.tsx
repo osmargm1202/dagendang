@@ -13,9 +13,14 @@ export default function SiteHeader() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [categories, setCategories] = useState<{slug: string, name: string}[]>([]);
 
   useEffect(() => {
     setMounted(true);
+    fetch("/api/articles/categories")
+      .then(res => res.json())
+      .then(data => setCategories(data))
+      .catch(err => console.error("Error fetching categories:", err));
   }, []);
   
 
@@ -62,13 +67,13 @@ export default function SiteHeader() {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex gap-6 font-sans font-semibold text-[10px] lg:text-xs tracking-widest items-center">
-          <Link href="/" className="hover:text-gray-300 transition-colors">INICIO</Link>
+
           <div className="flex gap-4">
-            <Link href="/categoria/editorial" className="hover:text-gray-300 transition-colors">EDITORIAL</Link>
-            <Link href="/categoria/economia" className="hover:text-gray-300 transition-colors">ECONOMÍA</Link>
-            <Link href="/categoria/empresas" className="hover:text-gray-300 transition-colors">EMPRESAS</Link>
-            <Link href="/categoria/mercados" className="hover:text-gray-300 transition-colors">MERCADOS</Link>
-            <Link href="/categoria/opinion" className="hover:text-gray-300 transition-colors">OPINIÓN</Link>
+            {categories.map(cat => (
+              <Link key={cat.slug} href={`/categoria/${cat.slug}`} className="hover:text-gray-300 transition-colors uppercase">
+                {cat.name}
+              </Link>
+            ))}
           </div>
 
           {/* Search Bar Desktop */}
@@ -160,12 +165,12 @@ export default function SiteHeader() {
           </form>
 
           <nav className="flex flex-col gap-6 font-sans font-bold text-sm tracking-[0.2em] uppercase">
-            <Link href="/" className="hover:text-blue-300 transition-colors">INICIO</Link>
-            <Link href="/categoria/editorial" className="hover:text-blue-300 transition-colors">EDITORIAL</Link>
-            <Link href="/categoria/economia" className="hover:text-blue-300 transition-colors">ECONOMÍA</Link>
-            <Link href="/categoria/empresas" className="hover:text-blue-300 transition-colors">EMPRESAS</Link>
-            <Link href="/categoria/mercados" className="hover:text-blue-300 transition-colors">MERCADOS</Link>
-            <Link href="/categoria/opinion" className="hover:text-blue-300 transition-colors">OPINIÓN</Link>
+
+            {categories.map(cat => (
+              <Link key={cat.slug} href={`/categoria/${cat.slug}`} className="hover:text-blue-300 transition-colors uppercase">
+                {cat.name}
+              </Link>
+            ))}
             
             <div className="pt-4 mt-2 border-t border-white/10 flex flex-col gap-5">
               {isLoggedIn ? (

@@ -9,7 +9,9 @@ export default function AdminSources() {
   const [sources, setSources] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
-  const [newSource, setNewSource] = useState({ name: "", url: "", category: "nacional", type: "rss" });
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [categories, setCategories] = useState<{slug: string, name: string}[]>([]);
+  const [newSource, setNewSource] = useState({ name: "", url: "", category: "editorial", type: "rss" });
   const router = useRouter();
 
   const fetchSources = async () => {
@@ -44,14 +46,28 @@ export default function AdminSources() {
     .catch(() => router.push("/admin"));
 
     fetchSources();
+
+    // Fetch categories
+    fetch("/api/articles/categories")
+      .then(res => res.json())
+      .then(data => {
+        setCategories(data);
+        if (data.length > 0) {
+          setNewSource(prev => ({ ...prev, category: data[0].slug }));
+        }
+      })
+      .catch(err => console.error("Error fetching categories:", err));
   }, [router]);
 
-  const handleCreate = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const token = localStorage.getItem("admin_token");
+    const method = editingId ? "PUT" : "POST";
+    const url = editingId ? `/api/ai/sources/${editingId}` : "/api/ai/sources";
+
     try {
-      const res = await fetch("/api/ai/sources", {
-        method: "POST",
+      const res = await fetch(url, {
+        method: method,
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`
@@ -60,12 +76,31 @@ export default function AdminSources() {
       });
       if (res.ok) {
         setIsAdding(false);
+        setEditingId(null);
         setNewSource({ name: "", url: "", category: "nacional", type: "rss" });
         fetchSources();
       }
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const handleEdit = (source: any) => {
+    setEditingId(source.id);
+    setNewSource({
+      name: source.name,
+      url: source.url,
+      category: source.category,
+      type: source.type || "rss"
+    });
+    setIsAdding(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const cancelEdit = () => {
+    setIsAdding(false);
+    setEditingId(null);
+    setNewSource({ name: "", url: "", category: "nacional", type: "rss" });
   };
 
   const handleDelete = async (id: number) => {
@@ -90,19 +125,24 @@ export default function AdminSources() {
 
       <main className="max-w-5xl mx-auto py-6 md:py-12 px-4">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 border-b pb-5">
-           <h1 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight">Fuentes de Noticias</h1>
-           <button 
-             onClick={() => setIsAdding(!isAdding)}
-             className="w-full md:w-auto bg-dr-blue text-white px-6 py-2.5 rounded-sm font-bold hover:bg-blue-900 transition-all uppercase text-sm tracking-widest"
-           >
-             {isAdding ? "Cancelar" : "+ Agregar Fuente"}
-           </button>
+            <h1 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight">Fuentes de Noticias</h1>
+            <button 
+              onClick={() => {
+                if (isAdding) cancelEdit();
+                else setIsAdding(true);
+              }}
+              className="w-full md:w-auto bg-dr-blue text-white px-6 py-2.5 rounded-sm font-bold hover:bg-blue-900 transition-all uppercase text-sm tracking-widest text-center"
+            >
+              {isAdding ? "Cancelar" : "+ Agregar Fuente"}
+            </button>
         </div>
 
         {isAdding && (
           <div className="bg-white p-6 rounded-lg shadow-lg border border-gray-200 mb-8 animate-in fade-in slide-in-from-top-2">
-            <h2 className="font-bold text-lg mb-4 text-dr-blue">Nueva Fuente RSS/Atom</h2>
-            <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <h2 className="font-bold text-lg mb-4 text-dr-blue">
+              {editingId ? "Editar Fuente" : "Nueva Fuente RSS/Atom"}
+            </h2>
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
                <div>
                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Nombre del Medio</label>
                  <input 
@@ -126,20 +166,20 @@ export default function AdminSources() {
                </div>
                <div>
                  <label className="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Categoría Sugerida</label>
-                 <select 
-                   className="w-full border border-gray-300 px-4 py-2.5 rounded focus:ring-2 focus:ring-dr-blue outline-none bg-white"
-                   value={newSource.category}
-                   onChange={e => setNewSource({...newSource, category: e.target.value})}
-                 >
-                    <option value="editorial">Editorial</option>
-                    <option value="economia">Economía</option>
-                    <option value="empresas">Empresas</option>
-                    <option value="mercados">Mercados</option>
-                    <option value="opinion">Opinión</option>
-                 </select>
+                  <select 
+                    className="w-full border border-gray-300 px-4 py-2.5 rounded focus:ring-2 focus:ring-dr-blue outline-none bg-white"
+                    value={newSource.category}
+                    onChange={e => setNewSource({...newSource, category: e.target.value})}
+                  >
+                    {categories.map(cat => (
+                      <option key={cat.slug} value={cat.slug}>{cat.name}</option>
+                    ))}
+                  </select>
                </div>
                <div className="flex items-end">
-                 <button type="submit" className="bg-dr-red text-white w-full py-3 rounded-sm font-bold uppercase text-xs tracking-widest shadow-md hover:bg-red-700 transition-colors">Guardar Fuente</button>
+                 <button type="submit" className="bg-dr-red text-white w-full py-3 rounded-sm font-bold uppercase text-xs tracking-widest shadow-md hover:bg-red-700 transition-colors">
+                   {editingId ? "Actualizar Fuente" : "Guardar Fuente"}
+                 </button>
                </div>
             </form>
           </div>
@@ -154,12 +194,20 @@ export default function AdminSources() {
                     <span className="uppercase text-[9px] bg-gray-100 px-2 py-0.5 rounded font-black text-gray-500 tracking-tighter">{source.category}</span>
                 </div>
                 <p className="text-xs text-gray-500 truncate mb-4 font-mono">{source.url}</p>
-                <button 
-                  onClick={() => handleDelete(source.id)} 
-                  className="w-full py-2 bg-red-50 text-dr-red text-[10px] font-black uppercase tracking-widest rounded hover:bg-red-100 transition-colors"
-                >
-                    Eliminar Fuente
-                </button>
+                <div className="grid grid-cols-2 gap-2">
+                  <button 
+                    onClick={() => handleEdit(source)} 
+                    className="py-2 bg-blue-50 text-dr-blue text-[10px] font-black uppercase tracking-widest rounded hover:bg-blue-100 transition-colors"
+                  >
+                      Editar
+                  </button>
+                  <button 
+                    onClick={() => handleDelete(source.id)} 
+                    className="py-2 bg-red-50 text-dr-red text-[10px] font-black uppercase tracking-widest rounded hover:bg-red-100 transition-colors"
+                  >
+                      Eliminar
+                  </button>
+                </div>
             </div>
           ))}
           {sources.length === 0 && (
@@ -180,11 +228,14 @@ export default function AdminSources() {
              </thead>
              <tbody className="divide-y divide-gray-100">
                {sources.map(source => (
-                 <tr key={source.id} className="hover:bg-blue-50/50 transition-colors">
+                 <tr key={source.id} className="hover:bg-blue-50/50 transition-colors group">
                    <td className="px-6 py-5 font-bold text-gray-900">{source.name}</td>
                    <td className="px-6 py-5 text-sm text-gray-500 font-mono italic truncate max-w-xs">{source.url}</td>
                    <td className="px-6 py-5"><span className="uppercase text-[10px] text-dr-red font-bold tracking-wider">{source.category}</span></td>
-                   <td className="px-6 py-5 text-right">
+                   <td className="px-6 py-5 text-right space-x-2">
+                      <button onClick={() => handleEdit(source)} className="text-gray-300 hover:text-dr-blue transition-colors">
+                        <svg className="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                      </button>
                       <button onClick={() => handleDelete(source.id)} className="text-gray-300 hover:text-dr-red transition-colors">
                         <svg className="w-5 h-5 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                       </button>

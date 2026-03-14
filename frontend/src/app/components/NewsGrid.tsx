@@ -9,15 +9,18 @@ interface Article {
   type: string;
   image_url?: string;
   published_at: string;
+  author?: string;
+  content: string;
 }
 
 interface NewsGridProps {
+  mainArticle: Article | null;
   initialArticles: Article[];
   totalArticles: number;
   pageSize?: number;
 }
 
-export default function NewsGrid({ initialArticles, totalArticles, pageSize = 10 }: NewsGridProps) {
+export default function NewsGrid({ mainArticle, initialArticles, totalArticles, pageSize = 8 }: NewsGridProps) {
   const [articles, setArticles] = useState<Article[]>(initialArticles);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -31,13 +34,21 @@ export default function NewsGrid({ initialArticles, totalArticles, pageSize = 10
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const totalPages = Math.ceil((totalArticles - 1) / pageSize); // -1 because first article is featured
+  // Calculate total pages accounting for page 1 (4 items) and subsequent pages (pageSize/6 items)
+  // Total of secondary articles = totalArticles - 1 (featured)
+  // First page takes 4. Remaining = (totalArticles - 1) - 4 = totalArticles - 5
+  // totalPages = 1 + Math.ceil(Math.max(0, totalArticles - 5) / pageSize)
+  const totalPages = 1 + Math.ceil(Math.max(0, totalArticles - 5) / pageSize);
 
   const fetchArticles = async (page: number, append = false) => {
     setLoading(true);
     try {
-      // Offset skips the featured article (1) and then calculates based on page
-      const skip = 1 + (page - 1) * pageSize;
+      // Offset calculation:
+      // Page 1: skip 1 (featured article), limit 4 (passed as initialArticles)
+      // Page 2: skip 1 + 4 = 5, limit 6
+      // Page 3: skip 1 + 4 + 6 = 11, limit 6
+      // Formula: skip = 5 + (page - 2) * pageSize for page > 1
+      const skip = page === 1 ? 1 : 5 + (page - 2) * pageSize;
       const res = await fetch(`/api/articles/?status=published&skip=${skip}&limit=${pageSize}`);
       const data = await res.json();
       
@@ -69,6 +80,50 @@ export default function NewsGrid({ initialArticles, totalArticles, pageSize = 10
   return (
     <div className="space-y-8">
       <div id="news-grid-start" className="scroll-mt-20"></div>
+
+      {/* featured article - Only on Page 1 */}
+      {currentPage === 1 && (
+        <>
+          {mainArticle ? (
+            <Link href={`/noticias/${mainArticle.id}`} className="group cursor-pointer block">
+              <article>
+                <div className="w-full aspect-video bg-gray-300 mb-4 relative overflow-hidden flex items-center justify-center">
+                  {mainArticle.image_url ? (
+                    <img 
+                      src={mainArticle.image_url.startsWith('http') ? mainArticle.image_url : `https://diariodigital.delioserver.duckdns.org${mainArticle.image_url}`} 
+                      alt={mainArticle.title} 
+                      className="w-full h-full object-cover" 
+                    />
+                  ) : (
+                    <span className="text-gray-400">Sin Imagen</span>
+                  )}
+                  <div className="absolute inset-0 bg-dr-blue/10 group-hover:bg-transparent transition duration-300"></div>
+                </div>
+                <span className="text-dr-red font-bold uppercase text-xs tracking-wider">{mainArticle.type}</span>
+                <h2 className="text-4xl md:text-5xl font-serif font-bold mt-3 leading-tight text-foreground group-hover:text-dr-red transition-colors">
+                  {mainArticle.title}
+                </h2>
+                <div className="mt-4 text-muted-foreground text-lg leading-relaxed">
+                  {/* We use div for content snippet to avoid p-within-p issues if any */}
+                  {mainArticle.title.length < 50 ? mainArticle.title : mainArticle.title.substring(0, 150) + "..."}
+                </div>
+                <div className="mt-4 text-sm text-muted-foreground flex items-center gap-2">
+                  <span className="font-semibold text-foreground/80">Por {mainArticle.author || "Redacción"}</span>
+                  <span>&bull;</span>
+                  <span>{new Date(mainArticle.published_at).toLocaleDateString()}</span>
+                </div>
+              </article>
+            </Link>
+          ) : (
+            <article className="group cursor-pointer">
+              <div className="w-full aspect-video bg-muted mb-4 relative overflow-hidden flex items-center justify-center text-muted-foreground">
+                No hay noticias publicadas
+              </div>
+            </article>
+          )}
+          <hr className="border-border" />
+        </>
+      )}
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {articles.map((article) => (

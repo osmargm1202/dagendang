@@ -7,15 +7,6 @@ from app.db.database import Base
 def get_dr_time():
     return datetime.datetime.now(ZoneInfo("America/Santo_Domingo"))
 
-class ArticleType(enum.Enum):
-    opinion = "opinion"
-    editorial = "editorial"
-    mercados = "mercados"
-    finanzas = "finanzas"
-    empresas = "empresas"
-    nacional = "nacional"
-    economia = "economia"
-
 class Article(Base):
     __tablename__ = "articles"
 
@@ -23,7 +14,7 @@ class Article(Base):
     title = Column(String(255), nullable=False)
     content = Column(Text, nullable=False)
     author = Column(String(100), nullable=True)
-    type = Column(Enum(ArticleType), nullable=False)
+    type = Column(String(50), nullable=False)
     image_url = Column(String(500), nullable=True)
     status = Column(String(50), default="published")
     is_premium = Column(Boolean, default=False)

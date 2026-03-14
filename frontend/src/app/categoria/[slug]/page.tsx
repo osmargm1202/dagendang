@@ -22,9 +22,22 @@ async function getCategoryArticles(slug: string) {
   }
 }
 
+async function getCategories() {
+  try {
+    const res = await fetch(`http://backend:8000/api/articles/categories`, { cache: 'no-store' });
+    if (!res.ok) return [];
+    return res.json();
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    return [];
+  }
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const categoryName = slug.charAt(0).toUpperCase() + slug.slice(1);
+  const categories = await getCategories();
+  const category = categories.find((c: any) => c.slug === slug);
+  const categoryName = category ? category.name : slug.charAt(0).toUpperCase() + slug.slice(1);
   
   return {
     title: `${categoryName} | La Agenda`,
@@ -44,9 +57,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const articles = await getCategoryArticles(slug);
+  const articlesData = getCategoryArticles(slug);
+  const categoriesData = getCategories();
   
-  const categoryName = slug.charAt(0).toUpperCase() + slug.slice(1);
+  const [articles, categories] = await Promise.all([articlesData, categoriesData]);
+  
+  const category = categories.find((c: any) => c.slug === slug);
+  const categoryName = category ? category.name : slug.charAt(0).toUpperCase() + slug.slice(1);
 
   return (
     <div className="w-full max-w-7xl mx-auto px-4 py-8">

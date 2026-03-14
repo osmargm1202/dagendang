@@ -64,7 +64,7 @@ async function getAdjacentNavigation(publishedAt: string) {
     // Next article (published AFTER current)
     const nextRes = await fetch(`http://backend:8000/api/articles/?status=published&published_after=${encodeURIComponent(publishedAt)}&limit=1`, { cache: 'no-store' });
     const nextList = nextRes.ok ? await nextRes.json() : [];
-    
+
     // Previous article (published BEFORE current)
     const prevRes = await fetch(`http://backend:8000/api/articles/?status=published&published_before=${encodeURIComponent(publishedAt)}&limit=1`, { cache: 'no-store' });
     const prevList = prevRes.ok ? await prevRes.json() : [];
@@ -89,8 +89,8 @@ export async function generateMetadata(
   if (!article) return { title: 'Nota no encontrada | La Agenda' };
 
   const snippet = article.content.substring(0, 160).replace(/\s+/g, ' ').trim() + '...';
-  const imageUrl = article.image_url?.startsWith('http') 
-    ? article.image_url 
+  const imageUrl = article.image_url?.startsWith('http')
+    ? article.image_url
     : `${BASE_URL}${article.image_url}`;
 
   return {
@@ -157,10 +157,10 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
             "datePublished": article.published_at,
             "dateModified": article.published_at,
             "author": [{
-                "@type": "Person",
-                "name": article.author || "La Agenda",
-                "url": BASE_URL
-              }],
+              "@type": "Person",
+              "name": article.author || "La Agenda",
+              "url": BASE_URL
+            }],
             "publisher": {
               "@type": "Organization",
               "name": "La Agenda",
@@ -192,7 +192,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
           </div>
         ) : (
           <div className="w-full aspect-video bg-muted mb-8 rounded-sm shadow-sm flex items-center justify-center border border-border">
-              <span className="text-muted-foreground">Sin Imagen</span>
+            <span className="text-muted-foreground">Sin Imagen</span>
           </div>
         )}
 
@@ -207,17 +207,17 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
               <span className="font-semibold text-foreground/80">Por {article.author || "Redacción"}</span>
             </div>
             <time dateTime={article.published_at}>
-              {new Date(article.published_at).toLocaleDateString('es-DO', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute:'2-digit' })}
+              {new Date(article.published_at).toLocaleDateString('es-DO', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
             </time>
           </div>
         </header>
 
         {/* Article Content with Premium logic and In-Content Ads */}
-        <PremiumContentWrapper 
-            content={article.content} 
-            isPremium={article.is_premium} 
-            adImageUrl={article.ad_image_url}
-            adLink={article.ad_link}
+        <PremiumContentWrapper
+          content={article.content}
+          isPremium={article.is_premium}
+          adImageUrl={article.ad_image_url}
+          adLink={article.ad_link}
         />
 
         <SocialShare title={article.title} url={articleUrl} />
@@ -239,25 +239,25 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
                 <span className="w-8 h-1 bg-dr-red"></span>
                 Noticias Relacionadas
               </h3>
-              
+
               {/* Navigation Arrows */}
               <div className="flex gap-2">
                 {navigation.prev && (
-                  <Link 
-                    href={`/noticias/${navigation.prev.id}`} 
+                  <Link
+                    href={`/noticias/${navigation.prev.id}`}
                     className="p-2 border border-border hover:bg-dr-blue hover:text-white transition-colors rounded-sm"
                     title="Anterior"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7"/></svg>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
                   </Link>
                 )}
                 {navigation.next && (
-                  <Link 
-                    href={`/noticias/${navigation.next.id}`} 
+                  <Link
+                    href={`/noticias/${navigation.next.id}`}
                     className="p-2 border border-border hover:bg-dr-blue hover:text-white transition-colors rounded-sm"
                     title="Siguiente"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7"/></svg>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" /></svg>
                   </Link>
                 )}
               </div>
@@ -266,9 +266,9 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
               {relatedArticles.map((rel: any) => (
                 <Link key={rel.id} href={`/noticias/${rel.id}`} className="group space-y-3">
                   <div className="aspect-video bg-muted overflow-hidden rounded-sm border border-border">
-                    <img 
-                      src={rel.image_url?.startsWith('http') ? rel.image_url : `${BASE_URL}${rel.image_url}`} 
-                      alt={rel.title} 
+                    <img
+                      src={rel.image_url?.startsWith('http') ? rel.image_url : `${BASE_URL}${rel.image_url}`}
+                      alt={rel.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   </div>
@@ -285,11 +285,11 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
 
       {/* Sidebar Derecha - Indicadores y Publicidad */}
       <aside className="space-y-8">
-        
+
         {/* Tasa de Cambio */}
         <div className="bg-card border border-border rounded shadow-sm p-5 mt-10 lg:mt-0">
-          <h3 className="font-bold text-lg border-b border-border pb-2 mb-4 text-primary tracking-wide uppercase">TASA DE CAMBIO OFICIAL</h3>
-          
+          <h3 className="font-bold text-lg border-b border-border pb-2 mb-4 text-primary tracking-wide uppercase">TASA DE CAMBIO</h3>
+
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
@@ -321,7 +321,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
         {/* Combustibles */}
         <div className="bg-card border border-border rounded shadow-sm p-5">
           <h3 className="font-bold text-lg border-b border-border pb-2 mb-4 text-primary tracking-wide uppercase">COMBUSTIBLES</h3>
-          
+
           <ul className="space-y-3 text-sm">
             <li className="flex justify-between">
               <span className="text-muted-foreground">Gasolina Premium</span>
@@ -348,12 +348,16 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
               <span className="font-bold text-foreground">RD$ {fuel?.gas_natural?.toFixed(2) || "43.90"}</span>
             </li>
           </ul>
-           <p className="text-xs text-center text-muted-foreground mt-4">Actualizado semanalmente (MICM)</p>
+          <p className="text-xs text-center text-muted-foreground mt-4">Actualizado semanalmente (MICM)</p>
         </div>
 
         {/* Publicidad Lateral */}
         <AdGuard>
-          <AdBanner position="sidebar_top" />
+          <AdBanner position="sidebar_top" className="mb-8" />
+        </AdGuard>
+
+        <AdGuard>
+          <AdBanner position="sidebar_bottom" />
         </AdGuard>
 
       </aside>

@@ -11,5 +11,7 @@ class User(Base):
     role = Column(String(50), default="editor") # "admin" or "editor"
     gemini_api_key = Column(String(255), nullable=True) # Only for admin/dashboard configuration
     gemini_model = Column(String(50), default="gemini-flash-lite-latest")
+    backup_limit_gb = Column(Integer, default=10)
+    backup_frequency_hours = Column(Integer, default=2)
     is_active = Column(Boolean, default=True)
     is_premium = Column(Boolean, default=False)

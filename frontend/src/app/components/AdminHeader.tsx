@@ -48,9 +48,9 @@ export default function AdminHeader({ user, currentTitle }: AdminHeaderProps) {
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center gap-6">
-            <Link href="/admin/fuentes" className="text-xs font-bold hover:text-blue-300 tracking-widest transition-colors uppercase">Fuentes IA</Link>
             <Link href="/admin/publicidad" className="text-xs font-bold hover:text-blue-300 tracking-widest transition-colors uppercase">Publicidad</Link>
             <Link href="/admin/configuracion" className="text-xs font-bold hover:text-blue-300 tracking-widest transition-colors uppercase">Configuración</Link>
+            
             <div className="flex items-center gap-3 pl-4 border-l border-blue-400">
               <div className="text-right">
                 <p className="text-[10px] font-bold leading-none">{user.full_name}</p>
@@ -84,7 +84,6 @@ export default function AdminHeader({ user, currentTitle }: AdminHeaderProps) {
       <div className={`md:hidden bg-blue-900 overflow-hidden transition-all duration-300 ease-in-out ${isMobileMenuOpen ? 'max-h-64 border-t border-blue-800' : 'max-h-0'}`}>
         <div className="px-4 py-4 space-y-3">
           <Link href="/admin/dashboard" className="block text-sm font-bold tracking-widest uppercase py-2">Dashboard</Link>
-          <Link href="/admin/fuentes" className="block text-sm font-bold tracking-widest uppercase py-2">Fuentes IA</Link>
           <Link href="/admin/publicidad" className="block text-sm font-bold tracking-widest uppercase py-2">Publicidad</Link>
           <Link href="/admin/configuracion" className="block text-sm font-bold tracking-widest uppercase py-2 border-b border-blue-800 pb-2">Configuración</Link>
           <Link href="/" className="block text-xs font-bold text-blue-300 py-2">IR AL PORTAL PÚBLICO</Link>

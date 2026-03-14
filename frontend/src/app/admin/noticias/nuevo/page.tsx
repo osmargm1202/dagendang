@@ -20,6 +20,7 @@ export default function NewArticle() {
   const [isPremium, setIsPremium] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [categories, setCategories] = useState<{slug: string, name: string}[]>([]);
 
   // AI Scrawl states
   const [showAIModal, setShowAIModal] = useState(false);
@@ -118,6 +119,15 @@ export default function NewArticle() {
         localStorage.removeItem("admin_token");
         router.push("/admin");
       });
+
+    // Fetch categories
+    fetch("/api/articles/categories")
+      .then(res => res.json())
+      .then(data => {
+        setCategories(data);
+        if (data.length > 0) setType(data[0].slug);
+      })
+      .catch(err => console.error("Error fetching categories:", err));
 
   }, [router]);
 
@@ -323,11 +333,9 @@ export default function NewArticle() {
                     value={type}
                     onChange={(e) => setType(e.target.value)}
                   >
-                    <option value="editorial">Editorial</option>
-                    <option value="economia">Economía</option>
-                    <option value="empresas">Empresas</option>
-                    <option value="mercados">Mercados</option>
-                    <option value="opinion">Opinión</option>
+                    {categories.map(cat => (
+                      <option key={cat.slug} value={cat.slug}>{cat.name}</option>
+                    ))}
                   </select>
                 </div>
 

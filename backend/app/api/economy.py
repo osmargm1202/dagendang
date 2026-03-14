@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+from typing import List
 from app.db.database import get_db
 from app.models.economy import ExchangeRate, FuelPrice
 from app.schemas.economy import ExchangeRateResponse, FuelPriceResponse
@@ -21,6 +22,14 @@ def get_latest_fuel_prices(db: Session = Depends(get_db)):
         # Fallback dummy data if no data scraped yet
         return {"id": 0, "gasoline_premium": 290.10, "gasoline_regular": 272.50, "diesel_optimum": 239.10, "diesel_regular": 221.60, "glp": 132.60, "gas_natural": 43.90, "date": "2024-01-01", "created_at": "2024-01-01T00:00:00"}
     return prices
+
+@router.get("/exchange-rate/history", response_model=List[ExchangeRateResponse])
+def get_exchange_rate_history(db: Session = Depends(get_db), days: int = 30):
+    return db.query(ExchangeRate).order_by(ExchangeRate.date.desc()).limit(days).all()
+
+@router.get("/fuel-prices/history", response_model=List[FuelPriceResponse])
+def get_fuel_prices_history(db: Session = Depends(get_db), days: int = 30):
+    return db.query(FuelPrice).order_by(FuelPrice.date.desc()).limit(days).all()
 from app.core import scraper
 import datetime
 

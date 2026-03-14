@@ -219,7 +219,7 @@ export default function AdminAdsPage() {
                                             <option value="header">Superior (728x90)</option>
                                             <option value="sidebar_top">Lateral Superior (300x250/600)</option>
                                             <option value="sidebar_bottom">Lateral Inferior</option>
-                                            <option value="content_middle">Dentro de Artículo</option>
+                                            <option value="content_middle">Inferior</option>
                                         </select>
                                     </div>
                                     <div>
@@ -309,7 +309,12 @@ export default function AdminAdsPage() {
                                         <div className="p-4">
                                             <div className="flex justify-between items-start mb-2">
                                                 <h3 className="font-bold text-gray-900 truncate pr-4">{ad.title}</h3>
-                                                <span className="text-[10px] font-black text-dr-blue uppercase opacity-60 tracking-tighter whitespace-nowrap">{ad.position}</span>
+                                                <span className="text-[10px] font-black text-dr-blue uppercase opacity-60 tracking-tighter whitespace-nowrap">
+                                                    {ad.position === 'header' ? 'Superior' : 
+                                                     ad.position === 'sidebar_top' ? 'Lat. Superior' : 
+                                                     ad.position === 'sidebar_bottom' ? 'Lat. Inferior' : 
+                                                     ad.position === 'content_middle' ? 'Inferior' : ad.position}
+                                                </span>
                                             </div>
                                             <p className="text-[10px] text-gray-400 font-mono truncate mb-4">{ad.link_url}</p>
                                             <div className="flex gap-2">
