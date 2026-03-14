@@ -302,10 +302,10 @@ export default function AdminSettings() {
   const inactiveCategories = categories.filter((cat) => !cat.is_active).length;
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(7,57,117,0.14),_transparent_34%),linear-gradient(180deg,_#f7f8fb_0%,_#eef2f7_100%)] pb-20">
+    <div className="w-full min-h-screen bg-gray-50 pb-20">
       <AdminHeader user={user} currentTitle="Configuración" />
 
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <main className="max-w-7xl mx-auto py-6 md:py-10 px-4 sm:px-6 lg:px-8">
         <section className="overflow-hidden rounded-[28px] border border-slate-200 bg-[linear-gradient(135deg,_#ffffff_0%,_#eef6ff_52%,_#f8fbff_100%)] text-slate-900 shadow-[0_24px_80px_rgba(15,23,42,0.10)]">
           <div className="grid gap-8 px-6 py-8 md:px-8 lg:grid-cols-[1.5fr_1fr] lg:px-10">
             <div>

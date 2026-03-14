@@ -84,10 +84,10 @@ export default function UserManagementPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="w-full min-h-screen bg-gray-50 pb-20">
       <AdminHeader user={currentUser} currentTitle="Gestión de Lectores" />
       
-      <main className="max-w-7xl mx-auto px-4 py-8">
+      <main className="max-w-7xl mx-auto py-6 md:py-10 px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-serif font-black text-dr-blue tracking-tighter uppercase">Lectores y Suscriptores</h1>

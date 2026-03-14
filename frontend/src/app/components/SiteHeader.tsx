@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import ThemeToggle from "./ThemeToggle";
 
@@ -14,6 +14,12 @@ export default function SiteHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [categories, setCategories] = useState<{slug: string, name: string}[]>([]);
+  
+  // Slider State & Refs
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const scrollInterval = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -22,7 +28,6 @@ export default function SiteHeader() {
       .then(data => setCategories(data))
       .catch(err => console.error("Error fetching categories:", err));
   }, []);
-  
 
   useEffect(() => {
     const adminToken = localStorage.getItem("admin_token");
@@ -31,16 +36,44 @@ export default function SiteHeader() {
     setIsAdmin(!!adminToken);
   }, [pathname]);
 
-  // Close menu when route changes
   useEffect(() => {
     setIsMenuOpen(false);
   }, [pathname]);
 
-  // Hide the public header in the CMS admin area
+  const checkScroll = () => {
+    if (containerRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = containerRef.current;
+      setShowLeftArrow(scrollLeft > 10);
+      setShowRightArrow(scrollLeft + clientWidth < scrollWidth - 10);
+    }
+  };
+
+  useEffect(() => {
+    checkScroll();
+    window.addEventListener("resize", checkScroll);
+    return () => window.removeEventListener("resize", checkScroll);
+  }, [categories]);
+
+  const startScrolling = (direction: "left" | "right") => {
+    if (scrollInterval.current) return;
+    scrollInterval.current = setInterval(() => {
+      if (containerRef.current) {
+        containerRef.current.scrollLeft += direction === "right" ? 5 : -5;
+        checkScroll();
+      }
+    }, 16);
+  };
+
+  const stopScrolling = () => {
+    if (scrollInterval.current) {
+      clearInterval(scrollInterval.current);
+      scrollInterval.current = null;
+    }
+  };
+
   if (!mounted || pathname.startsWith("/admin")) {
     return null;
   }
-
 
   const handleLogout = () => {
     localStorage.removeItem("user_token");
@@ -66,15 +99,53 @@ export default function SiteHeader() {
         </h1>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex gap-6 font-sans font-semibold text-[10px] lg:text-xs tracking-widest items-center">
+        <nav className="hidden md:flex gap-6 font-sans font-semibold text-[10px] lg:text-xs tracking-widest items-center overflow-hidden">
+          
+          <div className="relative flex items-center group/slider max-w-[280px] lg:max-w-[380px] xl:max-w-[480px]">
+            {/* Left Arrow */}
+            <div 
+              className={`absolute left-0 z-10 bg-gradient-to-r from-dr-blue via-dr-blue/90 to-transparent pr-10 py-4 transition-opacity duration-300 ${showLeftArrow ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+              onMouseEnter={() => startScrolling("left")}
+              onMouseLeave={stopScrolling}
+            >
+              <button className="animate-pulse">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+            </div>
 
-          <div className="flex gap-4">
-            {categories.map(cat => (
-              <Link key={cat.slug} href={`/categoria/${cat.slug}`} className="hover:text-gray-300 transition-colors uppercase">
-                {cat.name}
-              </Link>
-            ))}
+            {/* Categories Container */}
+            <div 
+              ref={containerRef}
+              className="flex gap-8 overflow-x-hidden scroll-smooth whitespace-nowrap px-4 py-2 no-scrollbar"
+              onScroll={checkScroll}
+            >
+              {categories.map(cat => (
+                <Link key={cat.slug} href={`/categoria/${cat.slug}`} className="hover:text-blue-300 transition-colors uppercase tracking-[0.15em]">
+                  {cat.name}
+                </Link>
+              ))}
+            </div>
+
+            {/* Right Arrow */}
+            <div 
+              className={`absolute right-0 z-10 bg-gradient-to-l from-dr-blue via-dr-blue/90 to-transparent pl-10 py-4 transition-opacity duration-300 ${showRightArrow ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+              onMouseEnter={() => startScrolling("right")}
+              onMouseLeave={stopScrolling}
+            >
+              <button className="animate-pulse">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
           </div>
+
+          <style jsx>{`
+            .no-scrollbar::-webkit-scrollbar { display: none; }
+            .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+          `}</style>
 
           {/* Search Bar Desktop */}
           <form onSubmit={handleSearch} className="relative ml-2">
@@ -83,7 +154,7 @@ export default function SiteHeader() {
               placeholder="BUSCAR..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-white/10 border border-white/20 rounded-sm px-3 py-1.5 text-[10px] font-bold focus:outline-none focus:bg-white/20 transition-all w-32 focus:w-48 placeholder:text-white/40"
+              className="bg-white/10 border border-white/20 rounded-sm px-3 py-1.5 text-[10px] font-bold focus:outline-none focus:bg-white/20 transition-all w-24 lg:w-32 focus:w-48 placeholder:text-white/40"
             />
             <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 text-white/50 hover:text-white">
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

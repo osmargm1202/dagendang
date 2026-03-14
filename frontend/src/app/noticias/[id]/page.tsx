@@ -294,9 +294,9 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
       {/* Sidebar Derecha - Indicadores y Publicidad */}
       <aside className="space-y-8">
 
-        {/* Tasa de Cambio */}
+        {/* Divisas */}
         <div className="bg-card border border-border rounded shadow-sm p-5 mt-10 lg:mt-0">
-          <h3 className="font-bold text-lg border-b border-border pb-2 mb-4 text-primary tracking-wide uppercase">TASA DE CAMBIO</h3>
+          <h3 className="font-bold text-lg border-b border-border pb-2 mb-4 text-primary tracking-wide uppercase">DIVISAS</h3>
 
           <div className="space-y-4">
             <div className="flex justify-between items-center">

@@ -159,7 +159,7 @@ export default function AdminAdsPage() {
         <div className="w-full min-h-screen bg-gray-50 pb-20">
             <AdminHeader user={user} currentTitle="Publicidad" />
 
-            <main className="max-w-7xl mx-auto py-6 md:py-10 px-4">
+            <main className="max-w-7xl mx-auto py-6 md:py-10 px-4 sm:px-6 lg:px-8">
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 border-b border-gray-200 pb-6">
                     <h1 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight">Gestión de Publicidad</h1>
                     {!isAddingNew && (

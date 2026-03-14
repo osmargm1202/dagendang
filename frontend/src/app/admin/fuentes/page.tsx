@@ -120,10 +120,10 @@ export default function AdminSources() {
   if (isLoading || !user) return <div className="p-10 text-center">Cargando fuentes...</div>;
 
   return (
-    <div className="w-full min-h-screen bg-gray-50 uppercase-none pb-20">
+    <div className="w-full min-h-screen bg-gray-50 pb-20">
       <AdminHeader user={user} currentTitle="Fuentes IA" />
 
-      <main className="max-w-5xl mx-auto py-6 md:py-12 px-4">
+      <main className="max-w-7xl mx-auto py-6 md:py-10 px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 border-b pb-5">
             <h1 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight">Fuentes de Noticias</h1>
             <button 

@@ -113,13 +113,13 @@ export default function EconomyIndicators({ initialRates, initialFuel }: Props) 
 
   return (
     <div className="space-y-8">
-      {/* Tasa de Cambio */}
+      {/* Divisas */}
       <div
         className={`bg-card border border-border rounded shadow-sm p-5 transition-all duration-300 hover:shadow-md cursor-pointer group ${showHistory !== 'none' && showHistory !== 'fuel' ? 'ring-2 ring-dr-blue/20' : ''}`}
         onClick={() => handleToggle(showHistory === 'usd' ? 'eur' : (showHistory === 'eur' ? 'none' : 'usd'))}
       >
         <div className="flex justify-between items-center border-b border-border pb-2 mb-4">
-          <h3 className="font-bold text-lg text-primary tracking-wide uppercase">TASA DE CAMBIO</h3>
+          <h3 className="font-bold text-lg text-primary tracking-wide uppercase">DIVISAS</h3>
           <div className="text-[10px] bg-dr-blue/10 text-dr-blue px-2 py-0.5 rounded-full font-black uppercase tracking-widest animate-pulse">
             {showHistory === 'usd' ? 'USD HIST' : (showHistory === 'eur' ? 'EUR HIST' : 'HISTORIAL DIARIO')}
           </div>
