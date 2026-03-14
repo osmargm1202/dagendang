@@ -5,10 +5,53 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import AdminHeader from "../../components/AdminHeader";
 
+const DEFAULT_ARTICLE_PROMPT_TEMPLATE = `Actua como el Editor en Jefe del diario digital dominicano "La Agenda".
+Nuestro estilo es "Ejecutivo Dominicano": serio, profesional, analitico y elegante, en una linea cercana a Bloomberg o Financial Times.
+
+Tu tarea es redactar una noticia ORIGINAL basada en la siguiente informacion de una fuente externa:
+
+--- INICIO INFORMACION FUENTE ---
+URL FUENTE: {source_url}
+CATEGORIA ASIGNADA: {category}
+CONTENIDO:
+{source_content}
+--- FIN INFORMACION FUENTE ---
+
+REQUISITOS DE REDACCION:
+1. No hables en primera persona.
+2. El titular debe ser impactante pero profesional.
+3. El contenido debe tener al menos 4 o 5 parrafos.
+4. Al final del articulo, debes incluir una linea de referencia: "Basado en informaciones de [Nombre de Fuente Original]".
+5. Adapta los terminos economicos al contexto dominicano si es necesario.
+6. Evita duplicar el texto exacto de la fuente, pero manten todos los datos y hechos veridicos.
+7. La categoria del articulo es {category}.
+8. Devuelve exclusivamente un objeto JSON compatible con el esquema esperado.`;
+
+const DEFAULT_IMAGE_PROMPT_TEMPLATE = `Crea una imagen editorial de alta calidad para un diario digital.
+
+Contexto del articulo:
+- Titulo: {title}
+- Categoria: {category}
+- Resumen/base editorial:
+{content_excerpt}
+
+Instrucciones visuales:
+- Representa la idea central del articulo con una sola escena clara, elegante y periodistica.
+- Prioriza composiciones realistas o editorialmente verosimiles.
+- Evita collage caotico, simbolos genericos vacios y elementos decorativos irrelevantes.
+- No renderices textos, titulares, letras, rotulos, marcas de agua, logotipos ni tipografia dentro de la imagen, salvo que sea estrictamente inevitable y natural en la escena.
+- Si aparece texto incidental en el entorno, debe ser minimo, secundario y no protagonista.
+- Sin marcos, sin interfaz de app, sin capturas de pantalla, sin diseno de poster.
+- La imagen debe funcionar como portada de noticia profesional.`;
+
 export default function AdminSettings() {
   const [user, setUser] = useState<any>(null);
   const [apiKey, setApiKey] = useState("");
-  const [selectedModel, setSelectedModel] = useState("gemini-flash-lite-latest");
+  const [selectedModel, setSelectedModel] = useState("gemini-3-flash-preview");
+  const [selectedImageModel, setSelectedImageModel] = useState("gemini-3.1-flash-image-preview");
+  const [selectedImageSize, setSelectedImageSize] = useState("1K");
+  const [articlePromptTemplate, setArticlePromptTemplate] = useState(DEFAULT_ARTICLE_PROMPT_TEMPLATE);
+  const [imagePromptTemplate, setImagePromptTemplate] = useState(DEFAULT_IMAGE_PROMPT_TEMPLATE);
   const [backupFreq, setBackupFreq] = useState(2);
   const [backupLimit, setBackupLimit] = useState(10);
   const [isLoading, setIsLoading] = useState(false);
@@ -42,6 +85,10 @@ export default function AdminSettings() {
         setUser(data);
         setApiKey(data.gemini_api_key || "");
         if (data.gemini_model) setSelectedModel(data.gemini_model);
+        if (data.gemini_image_model) setSelectedImageModel(data.gemini_image_model);
+        if (data.gemini_image_size) setSelectedImageSize(data.gemini_image_size);
+        if (data.article_prompt_template) setArticlePromptTemplate(data.article_prompt_template);
+        if (data.image_prompt_template) setImagePromptTemplate(data.image_prompt_template);
         if (data.backup_frequency_hours) setBackupFreq(data.backup_frequency_hours);
         if (data.backup_limit_gb) setBackupLimit(data.backup_limit_gb);
       })
@@ -80,8 +127,8 @@ export default function AdminSettings() {
     }
   };
 
-  const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSave = async (e?: React.FormEvent) => {
+    e?.preventDefault();
     setIsLoading(true);
     setMessage({ type: "", text: "" });
 
@@ -96,6 +143,10 @@ export default function AdminSettings() {
         body: JSON.stringify({
           gemini_api_key: apiKey,
           gemini_model: selectedModel,
+          gemini_image_model: selectedImageModel,
+          gemini_image_size: selectedImageSize,
+          article_prompt_template: articlePromptTemplate,
+          image_prompt_template: imagePromptTemplate,
           backup_frequency_hours: backupFreq,
           backup_limit_gb: backupLimit
         })
@@ -247,256 +298,496 @@ export default function AdminSettings() {
 
   if (!user) return <div className="p-10 text-center">Cargando...</div>;
 
+  const activeCategories = categories.filter((cat) => cat.is_active).length;
+  const inactiveCategories = categories.filter((cat) => !cat.is_active).length;
+
   return (
-    <div className="w-full min-h-screen bg-gray-50 uppercase-none pb-20">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(7,57,117,0.14),_transparent_34%),linear-gradient(180deg,_#f7f8fb_0%,_#eef2f7_100%)] pb-20">
       <AdminHeader user={user} currentTitle="Configuración" />
 
-      <main className="max-w-6xl mx-auto py-8 md:py-12 px-4">
-        <h1 className="text-2xl md:text-3xl font-black text-gray-900 mb-8 tracking-tight uppercase">Configuración del Sistema</h1>
+      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <section className="overflow-hidden rounded-[28px] border border-slate-200 bg-[linear-gradient(135deg,_#ffffff_0%,_#eef6ff_52%,_#f8fbff_100%)] text-slate-900 shadow-[0_24px_80px_rgba(15,23,42,0.10)]">
+          <div className="grid gap-8 px-6 py-8 md:px-8 lg:grid-cols-[1.5fr_1fr] lg:px-10">
+            <div>
+              <p className="text-[11px] font-black uppercase tracking-[0.35em] text-dr-blue">Centro de Control</p>
+              <h1 className="mt-4 max-w-2xl text-3xl font-black tracking-tight text-slate-950 md:text-4xl">
+                Configura IA, respaldos y estructura editorial sin mezclar contextos.
+              </h1>
+              <p className="mt-4 max-w-2xl text-sm leading-6 text-slate-600">
+                Esta pantalla ahora separa decisiones creativas, seguridad operativa y organización del portal para que cada área se administre con más claridad.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <span className="rounded-full border border-slate-200 bg-white px-4 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-slate-700">
+                  Texto: {selectedModel}
+                </span>
+                <span className="rounded-full border border-slate-200 bg-white px-4 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-slate-700">
+                  Imagen: {selectedImageModel}
+                </span>
+                <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-emerald-200">
+                  {backups.length} respaldos listos
+                </span>
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
+              <div className="rounded-3xl border border-slate-200 bg-white p-5">
+                <div className="text-[10px] font-black uppercase tracking-[0.28em] text-slate-400">IA Activa</div>
+                <div className="mt-4 text-3xl font-black text-slate-950">{apiKey ? "OK" : "--"}</div>
+                <p className="mt-2 text-xs leading-5 text-slate-600">
+                  {apiKey ? "La llave de Gemini esta cargada y lista para texto e imagen." : "Falta agregar la API key para habilitar las funciones de IA."}
+                </p>
+              </div>
+              <div className="rounded-3xl border border-slate-200 bg-white p-5">
+                <div className="text-[10px] font-black uppercase tracking-[0.28em] text-slate-400">Categorias</div>
+                <div className="mt-4 text-3xl font-black text-slate-950">{activeCategories}</div>
+                <p className="mt-2 text-xs leading-5 text-slate-600">
+                  {inactiveCategories > 0 ? `${inactiveCategories} categoria(s) inactiva(s) en reserva.` : "Todas las categorias actuales estan activas."}
+                </p>
+              </div>
+              <div className="rounded-3xl border border-slate-200 bg-white p-5">
+                <div className="text-[10px] font-black uppercase tracking-[0.28em] text-slate-400">Backups</div>
+                <div className="mt-4 text-3xl font-black text-slate-950">{backupFreq}h</div>
+                <p className="mt-2 text-xs leading-5 text-slate-600">
+                  Frecuencia automatica con un tope total configurado de {backupLimit} GB.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
 
-          {/* Panel Izquierdo: IA y Backups */}
-          <div className="space-y-8">
-            <div className="bg-white p-8 rounded-lg shadow border border-gray-200">
-              <h2 className="text-xl font-bold text-dr-blue mb-6 border-b pb-2 uppercase tracking-tighter">Integración con Google Gemini</h2>
-
-              {message.text && (
-                <div className={`p-4 mb-6 rounded ${message.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-dr-red border border-red-200'}`}>
-                  {message.text}
+        <div className="mt-8 grid gap-8 xl:grid-cols-[1.45fr_0.95fr]">
+          <section className="space-y-8">
+            <form onSubmit={handleSave} className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
+              <div className="border-b border-slate-200 bg-slate-50/80 px-6 py-5 md:px-8">
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                  <div>
+                    <p className="text-[11px] font-black uppercase tracking-[0.28em] text-slate-400">Estudio de IA</p>
+                    <h2 className="mt-2 text-2xl font-black tracking-tight text-slate-900">Motores y estilo editorial</h2>
+                  </div>
+                  <div className="rounded-2xl border border-cyan-200 bg-cyan-50 px-4 py-3 text-xs font-semibold text-cyan-950">
+                    Ajusta aqui solo lo relacionado con generacion de texto e imagen.
+                  </div>
                 </div>
-              )}
+              </div>
 
-              <form onSubmit={handleSave} className="space-y-6">
-                <div>
-                  <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Google Gemini API Key</label>
-                  <input
-                    type="password"
-                    className="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-dr-blue outline-none font-mono text-sm"
-                    placeholder="Introduzca su API Key de Gemini"
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
+              <div className="space-y-8 px-6 py-6 md:px-8 md:py-8">
+                {message.text && (
+                  <div className={`rounded-2xl border px-4 py-3 text-sm font-medium ${message.type === "success" ? "border-emerald-200 bg-emerald-50 text-emerald-900" : "border-red-200 bg-red-50 text-dr-red"}`}>
+                    {message.text}
+                  </div>
+                )}
+
+                <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+                  <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+                    <div className="text-[11px] font-black uppercase tracking-[0.28em] text-slate-400">Credenciales</div>
+                    <h3 className="mt-2 text-lg font-black text-slate-900">Acceso principal</h3>
+                    <p className="mt-2 text-sm leading-6 text-slate-500">
+                      La misma llave controla la redaccion automatica y la generacion visual.
+                    </p>
+                    <div className="mt-5">
+                      <label className="mb-2 block text-[11px] font-black uppercase tracking-[0.22em] text-slate-500">Google Gemini API Key</label>
+                      <input
+                        type="password"
+                        className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 font-mono text-sm text-slate-900 outline-none transition focus:border-dr-blue focus:ring-2 focus:ring-dr-blue/20"
+                        placeholder="Introduzca su API Key de Gemini"
+                        value={apiKey}
+                        onChange={(e) => setApiKey(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="rounded-3xl border border-slate-200 bg-white p-5">
+                    <div className="text-[11px] font-black uppercase tracking-[0.28em] text-slate-400">Modelos</div>
+                    <h3 className="mt-2 text-lg font-black text-slate-900">Separacion por medio</h3>
+                    <p className="mt-2 text-sm leading-6 text-slate-500">
+                      Mantiene desacoplados el flujo de redaccion y el flujo de ilustracion.
+                    </p>
+                    <div className="mt-5 grid gap-4 md:grid-cols-3">
+                      <div>
+                        <label className="mb-2 block text-[11px] font-black uppercase tracking-[0.22em] text-slate-500">Modelo de Texto</label>
+                        <select
+                          className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm font-bold text-slate-900 outline-none transition focus:border-dr-blue focus:ring-2 focus:ring-dr-blue/20"
+                          value={selectedModel}
+                          onChange={(e) => setSelectedModel(e.target.value)}
+                        >
+                          <option value="gemini-3-flash-preview">Gemini 3 Flash Preview</option>
+                          <option value="gemini-3.1-flash-lite-preview">Gemini 3.1 Flash-Lite Preview</option>
+                          <option value="gemini-3.1-pro-preview">Gemini 3.1 Pro Preview</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="mb-2 block text-[11px] font-black uppercase tracking-[0.22em] text-slate-500">Modelo de Imagen</label>
+                        <select
+                          className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm font-bold text-slate-900 outline-none transition focus:border-dr-blue focus:ring-2 focus:ring-dr-blue/20"
+                          value={selectedImageModel}
+                          onChange={(e) => setSelectedImageModel(e.target.value)}
+                        >
+                          <option value="gemini-3.1-flash-image-preview">Gemini 3.1 Flash Image Preview</option>
+                          <option value="gemini-3-pro-image-preview">Gemini 3 Pro Image Preview</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="mb-2 block text-[11px] font-black uppercase tracking-[0.22em] text-slate-500">Resolucion Imagen</label>
+                        <select
+                          className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm font-bold text-slate-900 outline-none transition focus:border-dr-blue focus:ring-2 focus:ring-dr-blue/20"
+                          value={selectedImageSize}
+                          onChange={(e) => setSelectedImageSize(e.target.value)}
+                        >
+                          <option value="1K">1K (Menor costo)</option>
+                          <option value="2K">2K (Balanceado)</option>
+                          <option value="4K">4K (Mayor costo)</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-[28px] border border-slate-200 bg-white p-6 text-slate-900">
+                  <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                    <div>
+                      <p className="text-[11px] font-black uppercase tracking-[0.28em] text-dr-blue">Direccion Editorial</p>
+                      <h3 className="mt-2 text-xl font-black tracking-tight">Plantilla de prompt de texto</h3>
+                      <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+                        Controla como Gemini redacta el titulo y el cuerpo del articulo a partir de la fuente original.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setArticlePromptTemplate(DEFAULT_ARTICLE_PROMPT_TEMPLATE)}
+                      className="inline-flex h-fit items-center justify-center rounded-full border border-blue-200 bg-white px-4 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-dr-blue transition hover:bg-blue-50"
+                    >
+                      Restaurar default
+                    </button>
+                  </div>
+                  <textarea
+                    rows={12}
+                    className="mt-6 w-full rounded-3xl border border-slate-300 bg-white px-4 py-4 font-mono text-xs leading-6 text-slate-900 outline-none transition focus:border-dr-blue focus:ring-2 focus:ring-dr-blue/20"
+                    value={articlePromptTemplate}
+                    onChange={(e) => setArticlePromptTemplate(e.target.value)}
                   />
-                  <p className="mt-2 text-[10px] text-gray-400 italic">
-                    * Esta llave se utiliza para el raspado inteligente (scrawl) y la re-redacción de noticias por IA.
+                  <p className="mt-3 text-[11px] leading-5 text-slate-500">
+                    Variables disponibles: {"{source_url}"}, {"{category}"}, {"{source_content}"}, {"{source_excerpt}"} y {"{article_context}"}.
                   </p>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Modelo de Gemini</label>
-                  <select
-                    className="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-dr-blue outline-none bg-white font-bold text-sm"
-                    value={selectedModel}
-                    onChange={(e) => setSelectedModel(e.target.value)}
-                  >
-                    <option value="gemini-flash-lite-latest">Gemini Flash Lite (Recomendado)</option>
-                    <option value="gemini-1.5-flash">Gemini 1.5 Flash (Balanceado)</option>
-                    <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash Exp</option>
-                  </select>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Frecuencia Backup (Horas)</label>
-                    <input
-                      type="number"
-                      className="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-dr-blue outline-none font-bold text-sm"
-                      value={backupFreq}
-                      onChange={(e) => setBackupFreq(parseInt(e.target.value))}
-                      min="1"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Límite Total (GB)</label>
-                    <input
-                      type="number"
-                      className="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-dr-blue outline-none font-bold text-sm"
-                      value={backupLimit}
-                      onChange={(e) => setBackupLimit(parseInt(e.target.value))}
-                      min="1"
-                    />
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  className="w-full bg-dr-blue text-white py-3 rounded font-black uppercase text-xs tracking-widest hover:bg-blue-900 transition-all disabled:bg-gray-400 shadow-md active:scale-95"
-                >
-                  {isLoading ? "Guardando..." : "Guardar Configuración"}
-                </button>
-              </form>
-            </div>
-
-            {/* Gestión de Respaldos */}
-            <div className="bg-white p-8 rounded-lg shadow border border-gray-200">
-              <div className="flex justify-between items-center mb-6 border-b pb-2">
-                <h2 className="text-xl font-bold text-gray-900 uppercase tracking-tighter">Respaldos de Base de Datos</h2>
-                <button
-                  onClick={handleCreateBackup}
-                  disabled={isCreatingBackup}
-                  className="bg-green-600 text-white px-3 py-1 rounded-sm hover:bg-green-700 transition-colors text-[10px] font-black uppercase tracking-widest disabled:bg-gray-400 shadow-sm"
-                >
-                  {isCreatingBackup ? "Procesando..." : "Crear Backup Ahora"}
-                </button>
-              </div>
-
-              <div className="space-y-3 max-h-[420px] overflow-y-auto pr-2 custom-scrollbar">
-                {isBackupLoading ? (
-                  <p className="text-center py-4 text-xs text-gray-400">Cargando archivos...</p>
-                ) : backups.map((b) => (
-                  <div key={b.filename} className="flex items-center justify-between p-3 border rounded bg-gray-50 hover:border-gray-300 transition-colors">
+                <div className="rounded-[28px] border border-slate-200 bg-[linear-gradient(180deg,_#f8fbff_0%,_#eef6ff_100%)] p-6 text-slate-900">
+                  <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                     <div>
-                      <div className="font-bold text-xs text-gray-900">{b.filename}</div>
-                      <div className="flex items-center gap-3 mt-1">
-                        <span className="text-[9px] font-black text-gray-400 uppercase">{formatSize(b.size)}</span>
-                        <span className="text-[9px] font-black text-gray-400 uppercase">{new Date(b.created_at).toLocaleString()}</span>
-                      </div>
+                      <p className="text-[11px] font-black uppercase tracking-[0.28em] text-dr-blue">Direccion Visual</p>
+                      <h3 className="mt-2 text-xl font-black tracking-tight">Plantilla de prompt de imagen</h3>
+                      <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
+                        Aqui defines como Gemini interpreta el titulo, la categoria y el contenido al construir la portada. El sistema ya empuja a evitar texto dentro de la imagen.
+                      </p>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => handleRestoreBackup(b.filename)}
-                        className="px-2 py-1 bg-dr-blue text-white text-[9px] font-black uppercase rounded-sm hover:bg-blue-900 transition-colors shadow-sm"
-                        title="Restaurar"
-                      >
-                        Restaurar
-                      </button>
-                      <button
-                        onClick={() => handleDeleteBackup(b.filename)}
-                        className="p-1 text-dr-red hover:bg-red-50 rounded transition-colors"
-                        title="Eliminar"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setImagePromptTemplate(DEFAULT_IMAGE_PROMPT_TEMPLATE)}
+                      className="inline-flex h-fit items-center justify-center rounded-full border border-blue-200 bg-white px-4 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-dr-blue transition hover:bg-blue-50"
+                    >
+                      Restaurar default
+                    </button>
                   </div>
-                ))}
-                {backups.length === 0 && !isBackupLoading && (
-                  <p className="text-center py-8 text-xs text-gray-400 uppercase font-black tracking-widest italic border border-dashed rounded">No hay respaldos disponibles</p>
-                )}
-              </div>
-              <p className="mt-4 text-[10px] text-gray-400 italic">
-                * Los respaldos automáticos se generan cada 2 horas (Background Safe).
-              </p>
-            </div>
-
-            {/* Accesos Rápidos */}
-            <div className="grid grid-cols-1 gap-6">
-              <Link href="/admin/fuentes" className="bg-white p-6 rounded-lg shadow border border-gray-200 hover:border-dr-blue transition-all group flex items-center gap-4">
-                <div className="p-3 bg-blue-50 rounded group-hover:bg-dr-blue group-hover:text-white transition-colors">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-                  </svg>
+                  <textarea
+                    rows={12}
+                    className="mt-6 w-full rounded-3xl border border-slate-300 bg-white px-4 py-4 font-mono text-xs leading-6 text-slate-900 outline-none transition focus:border-dr-blue focus:ring-2 focus:ring-dr-blue/20"
+                    value={imagePromptTemplate}
+                    onChange={(e) => setImagePromptTemplate(e.target.value)}
+                  />
+                  <p className="mt-3 text-[11px] leading-5 text-slate-500">
+                    Variables disponibles: {"{title}"}, {"{category}"}, {"{content_excerpt}"}, {"{content}"} y {"{article_context}"}.
+                  </p>
                 </div>
-                <div>
-                  <h3 className="text-lg font-bold text-gray-900 leading-none mb-1 uppercase tracking-tighter">Fuentes para IA</h3>
-                  <p className="text-[10px] text-gray-500 uppercase font-bold tracking-tight">Portales y RSS externos para automatización.</p>
-                </div>
-              </Link>
-            </div>
-          </div>
 
-          {/* Panel Derecho: Categorías */}
-          <div className="bg-white p-8 rounded-lg shadow border border-gray-200 h-fit">
-            <div className="flex justify-between items-center mb-6 border-b pb-2">
-              <h2 className="text-xl font-bold text-dr-red uppercase tracking-tighter">Categorías de Publicación</h2>
-              {!isEditingCat && (
-                <button
-                  onClick={() => setIsEditingCat(true)}
-                  className="bg-dr-blue text-white p-1 rounded-sm hover:bg-blue-900 transition-colors shadow-sm"
-                  title="Nueva Categoría"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                </button>
-              )}
-            </div>
-
-            {isEditingCat && (
-              <form onSubmit={handleSaveCategory} className="mb-8 p-4 bg-gray-50 border rounded-sm space-y-4 animate-in fade-in slide-in-from-top-2">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-xs font-black uppercase text-gray-400 tracking-widest">{catForm.id ? "Editar Categoría" : "Nueva Categoría"}</h3>
-                  <button type="button" onClick={() => { setIsEditingCat(false); setCatForm({ id: null, name: "", slug: "", order: 0, is_active: true }); }} className="text-gray-400 hover:text-gray-600">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                <div className="flex flex-col gap-4 border-t border-slate-200 pt-6 md:flex-row md:items-center md:justify-between">
+                  <div>
+                    <div className="text-sm font-black text-slate-900">Guardar configuracion de IA</div>
+                    <p className="mt-1 text-sm text-slate-500">
+                      Guarda credenciales, modelos y comportamiento visual en una sola accion.
+                    </p>
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={isLoading}
+                    className="inline-flex items-center justify-center rounded-full bg-dr-blue px-6 py-3 text-xs font-black uppercase tracking-[0.24em] text-white transition hover:bg-blue-900 disabled:bg-slate-400"
+                  >
+                    {isLoading ? "Guardando..." : "Guardar IA"}
                   </button>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-[10px] font-black text-gray-500 uppercase mb-1">Nombre</label>
-                    <input
-                      type="text"
-                      className="w-full px-3 py-2 border rounded text-sm outline-none focus:ring-1 focus:ring-dr-blue"
-                      value={catForm.name}
-                      onChange={(e) => handleCatNameChange(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-black text-gray-500 uppercase mb-1">Slug (URL)</label>
-                    <input
-                      type="text"
-                      className="w-full px-3 py-2 border rounded text-sm bg-gray-100 font-mono"
-                      value={catForm.slug}
-                      readOnly
-                    />
-                  </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="flex-grow">
-                    <label className="block text-[10px] font-black text-gray-500 uppercase mb-1">Orden</label>
-                    <input
-                      type="number"
-                      className="w-full px-3 py-2 border rounded text-sm outline-none"
-                      value={catForm.order}
-                      onChange={(e) => setCatForm(prev => ({ ...prev, order: parseInt(e.target.value) }))}
-                    />
-                  </div>
-                  <div className="flex items-center gap-2 pt-4">
-                    <input
-                      type="checkbox"
-                      id="cat_active"
-                      checked={catForm.is_active}
-                      onChange={(e) => setCatForm(prev => ({ ...prev, is_active: e.target.checked }))}
-                    />
-                    <label htmlFor="cat_active" className="text-xs font-bold text-gray-600 uppercase">Activa</label>
-                  </div>
-                </div>
-                <button type="submit" className="w-full bg-dr-red text-white py-2 rounded text-[10px] font-black uppercase tracking-widest hover:bg-red-700 shadow-sm transition-all active:scale-95">
-                  {catForm.id ? "Actualizar Categoría" : "Crear Categoría"}
-                </button>
-              </form>
-            )}
+              </div>
+            </form>
 
-            <div className="space-y-2 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
-              {isCatLoading ? (
-                <p className="text-center py-4 text-xs text-gray-400">Cargando categorías...</p>
-              ) : categories.map((cat) => (
-                <div key={cat.id} className={`flex items-center justify-between p-3 border rounded hover:border-gray-300 transition-colors ${!cat.is_active ? 'bg-gray-50 opacity-60' : 'bg-white shadow-sm'}`}>
+            <section className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
+              <div className="border-b border-slate-200 bg-rose-50/70 px-6 py-5 md:px-8">
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                   <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-sm text-gray-900">{cat.name}</span>
-                      <span className="text-[10px] font-mono text-gray-400">/{cat.slug}</span>
+                    <p className="text-[11px] font-black uppercase tracking-[0.28em] text-rose-500">Taller Editorial</p>
+                    <h2 className="mt-2 text-2xl font-black tracking-tight text-slate-900">Categorias de publicacion</h2>
+                  </div>
+                  {!isEditingCat && (
+                    <button
+                      onClick={() => setIsEditingCat(true)}
+                      className="inline-flex items-center justify-center rounded-full bg-dr-red px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.22em] text-white transition hover:bg-red-700"
+                    >
+                      Nueva categoria
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div className="grid gap-8 px-6 py-6 md:px-8 lg:grid-cols-[0.95fr_1.05fr]">
+                <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-[11px] font-black uppercase tracking-[0.24em] text-slate-400">
+                        {catForm.id ? "Edicion" : "Formulario"}
+                      </div>
+                      <h3 className="mt-2 text-lg font-black text-slate-900">
+                        {isEditingCat ? (catForm.id ? "Editar categoria" : "Crear categoria") : "Abre el editor"}
+                      </h3>
                     </div>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="text-[9px] font-black text-dr-blue uppercase tracking-tighter bg-blue-50 px-1.5 py-0.5 rounded">Orden: {cat.order}</span>
-                      {!cat.is_active && <span className="text-[9px] font-black text-gray-400 uppercase tracking-tighter bg-gray-200 px-1.5 py-0.5 rounded">Inactiva</span>}
+                    {isEditingCat && (
+                      <button
+                        type="button"
+                        onClick={() => { setIsEditingCat(false); setCatForm({ id: null, name: "", slug: "", order: 0, is_active: true }); }}
+                        className="rounded-full border border-slate-300 px-3 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-slate-600 transition hover:border-slate-400 hover:text-slate-900"
+                      >
+                        Cerrar
+                      </button>
+                    )}
+                  </div>
+
+                  {isEditingCat ? (
+                    <form onSubmit={handleSaveCategory} className="mt-6 space-y-4">
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <div>
+                          <label className="mb-2 block text-[11px] font-black uppercase tracking-[0.22em] text-slate-500">Nombre</label>
+                          <input
+                            type="text"
+                            className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-dr-blue focus:ring-2 focus:ring-dr-blue/20"
+                            value={catForm.name}
+                            onChange={(e) => handleCatNameChange(e.target.value)}
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="mb-2 block text-[11px] font-black uppercase tracking-[0.22em] text-slate-500">Slug (URL)</label>
+                          <input
+                            type="text"
+                            className="w-full rounded-2xl border border-slate-200 bg-slate-100 px-4 py-3 font-mono text-sm text-slate-500"
+                            value={catForm.slug}
+                            readOnly
+                          />
+                        </div>
+                      </div>
+                      <div className="grid gap-4 md:grid-cols-[0.7fr_1fr]">
+                        <div>
+                          <label className="mb-2 block text-[11px] font-black uppercase tracking-[0.22em] text-slate-500">Orden</label>
+                          <input
+                            type="number"
+                            className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-dr-blue focus:ring-2 focus:ring-dr-blue/20"
+                            value={catForm.order}
+                            onChange={(e) => setCatForm(prev => ({ ...prev, order: parseInt(e.target.value) }))}
+                          />
+                        </div>
+                        <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3">
+                          <input
+                            type="checkbox"
+                            id="cat_active"
+                            checked={catForm.is_active}
+                            onChange={(e) => setCatForm(prev => ({ ...prev, is_active: e.target.checked }))}
+                            className="h-4 w-4 rounded border-slate-300"
+                          />
+                          <span className="text-sm font-bold text-slate-700">Categoria activa y visible para nuevas publicaciones</span>
+                        </label>
+                      </div>
+                      <button
+                        type="submit"
+                        className="w-full rounded-full bg-dr-red py-3 text-[11px] font-black uppercase tracking-[0.24em] text-white transition hover:bg-red-700"
+                      >
+                        {catForm.id ? "Actualizar categoria" : "Crear categoria"}
+                      </button>
+                    </form>
+                  ) : (
+                    <div className="mt-6 rounded-3xl border border-dashed border-slate-300 bg-white px-5 py-10 text-center">
+                      <p className="text-sm font-semibold text-slate-600">
+                        Usa "Nueva categoria" o edita una existente desde el listado de la derecha.
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-3">
+                  {isCatLoading ? (
+                    <p className="rounded-3xl border border-slate-200 bg-slate-50 py-8 text-center text-sm text-slate-500">
+                      Cargando categorias...
+                    </p>
+                  ) : categories.map((cat) => (
+                    <div key={cat.id} className={`rounded-3xl border p-4 transition ${!cat.is_active ? "border-slate-200 bg-slate-100/80 opacity-75" : "border-slate-200 bg-white shadow-sm hover:border-slate-300"}`}>
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="text-base font-black text-slate-900">{cat.name}</span>
+                            <span className="rounded-full bg-slate-100 px-2.5 py-1 font-mono text-[11px] text-slate-500">/{cat.slug}</span>
+                          </div>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-dr-blue">
+                              Orden {cat.order}
+                            </span>
+                            <span className={`rounded-full px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.18em] ${cat.is_active ? "bg-emerald-50 text-emerald-700" : "bg-slate-200 text-slate-500"}`}>
+                              {cat.is_active ? "Activa" : "Inactiva"}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button onClick={() => handleEditCategory(cat)} className="rounded-full border border-blue-200 p-2 text-blue-600 transition hover:bg-blue-50">
+                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                          </button>
+                          <button onClick={() => handleDeleteCategory(cat.id)} className="rounded-full border border-red-200 p-2 text-dr-red transition hover:bg-red-50">
+                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {categories.length === 0 && !isCatLoading && (
+                    <p className="rounded-3xl border border-dashed border-slate-300 bg-white py-10 text-center text-sm font-semibold text-slate-500">
+                      No hay categorias configuradas.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </section>
+          </section>
+
+          <aside className="space-y-8">
+            <section className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
+              <div className="border-b border-slate-200 bg-emerald-50/70 px-6 py-5">
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                  <div>
+                    <p className="text-[11px] font-black uppercase tracking-[0.28em] text-emerald-600">Centro de Respaldo</p>
+                    <h2 className="mt-2 text-2xl font-black tracking-tight text-slate-900">Politica y ejecucion</h2>
+                  </div>
+                  <button
+                    onClick={handleCreateBackup}
+                    disabled={isCreatingBackup}
+                    className="inline-flex items-center justify-center rounded-full bg-emerald-600 px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.22em] text-white transition hover:bg-emerald-700 disabled:bg-slate-400"
+                  >
+                    {isCreatingBackup ? "Procesando..." : "Crear backup"}
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-6 px-6 py-6">
+                <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+                  <div className="text-[11px] font-black uppercase tracking-[0.24em] text-slate-400">Politica automatica</div>
+                  <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                    <div>
+                      <label className="mb-2 block text-[11px] font-black uppercase tracking-[0.22em] text-slate-500">Frecuencia backup (horas)</label>
+                      <input
+                        type="number"
+                        className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm font-bold text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                        value={backupFreq}
+                        onChange={(e) => setBackupFreq(parseInt(e.target.value))}
+                        min="1"
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-2 block text-[11px] font-black uppercase tracking-[0.22em] text-slate-500">Limite total (GB)</label>
+                      <input
+                        type="number"
+                        className="w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-sm font-bold text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                        value={backupLimit}
+                        onChange={(e) => setBackupLimit(parseInt(e.target.value))}
+                        min="1"
+                      />
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button onClick={() => handleEditCategory(cat)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                    </button>
-                    <button onClick={() => handleDeleteCategory(cat.id)} className="p-1.5 text-dr-red hover:bg-red-50 rounded transition-colors">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                    </button>
+                  <button
+                    type="button"
+                    onClick={handleSave}
+                    disabled={isLoading}
+                    className="mt-4 inline-flex items-center justify-center rounded-full border border-emerald-200 bg-white px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.22em] text-emerald-700 transition hover:bg-emerald-50 disabled:border-slate-200 disabled:text-slate-400"
+                  >
+                    {isLoading ? "Guardando..." : "Guardar politica"}
+                  </button>
+                </div>
+
+                <div>
+                  <div className="mb-3 flex items-center justify-between">
+                    <div className="text-[11px] font-black uppercase tracking-[0.24em] text-slate-400">Archivos disponibles</div>
+                    <div className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-400">{backups.length} items</div>
+                  </div>
+                  <div className="max-h-[460px] space-y-3 overflow-y-auto pr-1">
+                    {isBackupLoading ? (
+                      <p className="rounded-3xl border border-slate-200 bg-slate-50 py-8 text-center text-sm text-slate-500">
+                        Cargando archivos...
+                      </p>
+                    ) : backups.map((b) => (
+                      <div key={b.filename} className="rounded-3xl border border-slate-200 bg-slate-50 p-4 transition hover:border-slate-300 hover:bg-white">
+                        <div className="text-sm font-black text-slate-900">{b.filename}</div>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          <span className="rounded-full bg-slate-200 px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-slate-600">
+                            {formatSize(b.size)}
+                          </span>
+                          <span className="rounded-full bg-slate-200 px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.18em] text-slate-600">
+                            {new Date(b.created_at).toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="mt-4 flex gap-2">
+                          <button
+                            onClick={() => handleRestoreBackup(b.filename)}
+                            className="flex-1 rounded-full bg-dr-blue px-4 py-2.5 text-[11px] font-black uppercase tracking-[0.22em] text-white transition hover:bg-blue-900"
+                          >
+                            Restaurar
+                          </button>
+                          <button
+                            onClick={() => handleDeleteBackup(b.filename)}
+                            className="rounded-full border border-red-200 px-4 py-2.5 text-[11px] font-black uppercase tracking-[0.22em] text-dr-red transition hover:bg-red-50"
+                          >
+                            Eliminar
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                    {backups.length === 0 && !isBackupLoading && (
+                      <p className="rounded-3xl border border-dashed border-slate-300 bg-white py-10 text-center text-sm font-semibold text-slate-500">
+                        No hay respaldos disponibles.
+                      </p>
+                    )}
                   </div>
                 </div>
-              ))}
-              {categories.length === 0 && !isCatLoading && (
-                <p className="text-center py-8 text-xs text-gray-400 uppercase font-black tracking-widest italic border border-dashed rounded">No hay categorías configuradas</p>
-              )}
-            </div>
-          </div>
+              </div>
+            </section>
 
+            <section className="overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
+              <div className="border-b border-slate-200 bg-blue-50/70 px-6 py-5">
+                <p className="text-[11px] font-black uppercase tracking-[0.28em] text-dr-blue">Accesos Rapidos</p>
+                <h2 className="mt-2 text-2xl font-black tracking-tight text-slate-900">Herramientas conectadas</h2>
+              </div>
+              <div className="space-y-4 px-6 py-6">
+                <Link href="/admin/fuentes" className="group flex items-start gap-4 rounded-3xl border border-slate-200 bg-slate-50 p-5 transition hover:border-dr-blue hover:bg-white">
+                  <div className="rounded-2xl bg-blue-100 p-3 text-dr-blue transition group-hover:bg-dr-blue group-hover:text-white">
+                    <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="text-base font-black text-slate-900">Fuentes para IA</div>
+                    <p className="mt-1 text-sm leading-6 text-slate-500">
+                      Administra portales y feeds RSS usados para descubrir noticias candidatas.
+                    </p>
+                  </div>
+                </Link>
+
+                <div className="rounded-3xl border border-slate-200 bg-slate-50 p-5 text-slate-900">
+                  <div className="text-[11px] font-black uppercase tracking-[0.24em] text-dr-blue">Nota operativa</div>
+                  <p className="mt-3 text-sm leading-6 text-slate-600">
+                    La configuracion de IA y la politica de backups se guardan por separado en esta interfaz, aunque comparten el mismo endpoint de perfil para preservar la funcionalidad existente.
+                  </p>
+                </div>
+              </div>
+            </section>
+          </aside>
         </div>
       </main>
     </div>

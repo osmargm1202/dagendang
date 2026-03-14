@@ -11,13 +11,165 @@ from app.models.user import User
 from app.schemas.ai import (
     NewsSourceCreate, NewsSourceUpdate, NewsSourceResponse,
     AISuggestionRequest, AIPreviewResponse, NewsCandidate,
-    AIArticleGenerateRequest, AIArticleGenerateResponse
+    AIArticleGenerateRequest, AIArticleGenerateResponse, AIImageGenerateRequest
 )
 from app.core.security import get_current_user
 from google import genai
 from google.genai import types
+from pathlib import Path
 
 router = APIRouter()
+
+DEFAULT_ARTICLE_PROMPT_TEMPLATE = """
+Actua como el Editor en Jefe del diario digital dominicano "La Agenda".
+Nuestro estilo es "Ejecutivo Dominicano": serio, profesional, analitico y elegante, en una linea cercana a Bloomberg o Financial Times.
+
+Tu tarea es redactar una noticia ORIGINAL basada en la siguiente informacion de una fuente externa:
+
+--- INICIO INFORMACION FUENTE ---
+URL FUENTE: {source_url}
+CATEGORIA ASIGNADA: {category}
+CONTENIDO:
+{source_content}
+--- FIN INFORMACION FUENTE ---
+
+REQUISITOS DE REDACCION:
+1. No hables en primera persona.
+2. El titular debe ser impactante pero profesional.
+3. El contenido debe tener al menos 4 o 5 parrafos.
+4. Al final del articulo, debes incluir una linea de referencia: "Basado en informaciones de [Nombre de Fuente Original]".
+5. Adapta los terminos economicos al contexto dominicano si es necesario.
+6. Evita duplicar el texto exacto de la fuente, pero manten todos los datos y hechos veridicos.
+7. La categoria del articulo es {category}.
+8. Devuelve exclusivamente un objeto JSON compatible con el esquema esperado.
+""".strip()
+
+DEFAULT_IMAGE_PROMPT_TEMPLATE = """
+Crea una imagen editorial de alta calidad para un diario digital.
+
+Contexto del articulo:
+- Titulo: {title}
+- Categoria: {category}
+- Resumen/base editorial:
+{content_excerpt}
+
+Instrucciones visuales:
+- Representa la idea central del articulo con una sola escena clara, elegante y periodistica.
+- Prioriza composiciones realistas o editorialmente verosimiles.
+- Evita collage caotico, simbolos genericos vacios y elementos decorativos irrelevantes.
+- No renderices textos, titulares, letras, rotulos, marcas de agua, logotipos ni tipografia dentro de la imagen, salvo que sea estrictamente inevitable y natural en la escena.
+- Si aparece texto incidental en el entorno, debe ser minimo, secundario y no protagonista.
+- Sin marcos, sin interfaz de app, sin capturas de pantalla, sin diseno de poster.
+- La imagen debe funcionar como portada de noticia profesional.
+""".strip()
+
+LEGACY_TEXT_MODEL_ALIASES = {
+    "gemini-flash-lite-latest": "gemini-3.1-flash-lite-preview",
+    "gemini-1.5-flash": "gemini-3-flash-preview",
+    "gemini-2.0-flash-exp": "gemini-3-flash-preview",
+}
+
+LEGACY_IMAGE_MODEL_ALIASES = {
+    "gemini-2.5-flash-image": "gemini-3.1-flash-image-preview",
+    "imagen-3": "gemini-3.1-flash-image-preview",
+}
+
+SUPPORTED_IMAGE_SIZES = {"1K", "2K", "4K"}
+
+
+def _resolve_text_model(model_id: str | None) -> str:
+    configured_model = (model_id or "").strip() or "gemini-3-flash-preview"
+    return LEGACY_TEXT_MODEL_ALIASES.get(configured_model, configured_model)
+
+
+def _resolve_image_model(model_id: str | None) -> str:
+    configured_model = (model_id or "").strip() or "gemini-3.1-flash-image-preview"
+    return LEGACY_IMAGE_MODEL_ALIASES.get(configured_model, configured_model)
+
+
+def _resolve_image_size(image_size: str | None) -> str:
+    configured_size = (image_size or "").strip().upper() or "1K"
+    return configured_size if configured_size in SUPPORTED_IMAGE_SIZES else "1K"
+
+
+def _extract_inline_image_data(response) -> tuple[bytes | None, str]:
+    """
+    The SDK can expose parts at different levels depending on the method/version.
+    We inspect both direct parts and candidate content parts.
+    """
+    parts = []
+
+    direct_parts = getattr(response, "parts", None)
+    if direct_parts:
+        parts.extend(direct_parts)
+
+    candidates = getattr(response, "candidates", None) or []
+    for candidate in candidates:
+        content = getattr(candidate, "content", None)
+        candidate_parts = getattr(content, "parts", None) or []
+        parts.extend(candidate_parts)
+
+    for part in parts:
+        inline_data = getattr(part, "inline_data", None)
+        if inline_data and getattr(inline_data, "data", None):
+            return inline_data.data, getattr(inline_data, "mime_type", None) or "image/png"
+
+    return None, "image/png"
+
+
+class _PromptContext(dict):
+    def __missing__(self, key):
+        return ""
+
+
+def _build_image_prompt(req: AIImageGenerateRequest, current_user: User) -> str:
+    title = (req.title or req.prompt or "").strip()
+    category = (req.category or "general").strip()
+    content = (req.content or "").strip()
+    content_excerpt = content[:1800] if content else "Sin contenido adicional provisto."
+
+    template = (current_user.image_prompt_template or DEFAULT_IMAGE_PROMPT_TEMPLATE).strip()
+    article_context = (
+        f"Titulo: {title}\n"
+        f"Categoria: {category}\n"
+        f"Contenido base:\n{content_excerpt}"
+    ).strip()
+
+    return template.format_map(
+        _PromptContext(
+            title=title,
+            category=category,
+            content=content,
+            content_excerpt=content_excerpt,
+            article_context=article_context,
+            prompt=req.prompt or "",
+        )
+    )
+
+
+def _build_article_prompt(
+    source_url: str,
+    category: str,
+    source_content: str,
+    current_user: User,
+) -> str:
+    template = (current_user.article_prompt_template or DEFAULT_ARTICLE_PROMPT_TEMPLATE).strip()
+    source_excerpt = source_content[:3000]
+    article_context = (
+        f"URL FUENTE: {source_url}\n"
+        f"CATEGORIA: {category}\n"
+        f"CONTENIDO:\n{source_excerpt}"
+    ).strip()
+
+    return template.format_map(
+        _PromptContext(
+            source_url=source_url,
+            category=category,
+            source_content=source_excerpt,
+            source_excerpt=source_excerpt,
+            article_context=article_context,
+        )
+    )
 
 # --- News Source Management ---
 
@@ -214,29 +366,15 @@ async def generate_article_with_ai(req: AIArticleGenerateRequest, db: Session = 
         client = genai.Client(api_key=current_user.gemini_api_key)
         
         # Determine model to use
-        model_id = current_user.gemini_model or "gemini-flash-lite-latest"
+        configured_model_id = current_user.gemini_model or "gemini-3-flash-preview"
+        model_id = _resolve_text_model(configured_model_id)
         
-        prompt = f"""
-        Actúa como el Editor en Jefe del diario digital dominicano "La Agenda".
-        Nuestro estilo es "Ejecutivo Dominicano": serio, profesional, analítico y elegante (estilo Bloomberg o Financial Times).
-        
-        Tu tarea es redactar una noticia ORIGINAL basada en la siguiente información de una fuente externa:
-        
-        --- INICIO INFORMACIÓN FUENTE ---
-        URL FUENTE: {req.source_url}
-        CONTENIDO:
-        {content_to_rewrite}
-        --- FIN INFORMACIÓN FUENTE ---
-        
-        REQUISITOS DE REDACCIÓN:
-        1. NO hables en primera persona.
-        2. El títular debe ser impactante pero profesional.
-        3. El contenido debe tener al menos 4-5 párrafos.
-        4. Al final del artículo, DEBES incluir una línea de referencia: "Basado en informaciones de [Nombre de Fuente Original]".
-        5. Adapta los términos económicos al contexto dominicano si es necesario (ej. tasas de cambio, impacto local).
-        6. Evita duplicar el texto exacto de la fuente, pero mantén todos los datos y hechos verídicos.
-        7. Categoría asignada: {req.category}
-        """
+        prompt = _build_article_prompt(
+            source_url=req.source_url,
+            category=req.category,
+            source_content=content_to_rewrite,
+            current_user=current_user,
+        )
         
         # Use Structured Output with Pydantic
         response = client.models.generate_content(
@@ -245,6 +383,9 @@ async def generate_article_with_ai(req: AIArticleGenerateRequest, db: Session = 
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",
                 response_schema=AIArticleGenerateResponse, # Using our existing schema
+                thinking_config=types.ThinkingConfig(
+                    thinking_level="low",
+                ),
             )
         )
         
@@ -275,7 +416,10 @@ async def generate_article_with_ai(req: AIArticleGenerateRequest, db: Session = 
         if extracted_image_url:
             result.image_url = extracted_image_url
             
-        print(f"AI Generation ({model_id}): Title='{result.title[:50]}...', Image='{result.image_url}'")
+        print(
+            f"AI Generation (configured={configured_model_id}, resolved={model_id}): "
+            f"Title='{result.title[:50]}...', Image='{result.image_url}'"
+        )
         return result
         
     except Exception as e:
@@ -286,3 +430,78 @@ async def generate_article_with_ai(req: AIArticleGenerateRequest, db: Session = 
              raise HTTPException(status_code=404, detail=f"El modelo {model_id} no está disponible o el nombre es incorrecto.")
         
         raise HTTPException(status_code=500, detail=f"Error en Gemini IA ({model_id}): {error_msg}")
+
+@router.post("/generate-image")
+async def generate_image_with_ai(req: AIImageGenerateRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """
+    Generates an image using the model and configuration provided by the user example.
+    """
+    if not current_user.gemini_api_key:
+        raise HTTPException(status_code=400, detail="Gemini API Key is not configured in your profile.")
+    if not (req.title or req.prompt):
+        raise HTTPException(status_code=400, detail="Se requiere al menos un titulo o prompt para generar la imagen.")
+
+    try:
+        client = genai.Client(api_key=current_user.gemini_api_key)
+        
+        # Accept legacy stored values, but always call Gemini with a currently valid model id.
+        configured_model_id = current_user.gemini_image_model or "gemini-3.1-flash-image-preview"
+        model_id = _resolve_image_model(configured_model_id)
+
+        generate_content_config = types.GenerateContentConfig(
+            response_modalities=["IMAGE"],
+            image_config=types.ImageConfig(
+                aspect_ratio="16:9",
+                image_size=_resolve_image_size(current_user.gemini_image_size),
+            ),
+        )
+        final_prompt = _build_image_prompt(req, current_user)
+
+        print(
+            f"DEBUG AI: Generating image with configured model "
+            f"{configured_model_id} (resolved to {model_id}) for title: {req.title or req.prompt}"
+        )
+
+        response = client.models.generate_content(
+            model=model_id,
+            contents=final_prompt,
+            config=generate_content_config,
+        )
+
+        image_data, mime_type = _extract_inline_image_data(response)
+
+        if not image_data:
+            response_text = getattr(response, "text", None)
+            print(f"DEBUG AI: ERROR - No image data found. Text response: {response_text!r}")
+            raise HTTPException(
+                status_code=500,
+                detail=(
+                    "Gemini no devolvió datos de imagen. "
+                    "Verifica que el modelo configurado soporte salida de imagen."
+                ),
+            )
+
+        import uuid
+        import mimetypes
+
+        # Save to uploads directory
+        file_name = f"{uuid.uuid4().hex}"
+        extension = mimetypes.guess_extension(mime_type) or ".png"
+        full_file_name = f"{file_name}{extension}"
+        uploads_dir = Path("uploads")
+        uploads_dir.mkdir(parents=True, exist_ok=True)
+        file_path = uploads_dir / full_file_name
+
+        with open(file_path, "wb") as f:
+            f.write(image_data)
+
+        # Return the URL
+        image_url = f"/uploads/{full_file_name}"
+        return {"image_url": image_url}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        error_msg = str(e)
+        print(f"Error generating AI image: {error_msg}")
+        raise HTTPException(status_code=500, detail=f"Error al generar imagen con IA: {error_msg}")

@@ -55,3 +55,9 @@ class AIArticleGenerateResponse(BaseModel):
     content: str
     author: str
     image_url: Optional[str] = None
+
+class AIImageGenerateRequest(BaseModel):
+    title: Optional[str] = None
+    content: Optional[str] = None
+    category: Optional[str] = None
+    prompt: Optional[str] = None

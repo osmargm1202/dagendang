@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import AdminHeader from "../../../components/AdminHeader";
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
+
 export default function NewArticle() {
   const [user, setUser] = useState<{ full_name: string; email: string; role: string } | null>(null);
   const [title, setTitle] = useState("");
@@ -33,7 +35,7 @@ export default function NewArticle() {
     setIsAiLoading(true);
     const token = localStorage.getItem("admin_token");
     try {
-      const res = await fetch("/api/ai/suggest", {
+      const res = await fetch(`${API_BASE_URL}/api/ai/suggest`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -65,7 +67,7 @@ export default function NewArticle() {
     setShowAIModal(false);
     const token = localStorage.getItem("admin_token");
     try {
-      const res = await fetch("/api/ai/generate", {
+      const res = await fetch(`${API_BASE_URL}/api/ai/generate`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -90,7 +92,44 @@ export default function NewArticle() {
       }
     } catch (err) {
       setIsAiLoading(false);
-      alert("Error de red al generar con IA.");
+    }
+  };
+
+  const handleGenerateAIImage = async () => {
+    if (!title) {
+      alert("Primero escribe un título para que la IA sepa qué imagen generar.");
+      return;
+    }
+    setIsAiLoading(true);
+    const token = localStorage.getItem("admin_token");
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/ai/generate-image`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          title,
+          content,
+          category: type,
+          prompt: title
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setExternalImageUrl(data.image_url);
+        setImagePreview(data.image_url);
+        setImageFile(null);
+        setIsAiLoading(false);
+      } else {
+        const errorData = await res.json();
+        setIsAiLoading(false);
+        alert(errorData.detail || "Error al generar imagen con IA.");
+      }
+    } catch (err) {
+      setIsAiLoading(false);
+      alert("Error de red al intentar generar la imagen.");
     }
   };
 
@@ -323,6 +362,19 @@ export default function NewArticle() {
                       onChange={handleImageChange}
                     />
                   </div>
+                  
+                  <button
+                    type="button"
+                    onClick={handleGenerateAIImage}
+                    disabled={isAiLoading || !title}
+                    className="mt-3 w-full flex items-center justify-center gap-2 bg-purple-100 text-purple-700 hover:bg-purple-200 py-2 border border-purple-200 rounded text-xs font-bold transition-all disabled:opacity-50 disabled:grayscale"
+                  >
+                    {isAiLoading ? (
+                        <span className="animate-spin h-3 w-3 border-2 border-purple-700 border-t-transparent rounded-full"></span>
+                    ) : (
+                        <span>✨ Generar con IA</span>
+                    )}
+                  </button>
                 </div>
 
                 <div>
