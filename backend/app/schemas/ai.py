@@ -33,6 +33,7 @@ class NewsSourceResponse(NewsSourceBase):
 class AISuggestionRequest(BaseModel):
     category: Optional[str] = None
     limit: int = 5
+    force_refresh: bool = False
 
 class NewsCandidate(BaseModel):
     title: str

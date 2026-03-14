@@ -31,7 +31,7 @@ export default function NewArticle() {
 
   const router = useRouter();
 
-  const handleFetchAISuggestions = async (forceAllSources = false) => {
+  const handleFetchAISuggestions = async (forceAllSources = false, forceRefresh = false) => {
     setIsAiLoading(true);
     const token = localStorage.getItem("admin_token");
     try {
@@ -43,7 +43,8 @@ export default function NewArticle() {
         },
         body: JSON.stringify({
           category: forceAllSources ? null : type,
-          limit: 20
+          limit: 20,
+          force_refresh: forceRefresh
         })
       });
       if (res.ok) {
@@ -502,7 +503,21 @@ export default function NewArticle() {
               </h2>
               <div className="flex items-center gap-4">
                 <button
-                  onClick={() => handleFetchAISuggestions(true)}
+                  onClick={() => handleFetchAISuggestions(false, true)}
+                  disabled={isAiLoading}
+                  className="text-xs bg-muted text-muted-foreground px-3 py-1.5 rounded-full font-bold hover:bg-border transition-colors flex items-center gap-1"
+                >
+                  {isAiLoading ? "..." : (
+                    <>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      Recargar
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={() => handleFetchAISuggestions(true, true)}
                   className="text-xs bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 px-3 py-1.5 rounded-full font-bold hover:brightness-110 transition-colors"
                 >
                   🔍 Buscar en todas las fuentes

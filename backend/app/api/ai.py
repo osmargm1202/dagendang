@@ -17,6 +17,8 @@ from app.core.security import get_current_user
 from google import genai
 from google.genai import types
 from pathlib import Path
+import time
+from datetime import datetime, timedelta
 
 router = APIRouter()
 
@@ -273,13 +275,26 @@ async def fetch_rss_candidates(url: str, source_name: str, category: str):
         print(f"Error fetching suggestions from {url}: {e}")
     return candidates
 
+# --- Global Cache for Suggestions ---
+# Format: { "category_limit": { "timestamp": float, "data": List[NewsCandidate] } }
+_SUGGESTIONS_CACHE = {}
+_CACHE_TTL_SECONDS = 600 # 10 minutes
+
 @router.post("/suggest", response_model=AIPreviewResponse)
 async def get_ai_suggestions(req: AISuggestionRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     """
     Scrapes news sources and suggests news candidates.
-    If a category is provided, it prioritizes sources for that category, 
-    but falls back to all active sources if no category sources are found.
+    Uses a 10-minute server-side cache to improve performance.
     """
+    cache_key = f"{req.category or 'all'}_{req.limit}"
+    now = time.time()
+
+    if not req.force_refresh:
+        cached = _SUGGESTIONS_CACHE.get(cache_key)
+        if cached and (now - cached["timestamp"] < _CACHE_TTL_SECONDS):
+            print(f"DEBUG AI: Serving suggestions from cache for key: {cache_key}")
+            return {"suggestions": cached["data"]}
+
     query = db.query(NewsSource).filter(NewsSource.is_active == True)
     
     if req.category:
@@ -308,6 +323,12 @@ async def get_ai_suggestions(req: AISuggestionRequest, db: Session = Depends(get
             # Also check if we already added this one in the same batch
             if not any(s.title.strip().lower() == c_title_lower for s in suggestions):
                 suggestions.append(c)
+    
+    # Update cache
+    _SUGGESTIONS_CACHE[cache_key] = {
+        "timestamp": now,
+        "data": suggestions[:req.limit]
+    }
     
     return {"suggestions": suggestions[:req.limit]}
 
