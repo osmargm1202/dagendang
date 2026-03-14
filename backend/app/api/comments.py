@@ -30,7 +30,7 @@ async def get_comments(article_id: int, db: Session = Depends(get_db)):
         
     return result
 
-@router.post("/", response_model=CommentResponse)
+@router.post("", response_model=CommentResponse)
 async def create_comment(
     comment: CommentCreate, 
     db: Session = Depends(get_db), 

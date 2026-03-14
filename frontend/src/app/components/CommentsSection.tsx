@@ -69,7 +69,7 @@ export default function CommentsSection({ articleId }: { articleId: number }) {
     setError("");
 
     try {
-      const res = await fetch("/api/comments/", {
+      const res = await fetch("/api/comments", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
