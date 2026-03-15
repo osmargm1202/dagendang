@@ -72,7 +72,7 @@ export default function PremiumContentWrapper({
       >
         <div className="relative w-full aspect-[16/5] bg-muted overflow-hidden shadow-sm border border-border">
           <img 
-            src={adImageUrl.startsWith('http') ? adImageUrl : `https://diariodigital.delioserver.duckdns.org${adImageUrl}`} 
+            src={adImageUrl.startsWith('http') ? adImageUrl : `https://dagendang.com${adImageUrl}`} 
             alt="Publicidad" 
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
           />

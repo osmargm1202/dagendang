@@ -2,6 +2,11 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  allowedDevOrigins: [
+    "diariodigital.delioserver.duckdns.org",
+    "dagendang.com",
+    "www.dagendang.com",
+  ],
   async rewrites() {
     return [
       {

@@ -248,7 +248,7 @@ export default function AdminAdsPage() {
                                         {imageUrl && (
                                             <div className="mt-4 p-3 border rounded-sm bg-gray-50 shadow-inner">
                                                 <p className="text-[10px] text-gray-400 break-all mb-2 font-mono">{imageUrl}</p>
-                                                <img src={imageUrl.startsWith('http') ? imageUrl : `https://diariodigital.delioserver.duckdns.org${imageUrl}`} className="max-h-40 mx-auto rounded shadow-sm" alt="Preview"/>
+                                                <img src={imageUrl.startsWith('http') ? imageUrl : `https://dagendang.com${imageUrl}`} className="max-h-40 mx-auto rounded shadow-sm" alt="Preview"/>
                                             </div>
                                         )}
                                     </div>
@@ -292,7 +292,7 @@ export default function AdminAdsPage() {
                                     <div key={ad.id} className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden hover:shadow-md transition-shadow group">
                                         <div className="aspect-[21/9] bg-gray-100 relative group overflow-hidden">
                                             <img 
-                                                src={ad.image_url.startsWith('http') ? ad.image_url : `https://diariodigital.delioserver.duckdns.org${ad.image_url}`} 
+                                                src={ad.image_url.startsWith('http') ? ad.image_url : `https://dagendang.com${ad.image_url}`} 
                                                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
                                                 alt={ad.title}
                                             />

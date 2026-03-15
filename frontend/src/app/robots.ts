@@ -1,6 +1,6 @@
 import { MetadataRoute } from 'next';
 
-const BASE_URL = 'https://diariodigital.delioserver.duckdns.org';
+const BASE_URL = 'https://dagendang.com';
 
 export default function robots(): MetadataRoute.Robots {
   return {

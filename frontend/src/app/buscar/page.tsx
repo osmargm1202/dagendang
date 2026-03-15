@@ -72,7 +72,7 @@ function SearchResults() {
             <Link key={article.id} href={`/noticias/${article.id}`} className="group block">
               <div className="aspect-[16/10] overflow-hidden rounded-sm bg-muted mb-4 shadow-sm border border-border transition-all group-hover:shadow-md">
                 <img 
-                  src={article.image_url?.startsWith('http') ? article.image_url : `https://diariodigital.delioserver.duckdns.org${article.image_url}`} 
+                  src={article.image_url?.startsWith('http') ? article.image_url : `https://dagendang.com${article.image_url}`} 
                   alt={article.title}
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 grayscale-[0.2] group-hover:grayscale-0"
                 />

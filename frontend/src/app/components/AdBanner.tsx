@@ -76,7 +76,7 @@ export default function AdBanner({ position, className = "" }: AdBannerProps) {
   const ad = ads[currentIndex];
   const imageUrl = ad.image_url.startsWith('http') 
     ? ad.image_url 
-    : `https://diariodigital.delioserver.duckdns.org${ad.image_url}`;
+    : ad.image_url; // already a relative path like /uploads/... — served via Next.js rewrite proxy
 
   // Strict dimensions for header to prevent layout shift
   const isHeader = position === 'header';

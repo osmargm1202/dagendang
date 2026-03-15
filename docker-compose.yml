@@ -36,16 +36,21 @@ services:
     # command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
   frontend:
-    build: ./frontend
+    image: oven/bun:1
     container_name: diario_frontend
+    working_dir: /app
     restart: always
     ports:
       - "3550:3000"
     env_file:
       - .env
+    volumes:
+      - ./frontend:/app
     environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8080
+      - NEXT_PUBLIC_API_URL=https://dagendang.com/api
       - TZ=America/Santo_Domingo
+      - NODE_ENV=development
+    command: bun run dev
     depends_on:
       - backend
 
