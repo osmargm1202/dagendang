@@ -76,7 +76,7 @@ export default function RegisterPage() {
     <div className="w-full min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-lg border border-gray-100">
         <div className="text-center">
-          <h2 className="text-3xl font-serif font-black text-dr-blue tracking-tighter">LA AGENDA</h2>
+          <h2 className="text-3xl font-serif font-black text-dr-blue tracking-tighter">DAgendaNG</h2>
           <h3 className="mt-4 text-xl font-bold text-gray-900">
             Crea tu cuenta de suscriptor
           </h3>

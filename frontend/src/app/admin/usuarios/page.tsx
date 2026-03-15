@@ -91,7 +91,7 @@ export default function UserManagementPage() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-serif font-black text-dr-blue tracking-tighter uppercase">Lectores y Suscriptores</h1>
-            <p className="text-gray-500 text-sm mt-1">Gestiona la comunidad de lectores de La Agenda.</p>
+            <p className="text-gray-500 text-sm mt-1">Gestiona la comunidad de lectores de DAgendaNG.</p>
           </div>
           <div className="bg-white px-4 py-2 rounded shadow-sm border border-gray-100 flex items-center gap-2">
             <span className="text-xs font-bold text-gray-400 uppercase">Total Usuarios:</span>

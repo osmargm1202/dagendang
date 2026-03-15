@@ -7,7 +7,7 @@ import SocialShare from "@/app/components/SocialShare";
 import CommentsSection from "@/app/components/CommentsSection";
 import type { Metadata, ResolvingMetadata } from 'next';
 
-const BASE_URL = 'https://diariodigital.delioserver.duckdns.org';
+const BASE_URL = 'https://dagendang.com';
 
 // Always fetch fresh data dynamically
 export const dynamic = 'force-dynamic';
@@ -87,7 +87,7 @@ export async function generateMetadata(
   const { id } = await params;
   const article = await getArticle(id);
 
-  if (!article) return { title: 'Nota no encontrada | La Agenda' };
+  if (!article) return { title: 'Nota no encontrada | DAgendaNG' };
 
   const snippet = article.content.substring(0, 160).replace(/\s+/g, ' ').trim() + '...';
   const imageUrl = article.image_url?.startsWith('http')
@@ -95,7 +95,7 @@ export async function generateMetadata(
     : `${BASE_URL}${article.image_url}`;
 
   return {
-    title: `${article.title} | La Agenda`,
+    title: `${article.title} | DAgendaNG`,
     description: snippet,
     alternates: {
       canonical: `${BASE_URL}/noticias/${id}`,
@@ -104,7 +104,7 @@ export async function generateMetadata(
       title: article.title,
       description: snippet,
       url: `${BASE_URL}/noticias/${id}`,
-      siteName: 'La Agenda',
+      siteName: 'DAgendaNG',
       images: [
         {
           url: imageUrl,
@@ -115,7 +115,7 @@ export async function generateMetadata(
       locale: 'es_DO',
       type: 'article',
       publishedTime: article.published_at,
-      authors: [article.author || 'La Agenda'],
+      authors: [article.author || 'DAgendaNG'],
     },
     twitter: {
       card: 'summary_large_image',
@@ -165,12 +165,12 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
             "articleSection": article.type,
             "author": [{
               "@type": "Person",
-              "name": article.author || "La Agenda",
+              "name": article.author || "DAgendaNG",
               "url": BASE_URL
             }],
             "publisher": {
               "@type": "Organization",
-              "name": "La Agenda",
+              "name": "DAgendaNG",
               "logo": {
                 "@type": "ImageObject",
                 "url": `${BASE_URL}/logo.png`
@@ -194,7 +194,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
         {/* Main Article Image */}
         {article.image_url ? (
           <div className="w-full aspect-video bg-muted mb-8 rounded-sm shadow-sm overflow-hidden border border-border">
-            <img src={article.image_url.startsWith('http') ? article.image_url : `https://diariodigital.delioserver.duckdns.org${article.image_url}`} alt={article.title} className="w-full h-full object-cover" />
+            <img src={article.image_url.startsWith('http') ? article.image_url : `https://dagendang.com${article.image_url}`} alt={article.title} className="w-full h-full object-cover" />
           </div>
         ) : (
           <div className="w-full aspect-video bg-muted mb-8 rounded-sm shadow-sm flex items-center justify-center border border-border">

@@ -535,7 +535,7 @@ export default function NewArticle() {
 
             <div className="p-6 overflow-y-auto flex-grow space-y-4">
               <p className="text-sm text-muted-foreground mb-4 bg-dr-blue/5 p-3 rounded-md border border-dr-blue/10">
-                He encontrado estas noticias recientes de tus fuentes configuradas. Selecciona una para que **Gemini** redacte un artículo original para <strong>La Agenda</strong>.
+                He encontrado estas noticias recientes de tus fuentes configuradas. Selecciona una para que **Gemini** redacte un artículo original para <strong>DAgendaNG</strong>.
               </p>
 
               {aiSuggestions.length > 0 ? aiSuggestions.map((suggestion, idx) => (

@@ -56,7 +56,7 @@ export default function AdminLogin() {
             Panel de Administración
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            La Agenda - Diario Digital
+            DAgendaNG - Diario Digital
           </p>
         </div>
         

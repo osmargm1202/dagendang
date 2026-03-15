@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import AdminHeader from "../../components/AdminHeader";
 
-const DEFAULT_ARTICLE_PROMPT_TEMPLATE = `Actua como el Editor en Jefe del diario digital dominicano "La Agenda".
+const DEFAULT_ARTICLE_PROMPT_TEMPLATE = `Actua como el Editor en Jefe del diario digital dominicano "DAgendaNG" (De Agenda con Nelson Gómez).
 Nuestro estilo es "Ejecutivo Dominicano": serio, profesional, analitico y elegante, en una linea cercana a Bloomberg o Financial Times.
 
 Tu tarea es redactar una noticia ORIGINAL basada en la siguiente informacion de una fuente externa:

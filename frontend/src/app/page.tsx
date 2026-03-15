@@ -5,19 +5,19 @@ import type { Metadata } from 'next';
 import NewsGrid from "@/app/components/NewsGrid";
 import EconomyIndicators from "@/app/components/EconomyIndicators";
 
-const BASE_URL = 'https://diariodigital.delioserver.duckdns.org';
+const BASE_URL = 'https://dagendang.com';
 
 export const metadata: Metadata = {
-  title: 'La Agenda | Diario Digital Económico de la República Dominicana',
+  title: 'DAgendaNG | De Agenda con Nelson Gómez - Diario Digital Económico',
   description: 'El portal líder en información económica, tasa de cambio y precios de combustibles en República Dominicana.',
   alternates: {
     canonical: BASE_URL,
   },
   openGraph: {
-    title: 'La Agenda | Diario Digital Económico',
+    title: 'DAgendaNG | Diario Digital Económico',
     description: 'Información económica, tasas de cambio y combustibles al instante.',
     url: BASE_URL,
-    siteName: 'La Agenda',
+    siteName: 'DAgendaNG',
     images: [
       {
         url: `${BASE_URL}/og-main.png`, // Placeholder for future OG image

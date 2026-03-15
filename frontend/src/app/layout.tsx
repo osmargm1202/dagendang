@@ -19,14 +19,14 @@ const playfair = Playfair_Display({
 
 export const metadata: Metadata = {
   title: {
-    default: "La Agenda - Medio Digital Económico de RD",
-    template: "%s | La Agenda"
+    default: "DAgendaNG - De Agenda con Nelson Gómez",
+    template: "%s | DAgendaNG"
   },
   description: "Portal económico confiable con tasa oficial, precios de combustibles y análisis de alto valor en la República Dominicana.",
   keywords: ["economía", "República Dominicana", "tasa de cambio", "dólar RD", "combustibles RD", "noticias económicas", "diario digital"],
-  authors: [{ name: "La Agenda" }],
-  creator: "La Agenda",
-  publisher: "La Agenda",
+  authors: [{ name: "DAgendaNG" }],
+  creator: "DAgendaNG",
+  publisher: "DAgendaNG",
   robots: {
     index: true,
     follow: true,
@@ -49,7 +49,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
       <body
         className={`${inter.variable} ${playfair.variable} font-sans antialiased bg-background text-foreground dark:bg-background dark:text-foreground min-h-screen flex flex-col transition-colors duration-300`}
       >

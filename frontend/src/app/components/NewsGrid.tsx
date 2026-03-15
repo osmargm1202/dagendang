@@ -43,7 +43,7 @@ export default function NewsGrid({ mainArticle, initialArticles, totalArticles, 
   const fetchArticles = async (page: number, append = false) => {
     setLoading(true);
     try {
-      // Offset calculation for "La Agenda":
+      // Offset calculation for "DAgendaNG":
       // Page 1: skip 1 (featured), limit 4 (already passed in initialArticles)
       // Page 2: skip 5 (1 featured + 4 from page 1), limit 8
       // Page 3: skip 13 (5 + 8), limit 8
@@ -97,7 +97,7 @@ export default function NewsGrid({ mainArticle, initialArticles, totalArticles, 
                 <div className="w-full aspect-video bg-gray-300 mb-4 relative overflow-hidden flex items-center justify-center">
                   {mainArticle.image_url ? (
                     <img 
-                      src={mainArticle.image_url.startsWith('http') ? mainArticle.image_url : `https://diariodigital.delioserver.duckdns.org${mainArticle.image_url}`} 
+                      src={mainArticle.image_url.startsWith('http') ? mainArticle.image_url : `https://dagendang.com${mainArticle.image_url}`} 
                       alt={mainArticle.title} 
                       className="w-full h-full object-cover" 
                     />
@@ -139,7 +139,7 @@ export default function NewsGrid({ mainArticle, initialArticles, totalArticles, 
               <div className="w-full aspect-video bg-muted mb-3 overflow-hidden flex items-center justify-center border border-gray-100 shadow-sm">
                 {article.image_url ? (
                   <img 
-                    src={article.image_url.startsWith('http') ? article.image_url : `https://diariodigital.delioserver.duckdns.org${article.image_url}`} 
+                    src={article.image_url.startsWith('http') ? article.image_url : `https://dagendang.com${article.image_url}`} 
                     alt={article.title} 
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
                   />

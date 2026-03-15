@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from app.api import articles, economy, auth, upload, ai, ads, subscriptions, backups, comments, users
 import os
 
-app = FastAPI(title="La Agenda API")
+app = FastAPI(title="DAgendaNG API")
 
 # Ensure uploads directory exists
 os.makedirs("uploads", exist_ok=True)
@@ -81,16 +81,36 @@ async def periodic_backup_task():
             print(f"Error in background backup loop: {e}", flush=True)
             await asyncio.sleep(300) # Wait 5 mins on error
 
+async def periodic_news_scroller_task():
+    """
+    Background task to refresh the AI news candidates pool every 30 minutes.
+    """
+    while True:
+        try:
+            print(f"[{datetime.now()}] Iniciando scrapper de noticias en segundo plano...", flush=True)
+            from app.db.database import SessionLocal
+            from app.api.ai import refresh_candidates_pool
+            db = SessionLocal()
+            await refresh_candidates_pool(db)
+            db.close()
+        except Exception as e:
+            print(f"Error in periodic news scroller: {e}", flush=True)
+        
+        # Sleep for 30 minutes
+        await asyncio.sleep(1800)
+
 @app.on_event("startup")
 async def start_background_tasks():
     asyncio.create_task(daily_scraper_task())
     asyncio.create_task(periodic_backup_task())
+    asyncio.create_task(periodic_news_scroller_task())
 
 # Configure CORS
 origins = [
     "http://localhost:3000",
     "http://localhost:3550",
-    "https://diariodigital.delioserver.duckdns.org"
+    "https://dagendang.com",
+    "https://www.dagendang.com",
 ]
 
 app.add_middleware(
@@ -114,4 +134,4 @@ app.include_router(users.router, prefix="/api/users", tags=["User Management"])
 
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to La Agenda API"}
+    return {"message": "Welcome to DAgendaNG API"}

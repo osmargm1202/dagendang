@@ -23,7 +23,7 @@ from datetime import datetime, timedelta
 router = APIRouter()
 
 DEFAULT_ARTICLE_PROMPT_TEMPLATE = """
-Actua como el Editor en Jefe del diario digital dominicano "La Agenda".
+Actua como el Editor en Jefe del diario digital dominicano "DAgendaNG" (De Agenda con Nelson Gómez).
 Nuestro estilo es "Ejecutivo Dominicano": serio, profesional, analitico y elegante, en una linea cercana a Bloomberg o Financial Times.
 
 Tu tarea es redactar una noticia ORIGINAL basada en la siguiente informacion de una fuente externa:
@@ -281,6 +281,40 @@ _SUGGESTIONS_CACHE = {}
 _CACHE_TTL_SECONDS = 600 # 10 minutes
 MAX_CACHED_SUGGESTIONS = 500
 
+# Global pool for pre-loaded news candidates across all categories
+_GLOBAL_CANDIDATES_POOL: List[NewsCandidate] = []
+
+async def refresh_candidates_pool(db: Session):
+    """
+    Scrapes all active sources and populates the global candidates pool.
+    Designed for background task execution.
+    """
+    global _GLOBAL_CANDIDATES_POOL
+    print(f"[{datetime.now()}] AI: Proactive scrawl started for all sources...")
+    
+    query = db.query(NewsSource).filter(NewsSource.is_active == True)
+    sources = query.all()
+    
+    all_candidates = []
+    for source in sources:
+        candidates = await fetch_rss_candidates(source.url, source.name, source.category)
+        all_candidates.extend(candidates)
+    
+    # Filter by title similarity (last 200 articles)
+    existing_titles = [a.title.strip().lower() for a in db.query(Article).order_by(Article.published_at.desc()).limit(200).all()]
+    
+    new_pool = []
+    seen_urls = set()
+    for c in all_candidates:
+        c_title_lower = c.title.strip().lower()
+        if c_title_lower not in existing_titles and c.source_url not in seen_urls:
+            new_pool.append(c)
+            seen_urls.add(c.source_url)
+    
+    # Strictly limit to 500 and update global state
+    _GLOBAL_CANDIDATES_POOL = new_pool[:MAX_CACHED_SUGGESTIONS]
+    print(f"[{datetime.now()}] AI: Scrawl finished. Pool updated with {len(_GLOBAL_CANDIDATES_POOL)} candidates.")
+
 def _prune_suggestions_cache():
     """Ensures the global cache doesn't grow indefinitely."""
     if len(_SUGGESTIONS_CACHE) > 50: # Number of unique search keys (category+limit combos)
@@ -299,52 +333,54 @@ async def get_ai_suggestions(req: AISuggestionRequest, db: Session = Depends(get
     now = time.time()
 
     if not req.force_refresh:
-        cached = _SUGGESTIONS_CACHE.get(cache_key)
-        if cached and (now - cached["timestamp"] < _CACHE_TTL_SECONDS):
-            print(f"DEBUG AI: Serving suggestions from cache for key: {cache_key}")
-            return {"suggestions": cached["data"]}
-
-    query = db.query(NewsSource).filter(NewsSource.is_active == True)
-    
-    if req.category:
-        category_sources = query.filter(NewsSource.category == req.category).all()
-        if category_sources:
-            sources = category_sources
+        # If the pool is empty, initialize it proactively
+        if not _GLOBAL_CANDIDATES_POOL:
+            await refresh_candidates_pool(db)
+            
+        candidates_to_use = _GLOBAL_CANDIDATES_POOL
+        
+        # Filter by category if requested
+        if req.category and req.category != "all":
+            suggestions = [c for c in candidates_to_use if c.category == req.category][:req.limit]
         else:
-            # Fallback to all sources if none found for specified category
+            suggestions = candidates_to_use[:req.limit]
+    
+    # Fallback to direct fetch if we somehow have nothing after filtering but pool exists
+    if not suggestions and not _GLOBAL_CANDIDATES_POOL:
+        # This part is kept as safety if background task fails
+        query = db.query(NewsSource).filter(NewsSource.is_active == True)
+        if req.category and req.category != "all":
+            sources = query.filter(NewsSource.category == req.category).all() or query.all()
+        else:
             sources = query.all()
-    else:
-        sources = query.all()
+            
+        all_candidates = []
+        for source in sources:
+            candidates = await fetch_rss_candidates(source.url, source.name, source.category)
+            all_candidates.extend(candidates)
+        
+        existing_titles = [a.title.strip().lower() for a in db.query(Article).order_by(Article.published_at.desc()).limit(100).all()]
+        for c in all_candidates:
+            if c.title.strip().lower() not in existing_titles:
+                if not any(s.title.strip().lower() == c.title.strip().lower() for s in suggestions):
+                    suggestions.append(c)
+                if len(suggestions) >= req.limit: break
 
-    all_candidates = []
-    for source in sources:
-        candidates = await fetch_rss_candidates(source.url, source.name, source.category)
-        all_candidates.extend(candidates)
-    
-    # Filter out existing articles by title similarity (case-insensitive check)
-    # Get last 100 articles for better check
-    existing_titles = [a.title.strip().lower() for a in db.query(Article).order_by(Article.published_at.desc()).limit(100).all()]
-    
-    suggestions = []
-    for c in all_candidates:
-        c_title_lower = c.title.strip().lower()
-        if c_title_lower not in existing_titles:
-            # Also check if we already added this one in the same batch
-            if not any(s.title.strip().lower() == c_title_lower for s in suggestions):
-                suggestions.append(c)
-    
-    # Update cache
+    # Update cache for this specific request combo
     _prune_suggestions_cache()
-    
-    # Store candidates and maintain a limit of 500 per entry to avoid huge memory usage
-    final_suggestions = suggestions[:req.limit]
-    
     _SUGGESTIONS_CACHE[cache_key] = {
         "timestamp": now,
-        "data": suggestions[:500] # Cache up to 500 for potential reuse with different limits
+        "data": suggestions
     }
     
-    return {"suggestions": final_suggestions}
+    return {"suggestions": suggestions}
+
+@router.get("/cache", response_model=AIPreviewResponse)
+def get_ai_cache(current_user: User = Depends(get_current_user)):
+    """
+    Returns the entire global candidates pool for preview.
+    """
+    return {"suggestions": _GLOBAL_CANDIDATES_POOL}
 
 @router.post("/generate", response_model=AIArticleGenerateResponse)
 async def generate_article_with_ai(req: AIArticleGenerateRequest, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
@@ -440,7 +476,7 @@ async def generate_article_with_ai(req: AIArticleGenerateRequest, db: Session = 
             return AIArticleGenerateResponse(
                 title=result_dict.get("title", "Título no generado"),
                 content=result_dict.get("content", "Contenido no generado"),
-                author=result_dict.get("author", "IA La Agenda"),
+                author=result_dict.get("author", "IA DAgendaNG"),
                 image_url=extracted_image_url # Use the extracted image from HTML
             )
         

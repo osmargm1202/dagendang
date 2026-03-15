@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const BASE_URL = 'https://diariodigital.delioserver.duckdns.org';
+const BASE_URL = 'https://dagendang.com';
 
 export async function GET() {
   let articles = [];
@@ -26,7 +26,7 @@ export async function GET() {
       <loc>${BASE_URL}/noticias/${article.id}</loc>
       <news:news>
         <news:publication>
-          <news:name>La Agenda</news:name>
+          <news:name>DAgendaNG</news:name>
           <news:language>es</news:language>
         </news:publication>
         <news:publication_date>${new Date(article.published_at).toISOString()}</news:publication_date>

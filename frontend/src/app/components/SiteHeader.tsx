@@ -95,7 +95,7 @@ export default function SiteHeader() {
     <header className="bg-dr-blue text-white w-full shadow-md z-50 sticky top-0 border-b border-white/5">
       <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
         <h1 className="text-2xl md:text-3xl font-serif font-black tracking-widest shrink-0">
-          <Link href="/">LA AGENDA</Link>
+          <Link href="/">DAgendaNG</Link>
         </h1>
 
         {/* Desktop Navigation */}

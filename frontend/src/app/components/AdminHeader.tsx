@@ -40,7 +40,7 @@ export default function AdminHeader({ user, currentTitle }: AdminHeaderProps) {
                </svg>
              </button>
              <Link href="/admin/dashboard" className="font-bold text-lg md:text-xl tracking-tight">
-               La Agenda <span className="text-blue-300 font-normal">CMS</span>
+               DAgendaNG <span className="text-blue-300 font-normal">CMS</span>
              </Link>
              {currentTitle && <span className="hidden lg:inline text-blue-400 mx-2">/</span>}
              {currentTitle && <span className="hidden lg:inline text-xs font-bold uppercase tracking-widest text-white/70">{currentTitle}</span>}
