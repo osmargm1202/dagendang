@@ -5,7 +5,7 @@ import type { Metadata } from 'next';
 import NewsGrid from "@/app/components/NewsGrid";
 import EconomyIndicators from "@/app/components/EconomyIndicators";
 
-const BASE_URL = 'https://dagendang.com';
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://dagendang.com';
 
 export const metadata: Metadata = {
   title: 'DAgendaNG | De Agenda con Nelson Gómez - Diario Digital Económico',

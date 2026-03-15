@@ -107,9 +107,10 @@ async def start_background_tasks():
 
 # Configure CORS
 origins = [
-    "http://localhost:3000",
-    "http://localhost:3550",
     "https://dagendang.com",
+    "https://diariodigital.delioserver.duckdns.org",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
     "https://www.dagendang.com",
 ]
 

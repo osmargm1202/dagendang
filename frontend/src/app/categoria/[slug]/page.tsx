@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import AdBanner from "@/app/components/AdBanner";
 import type { Metadata } from 'next';
 
-const BASE_URL = 'https://dagendang.com';
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://dagendang.com';
 
 // Always fetch fresh data dynamically
 export const dynamic = 'force-dynamic';
@@ -84,7 +84,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
               <article>
                 <div className="w-full aspect-video bg-gray-200 mb-3 overflow-hidden flex items-center justify-center rounded-sm shadow-sm">
                   {article.image_url ? (
-                     <img src={article.image_url.startsWith('http') ? article.image_url : `https://dagendang.com${article.image_url}`} alt={article.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                     <img src={article.image_url} alt={article.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                   ) : (
                     <span className="text-muted-foreground text-sm">Sin Imagen</span>
                   )}

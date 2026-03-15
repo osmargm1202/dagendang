@@ -28,6 +28,7 @@ services:
       - ./backups:/app/backups
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-diario_digital}
+      - FRONTEND_URL=${NEXT_PUBLIC_BASE_URL:-https://dagendang.com}
       - TZ=America/Santo_Domingo
     depends_on:
       - db
@@ -47,7 +48,8 @@ services:
     volumes:
       - ./frontend:/app
     environment:
-      - NEXT_PUBLIC_API_URL=https://dagendang.com/api
+      - NEXT_PUBLIC_API_URL=/api
+      - NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL:-https://dagendang.com}
       - TZ=America/Santo_Domingo
       - NODE_ENV=development
     command: bun run dev

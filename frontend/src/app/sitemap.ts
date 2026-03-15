@@ -1,6 +1,6 @@
 import { MetadataRoute } from 'next';
 
-const BASE_URL = 'https://dagendang.com';
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://dagendang.com';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 1. Static Routes

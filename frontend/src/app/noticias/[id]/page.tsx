@@ -7,7 +7,7 @@ import SocialShare from "@/app/components/SocialShare";
 import CommentsSection from "@/app/components/CommentsSection";
 import type { Metadata, ResolvingMetadata } from 'next';
 
-const BASE_URL = 'https://dagendang.com';
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://dagendang.com';
 
 // Always fetch fresh data dynamically
 export const dynamic = 'force-dynamic';
@@ -194,7 +194,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
         {/* Main Article Image */}
         {article.image_url ? (
           <div className="w-full aspect-video bg-muted mb-8 rounded-sm shadow-sm overflow-hidden border border-border">
-            <img src={article.image_url.startsWith('http') ? article.image_url : `https://dagendang.com${article.image_url}`} alt={article.title} className="w-full h-full object-cover" />
+            <img src={article.image_url} alt={article.title} className="w-full h-full object-cover" />
           </div>
         ) : (
           <div className="w-full aspect-video bg-muted mb-8 rounded-sm shadow-sm flex items-center justify-center border border-border">
@@ -275,7 +275,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
                 <Link key={rel.id} href={`/noticias/${rel.id}`} className="group space-y-3">
                   <div className="aspect-video bg-muted overflow-hidden rounded-sm border border-border">
                     <img
-                      src={rel.image_url?.startsWith('http') ? rel.image_url : `${BASE_URL}${rel.image_url}`}
+                      src={rel.image_url}
                       alt={rel.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />

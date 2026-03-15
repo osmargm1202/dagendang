@@ -23,7 +23,8 @@ async def send_verification_email(email: str, token: str):
     message["Subject"] = "Verifica tu cuenta en DAgendaNG"
     
     # Updated link to the actual production/test domain
-    verification_link = f"https://dagendang.com/verificar?token={token}"
+    frontend_url = os.getenv("FRONTEND_URL", "https://dagendang.com").rstrip("/")
+    verification_link = f"{frontend_url}/verificar?token={token}"
     
     html_content = f"""
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 12px;">

@@ -60,11 +60,11 @@ export default function EditArticle() {
         setIsPremium(article.is_premium || false);
         if (article.image_url) {
           setExistingImageUrl(article.image_url);
-          setImagePreview(article.image_url.startsWith('http') ? article.image_url : `https://dagendang.com${article.image_url}`);
+          setImagePreview(article.image_url);
         }
         if (article.ad_image_url) {
           setExistingAdImageUrl(article.ad_image_url);
-          setAdImagePreview(article.ad_image_url.startsWith('http') ? article.ad_image_url : `https://dagendang.com${article.ad_image_url}`);
+          setAdImagePreview(article.ad_image_url);
         }
         if (article.ad_link) {
           setAdLink(article.ad_link);
