@@ -26,33 +26,30 @@ services:
     volumes:
       - ./backend:/app
       - ./backups:/app/backups
+      - ./uploads:/app/uploads
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-diario_digital}
       - FRONTEND_URL=${NEXT_PUBLIC_BASE_URL:-https://dagendang.com}
       - TZ=America/Santo_Domingo
     depends_on:
       - db
-    # In development, we use reload, no need to specify command here as it's in Dockerfile
-    # uncomment below command if you want to override the CMD from Dockerfile
-    # command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
 
   frontend:
-    image: oven/bun:1
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
     container_name: diario_frontend
-    working_dir: /app
     restart: always
     ports:
       - "3550:3000"
     env_file:
       - .env
-    volumes:
-      - ./frontend:/app
     environment:
       - NEXT_PUBLIC_API_URL=/api
       - NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL:-https://dagendang.com}
       - TZ=America/Santo_Domingo
-      - NODE_ENV=development
-    command: bun run dev
+      - NODE_ENV=production
     depends_on:
       - backend
 

@@ -93,8 +93,8 @@ export default function SiteHeader() {
 
   return (
     <header className="bg-dr-blue text-white w-full shadow-md z-50 sticky top-0 border-b border-white/5">
-      <div className="max-w-7xl mx-auto px-4 h-auto min-h-[90px] py-3 flex items-center justify-between">
-        <div className="flex items-center gap-5 shrink-0">
+      <div className="max-w-[1600px] mx-auto px-4 lg:px-8 h-auto min-h-[90px] py-3 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3 lg:gap-5 shrink-0">
           {/* Official Logo Image - Adjusted for natural width */}
           <div className="flex flex-col justify-center">
             <Link href="/" className="block group">
@@ -109,23 +109,23 @@ export default function SiteHeader() {
           </div>
 
           <Link href="/" className="flex flex-col group select-none py-1">
-            <h1 className="flex flex-col items-center">
+            <h1 className="flex flex-col items-start translate-y-1">
               {/* Line 1: D' Agenda */}
-              <span className="text-2xl md:text-3xl font-serif font-black tracking-tighter uppercase text-white group-hover:text-white transition-all duration-300 drop-shadow-sm flex items-start leading-none">
+              <span className="text-xl md:text-2xl lg:text-3xl font-serif font-black tracking-tighter uppercase text-white group-hover:text-white transition-all duration-300 drop-shadow-sm flex items-start leading-none">
                 D<span className="text-blue-300 font-sans font-black align-top relative -top-[0.1em] mx-[0.5px]">`</span>&nbsp;Agenda
               </span>
               
-              {/* Line 2: con (connecting line) */}
-              <div className="flex items-center w-full gap-2 my-0.5">
+              {/* Line 2: con (connecting line) - Compact */}
+              <div className="flex items-center w-full gap-1 lg:gap-2 my-0">
                 <div className="h-[0.5px] bg-white/20 flex-grow"></div>
-                <span className="text-[10px] md:text-[12px] font-serif italic font-medium lowercase text-blue-300 tracking-[0.3em] px-1 pb-0.5">
+                <span className="text-[8px] md:text-[10px] lg:text-[11px] font-serif italic font-medium lowercase text-blue-300 tracking-[0.2em] px-1">
                   con
                 </span>
                 <div className="h-[0.5px] bg-white/20 flex-grow"></div>
               </div>
               
               {/* Line 3: Nelson Gómez */}
-              <span className="text-xl md:text-2xl font-serif font-bold tracking-tight uppercase text-white leading-none">
+              <span className="text-lg md:text-xl lg:text-2xl font-serif font-bold tracking-tight uppercase text-white leading-none">
                 Nelson Gómez
               </span>
             </h1>
@@ -133,17 +133,17 @@ export default function SiteHeader() {
         </div>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex gap-6 font-sans font-semibold text-[10px] lg:text-xs tracking-widest items-center overflow-hidden">
-          
-          <div className="relative flex items-center group/slider max-w-[280px] lg:max-w-[380px] xl:max-w-[480px]">
+        <nav className="hidden md:flex flex-grow items-center justify-end h-full">
+          {/* Categories Slider - Now flexible Center */}
+          <div className="relative flex items-center group/slider flex-grow mx-4 lg:mx-8">
             {/* Left Arrow */}
             <div 
-              className={`absolute left-0 z-10 bg-gradient-to-r from-dr-blue via-dr-blue/90 to-transparent pr-10 py-4 transition-opacity duration-300 ${showLeftArrow ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+              className={`absolute left-0 z-10 bg-gradient-to-r from-dr-blue via-dr-blue/90 to-transparent pr-8 py-4 transition-opacity duration-300 ${showLeftArrow ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
               onMouseEnter={() => startScrolling("left")}
               onMouseLeave={stopScrolling}
             >
               <button className="animate-pulse">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
@@ -152,11 +152,11 @@ export default function SiteHeader() {
             {/* Categories Container */}
             <div 
               ref={containerRef}
-              className="flex gap-8 overflow-x-hidden scroll-smooth whitespace-nowrap px-4 py-2 no-scrollbar"
+              className="flex gap-4 lg:gap-7 overflow-x-hidden scroll-smooth whitespace-nowrap px-4 py-2 no-scrollbar font-sans font-bold text-[10px] lg:text-[11px] tracking-[0.15em]"
               onScroll={checkScroll}
             >
               {categories.map(cat => (
-                <Link key={cat.slug} href={`/categoria/${cat.slug}`} className="hover:text-blue-300 transition-colors uppercase tracking-[0.15em]">
+                <Link key={cat.slug} href={`/categoria/${cat.slug}`} className="hover:text-blue-300 transition-colors uppercase">
                   {cat.name}
                 </Link>
               ))}
@@ -164,12 +164,12 @@ export default function SiteHeader() {
 
             {/* Right Arrow */}
             <div 
-              className={`absolute right-0 z-10 bg-gradient-to-l from-dr-blue via-dr-blue/90 to-transparent pl-10 py-4 transition-opacity duration-300 ${showRightArrow ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+              className={`absolute right-0 z-10 bg-gradient-to-l from-dr-blue via-dr-blue/90 to-transparent pl-8 py-4 transition-opacity duration-300 ${showRightArrow ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
               onMouseEnter={() => startScrolling("right")}
               onMouseLeave={stopScrolling}
             >
               <button className="animate-pulse">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
                 </svg>
               </button>
@@ -180,53 +180,58 @@ export default function SiteHeader() {
             .no-scrollbar::-webkit-scrollbar { display: none; }
             .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
           `}</style>
-
-          {/* Search Bar Desktop */}
-          <form onSubmit={handleSearch} className="relative ml-2">
-            <input 
-              type="text" 
-              placeholder="BUSCAR..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-white/10 border border-white/20 rounded-sm px-3 py-1.5 text-[10px] font-bold focus:outline-none focus:bg-white/20 transition-all w-24 lg:w-32 focus:w-48 placeholder:text-white/40"
-            />
-            <button type="submit" className="absolute right-2 top-1/2 -translate-y-1/2 text-white/50 hover:text-white">
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </button>
-          </form>
           
-          <div className="mx-2 h-4 w-px bg-white/20"></div>
-          <ThemeToggle />
-
-          {isLoggedIn ? (
-            <div className="flex items-center gap-4 ml-6">
-              {isAdmin && (
-                <Link 
-                  href="/admin/dashboard" 
-                  className="bg-white text-dr-blue text-[10px] font-bold px-3 py-1.5 rounded-sm hover:bg-gray-100 transition shadow-sm tracking-wider"
-                >
-                  ADMIN
-                </Link>
-              )}
-               <button 
-                onClick={handleLogout}
-                className="text-[10px] uppercase font-bold text-blue-200 hover:text-white transition-colors"
-                >
-                Cerrar Sesión
-              </button>
-              <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-md transition-transform hover:scale-105">
-                <svg className="w-5 h-5 text-dr-blue" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                  <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"></path>
+          {/* Action Tools Cluster - COMPACT */}
+          <div className="flex items-center gap-2 lg:gap-3 shrink-0 pr-1">
+            {/* Search - Minimalized */}
+            <form onSubmit={handleSearch} className="relative group/search h-10 flex items-center">
+              <input 
+                type="text" 
+                placeholder="BUSCAR..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="bg-white/5 border border-white/20 rounded-full px-4 h-10 text-[10px] font-bold focus:outline-none focus:bg-white/10 focus:border-blue-400/50 transition-all w-10 group-hover/search:w-40 focus:w-48 overflow-hidden placeholder:text-transparent group-hover/search:placeholder:text-white/30"
+              />
+              <button type="submit" className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 hover:text-white">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
+              </button>
+            </form>
+
+            <ThemeToggle />
+
+            {isLoggedIn ? (
+              <div className="flex items-center gap-2 lg:gap-3 lg:ml-2">
+                {isAdmin && (
+                  <Link 
+                    href="/admin/dashboard" 
+                    className="bg-blue-500/20 text-blue-300 border border-blue-400/30 text-[9px] font-black px-3 py-1.5 rounded-full hover:bg-blue-500 hover:text-white transition-all shadow-sm tracking-widest uppercase"
+                  >
+                    ADMIN
+                  </Link>
+                )}
+                 <button 
+                  onClick={handleLogout}
+                  className="text-[9px] uppercase font-black text-white/50 hover:text-red-400 transition-colors px-1"
+                  title="Cerrar Sesión"
+                  >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                </button>
+                <div className="w-9 h-9 rounded-full border-2 border-white/20 bg-white/10 flex items-center justify-center shadow-lg transition-transform hover:scale-105 shrink-0">
+                  <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"></path>
+                  </svg>
+                </div>
               </div>
-            </div>
-          ) : (
-            <Link href="/registro" className="px-5 py-2 bg-dr-red text-white font-bold rounded-sm hover:bg-red-800 transition uppercase shrink-0">
-                SUSCRIBIRSE
-            </Link>
-          )}
+            ) : (
+              <Link href="/registro" className="px-5 py-2.5 bg-dr-red text-white text-[10px] font-black rounded-full hover:bg-red-700 transition-all uppercase shrink-0 tracking-widest shadow-lg shadow-red-900/20">
+                  SUSCRIBIRSE
+              </Link>
+            )}
+          </div>
         </nav>
 
         {/* Mobile Actions (Theme Toggle + Hamburger) */}

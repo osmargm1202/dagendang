@@ -50,7 +50,7 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="group flex items-center justify-center p-2 rounded-full border border-blue-400/30 hover:border-white/50 hover:bg-white/10 transition-all duration-500 relative overflow-hidden max-w-[40px] hover:max-w-[120px] gap-0 hover:gap-2 px-3 min-h-[40px]"
+      className="group flex items-center justify-center h-10 rounded-full border border-white/20 bg-white/5 hover:border-white/50 hover:bg-white/10 transition-all duration-500 relative overflow-hidden w-10 hover:w-[120px] gap-0 hover:gap-2 px-3"
       title={`Cambiar Tema (Actual: ${getLabel()})`}
     >
       <div className="transition-transform group-active:scale-90 flex-shrink-0 flex items-center justify-center">

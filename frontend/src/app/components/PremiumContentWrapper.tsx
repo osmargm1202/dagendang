@@ -88,7 +88,7 @@ export default function PremiumContentWrapper({
     const teaserParagraphs = paragraphs.slice(0, 2);
     return (
       <div className="relative">
-        <div className="prose prose-lg max-w-none text-foreground leading-relaxed mb-4 opacity-70">
+        <div className="font-serif text-lg text-foreground/80 leading-[1.8] mb-4 opacity-70 italic">
           {teaserParagraphs.map((paragraph, i) => (
             <p key={i} className="mb-6">{paragraph}</p>
           ))}
@@ -121,10 +121,12 @@ export default function PremiumContentWrapper({
   const showAds = !isPremium && !isUserPremium && !isChecking;
 
   return (
-    <article className="prose prose-lg max-w-none text-foreground leading-relaxed">
+    <article className="font-serif text-lg md:text-xl text-foreground/90 leading-[1.9] text-justify max-w-none antialiased">
       {paragraphs.map((paragraph, i) => (
         <div key={i}>
-          <p className="mb-6">{paragraph}</p>
+          <p className={`mb-8 ${i === 0 ? "first-letter:text-7xl first-letter:font-black first-letter:text-dr-blue first-letter:mr-3 first-letter:float-left first-letter:leading-[0.8] first-letter:mt-2" : ""}`}>
+            {paragraph}
+          </p>
           {/* Only insert ad if NEITHER the article OR the USER is premium and at the calculated index AND we finished checking */}
           {showAds && i === insertIndex && AdComponent}
         </div>

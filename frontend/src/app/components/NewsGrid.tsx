@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 interface Article {
   id: number;
@@ -20,11 +21,32 @@ interface NewsGridProps {
   pageSize?: number;
 }
 
-export default function NewsGrid({ mainArticle, initialArticles, totalArticles, pageSize = 8 }: NewsGridProps) {
+export default function NewsGrid(props: NewsGridProps) {
+  return (
+    <Suspense fallback={<div className="h-96 flex items-center justify-center animate-pulse bg-gray-100 rounded-sm">Cargando noticias...</div>}>
+      <NewsGridContent {...props} />
+    </Suspense>
+  );
+}
+
+function NewsGridContent({ mainArticle, initialArticles, totalArticles, pageSize = 8 }: NewsGridProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pageFromUrl = parseInt(searchParams.get('p') || '1');
+
   const [articles, setArticles] = useState<Article[]>(initialArticles);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(pageFromUrl);
   const [loading, setLoading] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Sync with URL on mount or back navigation
+  useEffect(() => {
+    if (pageFromUrl !== currentPage) {
+      setCurrentPage(pageFromUrl);
+      fetchArticles(pageFromUrl, false);
+    }
+  }, [pageFromUrl]);
 
   // Detect mobile view and prevent hydration mismatch
   useEffect(() => {
@@ -34,8 +56,6 @@ export default function NewsGrid({ mainArticle, initialArticles, totalArticles, 
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
-
-  const [isMounted, setIsMounted] = useState(false);
 
   // Calculate total pages:
   // Page 1: 1 featured + 4 secondary (Total 5)
@@ -70,6 +90,10 @@ export default function NewsGrid({ mainArticle, initialArticles, totalArticles, 
   };
 
   const handlePageChange = (newPage: number) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('p', newPage.toString());
+    router.push(`?${params.toString()}`, { scroll: false });
+
     if (newPage === 1) {
       setArticles(initialArticles);
       setCurrentPage(1);
@@ -113,14 +137,20 @@ export default function NewsGrid({ mainArticle, initialArticles, totalArticles, 
                 <h2 className="text-4xl md:text-5xl font-serif font-bold mt-3 leading-tight text-foreground group-hover:text-dr-red transition-colors">
                   {mainArticle.title}
                 </h2>
-                <div className="mt-4 text-muted-foreground text-lg leading-relaxed">
-                  {/* We use div for content snippet to avoid p-within-p issues if any */}
-                  {mainArticle.title.length < 50 ? mainArticle.title : mainArticle.title.substring(0, 150) + "..."}
-                </div>
-                <div className="mt-4 text-sm text-muted-foreground flex items-center gap-2">
-                  <span className="font-semibold text-foreground/80">Por {mainArticle.author || "Redacción"}</span>
-                  <span>&bull;</span>
-                  <span>{isMounted ? new Date(mainArticle.published_at).toLocaleDateString() : ''}</span>
+                
+                <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
+                  <span className="font-serif italic text-lg text-foreground/90">
+                    Escrito por <span className="font-bold not-italic border-b border-dr-red/30 pb-0.5 hover:border-dr-red transition-all cursor-default">{mainArticle.author || "Redacción DAgendaNG"}</span>
+                  </span>
+                  
+                  <span className="hidden md:inline text-gray-200">—</span>
+
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-black">Publicado el</span>
+                    <time className="font-sans text-sm font-semibold text-foreground/70">
+                      {isMounted ? new Date(mainArticle.published_at).toLocaleDateString('es-DO', { day: 'numeric', month: 'long', year: 'numeric' }) : ''}
+                    </time>
+                  </div>
                 </div>
               </article>
             </Link>
@@ -131,7 +161,7 @@ export default function NewsGrid({ mainArticle, initialArticles, totalArticles, 
               </div>
             </article>
           )}
-          <hr className="border-border" />
+          <hr className="border-gray-100 my-8" />
         </>
       )}
       

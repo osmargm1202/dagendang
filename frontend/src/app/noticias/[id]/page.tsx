@@ -203,18 +203,33 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
         )}
 
         {/* Header */}
-        <header className="mb-8">
-          <span className="text-dr-red font-bold uppercase tracking-wider">{article.type}</span>
-          <h1 className="text-4xl md:text-5xl font-serif font-bold mt-4 leading-tight text-foreground border-b border-border pb-6 mb-6">
+        <header className="mb-8 overflow-hidden">
+          <span className="bg-dr-red text-white font-black uppercase text-[10px] tracking-[0.2em] px-3 py-1 shadow-sm inline-block mb-6">
+            {article.type}
+          </span>
+          <h1 className="text-5xl md:text-7xl font-serif font-black mt-2 leading-[1.05] text-dr-blue tracking-tighter pb-8 border-b border-gray-100">
             {article.title}
           </h1>
-          <div className="flex items-center justify-between text-muted-foreground text-sm">
-            <div>
-              <span className="font-semibold text-foreground/80">Por {article.author || "Redacción"}</span>
+          
+          <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3 text-muted-foreground">
+            <div className="flex items-center gap-3">
+              <span className="font-serif italic text-lg text-foreground/90">
+                Escrito por <span className="font-bold not-italic border-b border-dr-red/30 pb-0.5 hover:border-dr-red transition-all cursor-default">{article.author || "Redacción DAgendaNG"}</span>
+              </span>
             </div>
-            <time dateTime={article.published_at}>
-              {new Date(article.published_at).toLocaleDateString('es-DO', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-            </time>
+            
+            <span className="hidden md:inline text-gray-200 text-xl">—</span>
+
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-black">Publicado el</span>
+              <time className="font-sans text-sm font-semibold text-foreground/70" dateTime={article.published_at}>
+                {new Date(article.published_at).toLocaleDateString('es-DO', { day: 'numeric', month: 'long', year: 'numeric' })}
+              </time>
+              <span className="text-gray-300 mx-1">|</span>
+              <time className="font-sans text-sm font-bold text-dr-blue/70">
+                {new Date(article.published_at).toLocaleTimeString('es-DO', { hour: '2-digit', minute: '2-digit' })}
+              </time>
+            </div>
           </div>
         </header>
 
@@ -280,8 +295,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   </div>
-                  <span className="block text-[10px] font-bold text-dr-red uppercase tracking-widest">{rel.type}</span>
-                  <h4 className="font-bold text-sm leading-snug group-hover:text-dr-blue transition-colors line-clamp-2">
+                  <span className="block text-[10px] font-black text-dr-red uppercase tracking-[0.2em]">{rel.type}</span>
+                  <h4 className="font-serif font-bold text-lg leading-[1.3] group-hover:text-dr-blue transition-colors line-clamp-3">
                     {rel.title}
                   </h4>
                 </Link>

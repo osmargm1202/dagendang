@@ -6,6 +6,9 @@ import os
 
 app = FastAPI(title="DAgendaNG API")
 
+import mimetypes
+mimetypes.add_type('image/jpeg', '.jfif')
+
 # Ensure uploads directory exists
 os.makedirs("uploads", exist_ok=True)
 
