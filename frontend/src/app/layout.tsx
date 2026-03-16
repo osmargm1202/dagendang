@@ -19,14 +19,49 @@ const playfair = Playfair_Display({
 
 export const metadata: Metadata = {
   title: {
-    default: "DAgendaNG - De Agenda con Nelson Gómez",
+    default: "D' Agenda con Nelson Gómez | DAgendaNG",
     template: "%s | DAgendaNG"
   },
   description: "Portal económico confiable con tasa oficial, precios de combustibles y análisis de alto valor en la República Dominicana.",
   keywords: ["economía", "República Dominicana", "tasa de cambio", "dólar RD", "combustibles RD", "noticias económicas", "diario digital"],
-  authors: [{ name: "DAgendaNG" }],
+  authors: [{ name: "Nelson Gómez" }],
   creator: "DAgendaNG",
   publisher: "DAgendaNG",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://dagendang.com'),
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    title: "D' Agenda con Nelson Gómez | DAgendaNG",
+    description: "Portal económico confiable con tasa oficial, precios de combustibles y análisis de alto valor en la República Dominicana.",
+    url: 'https://dagendang.com',
+    siteName: 'DAgendaNG',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: "D' Agenda con Nelson Gómez",
+      },
+    ],
+    locale: 'es_DO',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: "D' Agenda con Nelson Gómez | DAgendaNG",
+    description: "Portal económico confiable con tasa oficial, precios de combustibles y análisis de alto valor en la República Dominicana.",
+    images: ['/og-image.png'],
+  },
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/favicon.png', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-icon.png' },
+    ],
+  },
   robots: {
     index: true,
     follow: true,

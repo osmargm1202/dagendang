@@ -93,8 +93,8 @@ export default function AdBanner({ position, className = "" }: AdBannerProps) {
           alt={ad.title} 
           className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105 animate-in fade-in zoom-in-95 duration-700"
         />
-        <div className="absolute top-0 right-0 bg-black/50 text-[10px] text-white px-1 font-sans">
-            Publicidad {ads.length > 1 && `(${currentIndex + 1}/${ads.length})`}
+        <div className="absolute top-0 right-0 bg-black/50 text-[10px] text-white px-2 font-sans py-0.5 rounded-bl-sm">
+            Publicidad
         </div>
       </Link>
     </div>

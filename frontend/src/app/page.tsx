@@ -20,9 +20,10 @@ export const metadata: Metadata = {
     siteName: 'DAgendaNG',
     images: [
       {
-        url: `${BASE_URL}/og-main.png`, // Placeholder for future OG image
+        url: `${BASE_URL}/og-image.png`,
         width: 1200,
         height: 630,
+        alt: 'DAgendaNG | Diario Digital Económico',
       },
     ],
     locale: 'es_DO',

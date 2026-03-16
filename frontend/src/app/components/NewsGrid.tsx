@@ -26,13 +26,16 @@ export default function NewsGrid({ mainArticle, initialArticles, totalArticles, 
   const [loading, setLoading] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Detect mobile view
+  // Detect mobile view and prevent hydration mismatch
   useEffect(() => {
+    setIsMounted(true);
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  const [isMounted, setIsMounted] = useState(false);
 
   // Calculate total pages:
   // Page 1: 1 featured + 4 secondary (Total 5)
@@ -97,7 +100,7 @@ export default function NewsGrid({ mainArticle, initialArticles, totalArticles, 
                 <div className="w-full aspect-video bg-gray-300 mb-4 relative overflow-hidden flex items-center justify-center">
                   {mainArticle.image_url ? (
                     <img 
-                      src={mainArticle.image_url.startsWith('http') ? mainArticle.image_url : `https://dagendang.com${mainArticle.image_url}`} 
+                      src={mainArticle.image_url} 
                       alt={mainArticle.title} 
                       className="w-full h-full object-cover" 
                     />
@@ -117,7 +120,7 @@ export default function NewsGrid({ mainArticle, initialArticles, totalArticles, 
                 <div className="mt-4 text-sm text-muted-foreground flex items-center gap-2">
                   <span className="font-semibold text-foreground/80">Por {mainArticle.author || "Redacción"}</span>
                   <span>&bull;</span>
-                  <span>{new Date(mainArticle.published_at).toLocaleDateString()}</span>
+                  <span>{isMounted ? new Date(mainArticle.published_at).toLocaleDateString() : ''}</span>
                 </div>
               </article>
             </Link>
@@ -139,7 +142,7 @@ export default function NewsGrid({ mainArticle, initialArticles, totalArticles, 
               <div className="w-full aspect-video bg-muted mb-3 overflow-hidden flex items-center justify-center border border-gray-100 shadow-sm">
                 {article.image_url ? (
                   <img 
-                    src={article.image_url.startsWith('http') ? article.image_url : `https://dagendang.com${article.image_url}`} 
+                    src={article.image_url} 
                     alt={article.title} 
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
                   />

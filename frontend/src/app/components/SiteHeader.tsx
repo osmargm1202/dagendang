@@ -93,10 +93,44 @@ export default function SiteHeader() {
 
   return (
     <header className="bg-dr-blue text-white w-full shadow-md z-50 sticky top-0 border-b border-white/5">
-      <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
-        <h1 className="text-2xl md:text-3xl font-serif font-black tracking-widest shrink-0">
-          <Link href="/">DAgendaNG</Link>
-        </h1>
+      <div className="max-w-7xl mx-auto px-4 h-auto min-h-[90px] py-3 flex items-center justify-between">
+        <div className="flex items-center gap-5 shrink-0">
+          {/* Official Logo Image - Adjusted for natural width */}
+          <div className="flex flex-col justify-center">
+            <Link href="/" className="block group">
+              <div className="h-16 md:h-20 flex items-center justify-center rounded-sm transition-all duration-500 group-hover:scale-105">
+                <img 
+                  src="/logo-header.png" 
+                  alt="Logo DAgendaNG" 
+                  className="h-full w-auto object-contain"
+                />
+              </div>
+            </Link>
+          </div>
+
+          <Link href="/" className="flex flex-col group select-none py-1">
+            <h1 className="flex flex-col items-center">
+              {/* Line 1: D' Agenda */}
+              <span className="text-2xl md:text-3xl font-serif font-black tracking-tighter uppercase text-white group-hover:text-white transition-all duration-300 drop-shadow-sm flex items-start leading-none">
+                D<span className="text-blue-300 font-sans font-black align-top relative -top-[0.1em] mx-[0.5px]">`</span>&nbsp;Agenda
+              </span>
+              
+              {/* Line 2: con (connecting line) */}
+              <div className="flex items-center w-full gap-2 my-0.5">
+                <div className="h-[0.5px] bg-white/20 flex-grow"></div>
+                <span className="text-[10px] md:text-[12px] font-serif italic font-medium lowercase text-blue-300 tracking-[0.3em] px-1 pb-0.5">
+                  con
+                </span>
+                <div className="h-[0.5px] bg-white/20 flex-grow"></div>
+              </div>
+              
+              {/* Line 3: Nelson Gómez */}
+              <span className="text-xl md:text-2xl font-serif font-bold tracking-tight uppercase text-white leading-none">
+                Nelson Gómez
+              </span>
+            </h1>
+          </Link>
+        </div>
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex gap-6 font-sans font-semibold text-[10px] lg:text-xs tracking-widest items-center overflow-hidden">
@@ -218,7 +252,7 @@ export default function SiteHeader() {
 
       {/* Mobile Menu Overlay */}
       <div 
-        className={`md:hidden absolute top-20 left-0 w-full bg-dr-blue border-t border-white/10 shadow-2xl transition-all duration-300 ease-in-out overflow-hidden ${
+        className={`md:hidden absolute top-full left-0 w-full bg-dr-blue border-t border-white/10 shadow-2xl transition-all duration-300 ease-in-out overflow-hidden ${
           isMenuOpen ? 'max-h-screen pb-8' : 'max-h-0'
         }`}
       >
