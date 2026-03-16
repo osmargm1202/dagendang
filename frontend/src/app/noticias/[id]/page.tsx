@@ -207,18 +207,16 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
           <span className="bg-dr-red text-white font-black uppercase text-[10px] tracking-[0.2em] px-3 py-1 shadow-sm inline-block mb-6">
             {article.type}
           </span>
-          <h1 className="text-5xl md:text-7xl font-serif font-black mt-2 leading-[1.05] text-dr-blue tracking-tighter pb-8 border-b border-gray-100">
+          <h1 className="text-4xl md:text-5xl font-serif font-bold mt-4 leading-tight text-foreground pb-2 mb-4">
             {article.title}
           </h1>
           
-          <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-3 text-muted-foreground">
+          <div className="mt-2 flex flex-col md:flex-row md:items-center justify-between gap-y-3 text-muted-foreground pt-2">
             <div className="flex items-center gap-3">
               <span className="font-serif italic text-lg text-foreground/90">
                 Escrito por <span className="font-bold not-italic border-b border-dr-red/30 pb-0.5 hover:border-dr-red transition-all cursor-default">{article.author || "Redacción DAgendaNG"}</span>
               </span>
             </div>
-            
-            <span className="hidden md:inline text-gray-200 text-xl">—</span>
 
             <div className="flex items-center gap-2">
               <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-black">Publicado el</span>
@@ -295,8 +293,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   </div>
-                  <span className="block text-[10px] font-black text-dr-red uppercase tracking-[0.2em]">{rel.type}</span>
-                  <h4 className="font-serif font-bold text-lg leading-[1.3] group-hover:text-dr-blue transition-colors line-clamp-3">
+                  <span className="block text-[10px] font-bold text-dr-red uppercase tracking-widest">{rel.type}</span>
+                  <h4 className="font-bold text-sm leading-snug group-hover:text-dr-blue transition-colors line-clamp-2">
                     {rel.title}
                   </h4>
                 </Link>

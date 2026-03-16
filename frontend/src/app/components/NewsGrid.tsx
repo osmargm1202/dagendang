@@ -138,12 +138,12 @@ function NewsGridContent({ mainArticle, initialArticles, totalArticles, pageSize
                   {mainArticle.title}
                 </h2>
                 
-                <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2">
-                  <span className="font-serif italic text-lg text-foreground/90">
-                    Escrito por <span className="font-bold not-italic border-b border-dr-red/30 pb-0.5 hover:border-dr-red transition-all cursor-default">{mainArticle.author || "Redacción DAgendaNG"}</span>
-                  </span>
-                  
-                  <span className="hidden md:inline text-gray-200">—</span>
+                <div className="mt-4 flex flex-col md:flex-row md:items-center justify-between gap-y-2">
+                  <div className="flex items-center gap-3">
+                    <span className="font-serif italic text-lg text-foreground/90">
+                      Escrito por <span className="font-bold not-italic border-b border-dr-red/30 pb-0.5 hover:border-dr-red transition-all cursor-default">{mainArticle.author || "Redacción DAgendaNG"}</span>
+                    </span>
+                  </div>
 
                   <div className="flex items-center gap-2">
                     <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-black">Publicado el</span>

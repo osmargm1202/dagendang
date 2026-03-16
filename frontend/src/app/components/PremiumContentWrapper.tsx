@@ -124,7 +124,7 @@ export default function PremiumContentWrapper({
     <article className="font-serif text-lg md:text-xl text-foreground/90 leading-[1.9] text-justify max-w-none antialiased">
       {paragraphs.map((paragraph, i) => (
         <div key={i}>
-          <p className={`mb-8 ${i === 0 ? "first-letter:text-7xl first-letter:font-black first-letter:text-dr-blue first-letter:mr-3 first-letter:float-left first-letter:leading-[0.8] first-letter:mt-2" : ""}`}>
+          <p className={`mb-8 ${i === 0 ? "first-letter:text-7xl first-letter:font-bold first-letter:text-foreground first-letter:mr-3 first-letter:float-left first-letter:leading-[0.8] first-letter:mt-2" : ""}`}>
             {paragraph}
           </p>
           {/* Only insert ad if NEITHER the article OR the USER is premium and at the calculated index AND we finished checking */}
