@@ -18,18 +18,10 @@ export default function ThemeToggle() {
   }
 
   const toggleTheme = () => {
-    if (theme === "light") setTheme("dark");
-    else if (theme === "dark") setTheme("system");
-    else setTheme("light");
+    setTheme(resolvedTheme === "dark" ? "light" : "dark");
   };
 
   const getIcon = () => {
-    if (theme === "system") return (
-      <svg className="w-5 h-5 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v18m0-18a9 9 0 110 18m0-18a9 9 0 000 18" />
-        <path d="M12 3a9 9 0 000 18V3z" fill="currentColor" fillOpacity="0.3" stroke="none" />
-      </svg>
-    );
     return resolvedTheme === "dark" ? (
       <svg className="w-5 h-5 text-yellow-200 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
@@ -43,8 +35,7 @@ export default function ThemeToggle() {
   };
 
   const getLabel = () => {
-    if (theme === "system") return "Sistema";
-    return theme === "dark" ? "Oscuro" : "Claro";
+    return resolvedTheme === "dark" ? "Oscuro" : "Claro";
   };
 
   return (
