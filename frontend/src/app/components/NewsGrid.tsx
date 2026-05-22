@@ -3,14 +3,19 @@
 import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
+import AdBanner from "@/app/components/AdBanner";
+import AdGuard from "@/app/components/AdGuard";
 
 interface Article {
-  id: number;
+  id?: number;
+  documentId?: string;
   title: string;
+  slug?: string;
   type: string;
-  image_url?: string;
+  image_url?: string | null;
   published_at: string;
   author?: string;
+  subtitle?: string;
   content: string;
 }
 
@@ -39,6 +44,8 @@ function NewsGridContent({ mainArticle, initialArticles, totalArticles, pageSize
   const [loading, setLoading] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+
+  const articleHref = (article: Article) => `/noticias/${article.slug || article.documentId || article.id}`;
 
   // Sync with URL on mount or back navigation
   useEffect(() => {
@@ -119,9 +126,9 @@ function NewsGridContent({ mainArticle, initialArticles, totalArticles, pageSize
       {currentPage === 1 && (
         <>
           {mainArticle ? (
-            <Link href={`/noticias/${mainArticle.id}`} className="group cursor-pointer block">
+            <Link href={articleHref(mainArticle)} className="group cursor-pointer block transition-transform duration-500 hover:-translate-y-1">
               <article>
-                <div className="w-full aspect-video bg-gray-300 mb-4 relative overflow-hidden flex items-center justify-center">
+                <div className="w-full aspect-video bg-muted mb-4 relative overflow-hidden flex items-center justify-center border border-border-light dark:border-border-dark">
                   {mainArticle.image_url ? (
                     <img 
                       src={mainArticle.image_url} 
@@ -133,15 +140,15 @@ function NewsGridContent({ mainArticle, initialArticles, totalArticles, pageSize
                   )}
                   <div className="absolute inset-0 bg-dr-blue/10 group-hover:bg-transparent transition duration-300"></div>
                 </div>
-                <span className="text-dr-red font-bold uppercase text-xs tracking-wider">{mainArticle.type}</span>
-                <h2 className="text-4xl md:text-5xl font-serif font-bold mt-3 leading-tight text-foreground group-hover:text-dr-red transition-colors">
+                <span className="text-secondary dark:text-secondary-fixed-dim font-bold uppercase text-xs tracking-wider">{mainArticle.type}</span>
+                <h2 className="text-4xl md:text-5xl font-serif font-bold mt-3 leading-tight text-primary dark:text-white group-hover:text-secondary transition-colors">
                   {mainArticle.title}
                 </h2>
                 
                 <div className="mt-4 flex flex-col md:flex-row md:items-center justify-between gap-y-2">
                   <div className="flex items-center gap-3">
-                    <span className="font-serif italic text-lg text-foreground/90">
-                      Escrito por <span className="font-bold not-italic border-b border-dr-red/30 pb-0.5 hover:border-dr-red transition-all cursor-default">{mainArticle.author || "Redacción DAgendaNG"}</span>
+                    <span className="font-serif italic text-lg text-primary/90 dark:text-white/90">
+                      Escrito por <span className="font-bold not-italic border-b border-secondary/30 pb-0.5 hover:border-secondary transition-all cursor-default">{mainArticle.author || "Redacción DAgendaNG"}</span>
                     </span>
                   </div>
 
@@ -161,15 +168,17 @@ function NewsGridContent({ mainArticle, initialArticles, totalArticles, pageSize
               </div>
             </article>
           )}
-          <hr className="border-gray-100 my-8" />
+          <AdGuard>
+            <AdBanner position="home_middle" className="my-8" />
+          </AdGuard>
         </>
       )}
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {articles.map((article) => (
-          <Link href={`/noticias/${article.id}`} key={article.id} className="group cursor-pointer block">
+          <Link href={articleHref(article)} key={article.slug || article.documentId || article.id} className="group cursor-pointer block">
             <article>
-              <div className="w-full aspect-video bg-muted mb-3 overflow-hidden flex items-center justify-center border border-gray-100 shadow-sm">
+              <div className="w-full aspect-video bg-muted mb-3 overflow-hidden flex items-center justify-center border border-border-light dark:border-border-dark">
                 {article.image_url ? (
                   <img 
                     src={article.image_url} 
@@ -180,8 +189,8 @@ function NewsGridContent({ mainArticle, initialArticles, totalArticles, pageSize
                   <span className="text-gray-400 text-sm">Sin Imagen</span>
                 )}
               </div>
-              <span className="text-dr-red font-bold uppercase text-[10px] tracking-widest">{article.type}</span>
-              <h3 className="text-xl font-serif font-bold mt-2 leading-snug group-hover:text-dr-red transition-colors">
+              <span className="text-secondary dark:text-secondary-fixed-dim font-bold uppercase text-[10px] tracking-widest">{article.type}</span>
+              <h3 className="text-xl font-serif font-bold mt-2 leading-snug text-primary dark:text-white group-hover:text-secondary transition-colors">
                 {article.title}
               </h3>
             </article>
