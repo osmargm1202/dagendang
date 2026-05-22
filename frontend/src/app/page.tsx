@@ -69,7 +69,7 @@ export default async function Home() {
 
   const mainArticle = articles[0] || null;
   const secondaryArticles = articles.slice(1);
-  const totalArticles = articles.length;
+  const totalArticles = mainArticle ? secondaryArticles.length + 1 : secondaryArticles.length;
 
   return (
     <div className="w-full">
