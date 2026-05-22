@@ -12,6 +12,7 @@ export default function SiteHeader() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [formattedDate, setFormattedDate] = useState("");
   const [categories, setCategories] = useState<{ slug: string; name: string }[]>([]);
 
   useEffect(() => {
@@ -38,6 +39,21 @@ export default function SiteHeader() {
     return () => window.clearTimeout(timeoutId);
   }, [pathname]);
 
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setFormattedDate(
+        new Date().toLocaleDateString("es-DO", {
+          weekday: "long",
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        }),
+      );
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, []);
+
   if (pathname.startsWith("/admin")) {
     return null;
   }
@@ -57,13 +73,6 @@ export default function SiteHeader() {
       setIsMenuOpen(false);
     }
   };
-
-  const formattedDate = new Date().toLocaleDateString("es-DO", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
 
   return (
     <header className="bg-background/95 dark:bg-dark-bg/95 backdrop-blur sticky top-0 z-50 border-b border-border-light dark:border-border-dark">
