@@ -7,8 +7,11 @@ const VALID_OPTIONS = new Set(["A", "B", "C", "D", "E", "F", "G", "H", "I"]);
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ documentId: string }> }) {
   const { documentId } = await params;
-  const body = await request.json().catch(() => null) as { option?: string } | null;
-  const option = body?.option?.toUpperCase();
+  const body: unknown = await request.json().catch(() => null);
+  const option =
+    body && typeof body === "object" && "option" in body && typeof body.option === "string"
+      ? body.option.trim().toUpperCase()
+      : undefined;
 
   if (!STRAPI_API_URL || !POLL_VOTE_TOKEN) {
     return NextResponse.json({ error: "Poll voting is not configured" }, { status: 500 });
