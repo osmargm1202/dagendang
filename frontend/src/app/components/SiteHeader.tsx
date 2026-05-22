@@ -90,7 +90,7 @@ export default function SiteHeader() {
             {/* eslint-disable-next-line @next/next/no-img-element -- Existing public logo asset keeps header behavior unchanged. */}
             <img src="/logo-header.png" alt="DAgendaNG" className="h-12 md:h-14 w-auto object-contain" />
             <span className="hidden lg:inline-flex items-baseline font-serif text-2xl font-black tracking-tight text-primary dark:text-primary-fixed-dim">
-              DAgenda<span className="ml-0.5 text-[#9a7b16] dark:text-secondary-fixed-dim">NG</span>
+              DAgenda<span className="ml-0.5 text-[#b6171e]">NG</span>
             </span>
           </Link>
 

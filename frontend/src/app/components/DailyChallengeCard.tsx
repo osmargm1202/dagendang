@@ -45,7 +45,7 @@ export default function DailyChallengeCard({ poll }: { poll: Poll | null }) {
 
   return (
     <section className="bg-white border border-slate-200 dark:bg-dark-surface dark:border-border-dark rounded-lg p-6 text-center md:text-left">
-      <span className="block text-secondary dark:text-secondary-fixed-dim text-xs font-black uppercase tracking-[0.25em] mb-2">Reto Diario</span>
+      <span className="block text-[#b6171e] dark:text-[#b6171e] text-xs font-black uppercase tracking-[0.25em] mb-2">Reto Diario</span>
       <h2 className="font-serif text-2xl font-bold text-primary dark:text-primary-fixed-dim mb-3">
         {poll?.title || "Participa en el reto de hoy"}
       </h2>

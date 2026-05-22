@@ -7,7 +7,7 @@ export default function TonyColumnCard({ opinion }: { opinion: TonyOpinion | nul
       <div className="absolute top-0 right-0 w-20 h-20 bg-primary-container/10 rounded-bl-full" />
       <div className="flex items-center justify-between border-b border-border-light dark:border-border-dark pb-3 mb-4 relative z-10">
         <h2 className="font-serif text-xl font-bold text-primary dark:text-primary-fixed-dim">La Columna</h2>
-        <span className="text-secondary dark:text-secondary-fixed-dim text-xs font-black uppercase tracking-widest">Diaria</span>
+        <span className="text-[#b6171e] dark:text-[#b6171e] text-xs font-black uppercase tracking-widest">Diaria</span>
       </div>
       <div className="flex items-center gap-4 mb-4 relative z-10">
         {opinion?.authorPhoto ? (

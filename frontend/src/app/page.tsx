@@ -78,17 +78,17 @@ export default async function Home() {
       </AdGuard>
 
       <div className="w-full max-w-[1280px] mx-auto px-5 md:px-10 py-10 md:py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <aside className="lg:col-span-3 xl:col-span-2 space-y-8 lg:border-r lg:border-border-light dark:lg:border-border-dark lg:pr-6">
+        <div className="grid grid-cols-1 lg:grid-cols-[320px_minmax(0,1fr)_320px] gap-6">
+          <aside className="space-y-8 lg:border-r lg:border-border-light dark:lg:border-border-dark lg:pr-6">
             <DailyChallengeCard poll={poll} />
             <AdGuard><AdBanner position="home_left" /></AdGuard>
           </aside>
 
-          <section className="lg:col-span-6 xl:col-span-7 lg:px-2">
+          <section className="lg:px-2">
             <NewsGrid mainArticle={mainArticle} initialArticles={secondaryArticles} totalArticles={totalArticles} pageSize={8} />
           </section>
 
-          <aside className="lg:col-span-3 space-y-8 lg:border-l lg:border-border-light dark:lg:border-border-dark lg:pl-6">
+          <aside className="space-y-8 lg:border-l lg:border-border-light dark:lg:border-border-dark lg:pl-6">
             <TonyColumnCard opinion={tonyOpinion} />
             <EconomyIndicators initialRates={rates} initialFuel={fuel} />
             <AdGuard><AdBanner position="sidebar_top" /></AdGuard>

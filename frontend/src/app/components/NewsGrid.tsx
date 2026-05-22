@@ -176,13 +176,13 @@ function NewsGridContent({ mainArticle, initialArticles, totalArticles, pageSize
                   <div className="absolute inset-0 bg-dr-blue/10 group-hover:bg-transparent transition duration-300"></div>
                 </div>
                 <span className="text-secondary dark:text-secondary-fixed-dim font-bold uppercase text-xs tracking-wider">{mainArticle.type}</span>
-                <h2 className="text-4xl md:text-5xl font-serif font-bold mt-3 leading-tight text-primary dark:text-white group-hover:text-secondary transition-colors">
+                <h2 className="text-4xl md:text-5xl font-serif font-bold mt-3 leading-tight text-dr-blue dark:text-white group-hover:text-secondary transition-colors">
                   {mainArticle.title}
                 </h2>
                 
                 <div className="mt-4 flex flex-col md:flex-row md:items-center justify-between gap-y-2">
                   <div className="flex items-center gap-3">
-                    <span className="font-serif italic text-lg text-primary/90 dark:text-white/90">
+                    <span className="font-serif italic text-lg text-dr-blue/90 dark:text-white/90">
                       Escrito por <span className="font-bold not-italic border-b border-secondary/30 pb-0.5 hover:border-secondary transition-all cursor-default">{mainArticle.author || "Redacción DAgendaNG"}</span>
                     </span>
                   </div>
@@ -225,7 +225,7 @@ function NewsGridContent({ mainArticle, initialArticles, totalArticles, pageSize
                 )}
               </div>
               <span className="text-secondary dark:text-secondary-fixed-dim font-bold uppercase text-[10px] tracking-widest">{article.type}</span>
-              <h3 className="text-xl font-serif font-bold mt-2 leading-snug text-primary dark:text-white group-hover:text-secondary transition-colors">
+              <h3 className="text-xl font-serif font-bold mt-2 leading-snug text-dr-blue dark:text-white group-hover:text-secondary transition-colors">
                 {article.title}
               </h3>
             </article>

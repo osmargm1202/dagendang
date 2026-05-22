@@ -56,7 +56,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
 
       <header className="mb-10 text-center">
         <span className="text-secondary dark:text-secondary-fixed-dim text-xs font-black uppercase tracking-[0.3em]">Categoría</span>
-        <h1 className="mt-3 text-4xl md:text-5xl font-serif font-black tracking-tight text-primary dark:text-primary-fixed-dim uppercase border-b-2 border-secondary pb-4 inline-block">
+        <h1 className="mt-3 text-4xl md:text-5xl font-serif font-black tracking-tight text-dr-blue dark:text-dr-blue border-b-2 border-secondary pb-4 inline-block">
           {categoryName}
         </h1>
         <p className="mt-4 text-muted-foreground font-sans tracking-wide">Últimas noticias en {categoryName}</p>
@@ -76,7 +76,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
                   )}
                 </div>
                 <span className="text-secondary dark:text-secondary-fixed-dim font-bold uppercase text-xs tracking-wider">{article.type}</span>
-                <h3 className="text-xl font-serif font-bold mt-2 leading-snug text-primary dark:text-white group-hover:text-secondary transition-colors">
+                <h3 className="text-xl font-serif font-bold mt-2 leading-snug text-dr-blue dark:text-white group-hover:text-secondary transition-colors">
                   {article.title}
                 </h3>
                 <div className="mt-2 text-xs text-muted-foreground flex items-center gap-2">

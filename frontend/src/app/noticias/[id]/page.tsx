@@ -202,7 +202,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
           <span className="bg-secondary text-white font-black uppercase text-[10px] tracking-[0.2em] px-3 py-1 inline-block mb-6">
             {article.type}
           </span>
-          <h1 className="font-serif text-4xl md:text-6xl font-bold text-primary dark:text-white leading-tight mb-4">
+          <h1 className="font-serif text-4xl md:text-6xl font-bold text-dr-blue dark:text-white leading-tight mb-4">
             {article.title}
           </h1>
           {article.subtitle && (
@@ -288,7 +288,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
                     />
                   </div>
                   <span className="block text-[10px] font-bold text-secondary uppercase tracking-widest">{rel.type}</span>
-                  <h4 className="font-bold text-sm leading-snug group-hover:text-primary transition-colors line-clamp-2">
+                  <h4 className="font-bold text-sm leading-snug group-hover:text-dr-blue transition-colors line-clamp-2">
                     {rel.title}
                   </h4>
                 </Link>
