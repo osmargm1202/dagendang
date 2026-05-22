@@ -87,7 +87,7 @@ export default function AdBanner({ position, className = "" }: AdBannerProps) {
 
   if (!ad) {
     return (
-      <div className={`w-full bg-surface-container-low dark:bg-dark-surface border border-dashed border-border-light dark:border-border-dark flex flex-col items-center justify-center text-center px-4 ${config.className} ${className}`}>
+      <div className={`w-full bg-white dark:bg-dark-surface border border-dashed border-slate-200 dark:border-border-dark flex flex-col items-center justify-center text-center px-4 ${config.className} ${className}`}>
         <span className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground mb-2">{config.label}</span>
         <strong className="font-serif text-xl text-primary dark:text-primary-fixed-dim">Anúnciate aquí</strong>
         <span className="text-sm text-on-surface-variant dark:text-surface-variant mt-2">{config.size}</span>
@@ -104,7 +104,7 @@ export default function AdBanner({ position, className = "" }: AdBannerProps) {
     : `${config.className} w-full`;
 
   return (
-    <div className={`overflow-hidden border border-border-light dark:border-border-dark bg-surface dark:bg-dark-surface shadow-sm relative group transition-all duration-1000 ${containerClasses} ${className}`}>
+    <div className={`overflow-hidden border border-slate-200 dark:border-border-dark bg-white dark:bg-dark-surface shadow-sm relative group transition-all duration-1000 ${containerClasses} ${className}`}>
       <Link href={ad.link_url || "#"} target="_blank" rel="noopener noreferrer" className="block w-full h-full p-2 md:p-0">
         <img
           key={ad.id}
