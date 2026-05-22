@@ -8,6 +8,7 @@ import EconomyIndicators from "@/app/components/EconomyIndicators";
 import { getActivePoll, getHomepageArticles, getLatestTonyOpinion } from "@/app/lib/content";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://dagendang.com';
+const FASTAPI_API_URL = process.env.FASTAPI_API_URL;
 
 export const metadata: Metadata = {
   title: 'DAgendaNG | De Agenda con Nelson Gómez - Diario Digital Económico',
@@ -36,26 +37,25 @@ export const metadata: Metadata = {
 // Always fetch fresh data dynamically
 export const dynamic = 'force-dynamic';
 
-async function getExchangeRates() {
+async function fetchFastApi(path: string) {
+  if (!FASTAPI_API_URL) return null;
+
   try {
-    const res = await fetch('http://backend:8000/api/economy/exchange-rate/latest', { cache: 'no-store' });
+    const res = await fetch(`${FASTAPI_API_URL}${path}`, { cache: 'no-store' });
     if (!res.ok) return null;
     return res.json();
   } catch (error) {
-    console.error("Error fetching rates:", error);
+    console.error("Error fetching FastAPI data:", error);
     return null;
   }
 }
 
+async function getExchangeRates() {
+  return fetchFastApi('/api/economy/exchange-rate/latest');
+}
+
 async function getFuelPrices() {
-  try {
-    const res = await fetch('http://backend:8000/api/economy/fuel-prices/latest', { cache: 'no-store' });
-    if (!res.ok) return null;
-    return res.json();
-  } catch (error) {
-    console.error("Error fetching fuel prices:", error);
-    return null;
-  }
+  return fetchFastApi('/api/economy/fuel-prices/latest');
 }
 
 export default async function Home() {

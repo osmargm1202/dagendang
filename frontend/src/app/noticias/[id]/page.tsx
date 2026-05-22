@@ -8,10 +8,11 @@ import CommentsSection from "@/app/components/CommentsSection";
 import DailyChallengeCard from "@/app/components/DailyChallengeCard";
 import EconomyIndicators from "@/app/components/EconomyIndicators";
 import TonyColumnCard from "@/app/components/TonyColumnCard";
-import { getActivePoll, getArticleBySlugOrId, getLatestTonyOpinion } from "@/app/lib/content";
+import { getActivePoll, getArticleBySlugOrId, getHomepageArticles, getLatestTonyOpinion } from "@/app/lib/content";
 import type { Metadata } from "next";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://dagendang.com";
+const FASTAPI_API_URL = process.env.FASTAPI_API_URL;
 
 // Always fetch fresh data dynamically
 export const dynamic = "force-dynamic";
@@ -20,58 +21,53 @@ async function getArticle(id: string) {
   return getArticleBySlugOrId(id);
 }
 
-async function getExchangeRates() {
+async function fetchFastApi(path: string) {
+  if (!FASTAPI_API_URL) return null;
+
   try {
-    const res = await fetch("http://backend:8000/api/economy/exchange-rate/latest", { cache: "no-store" });
+    const res = await fetch(`${FASTAPI_API_URL}${path}`, { cache: "no-store" });
     if (!res.ok) return null;
     return res.json();
   } catch (error) {
-    console.error("Error fetching rates:", error);
+    console.error("Error fetching FastAPI data:", error);
     return null;
   }
+}
+
+async function getExchangeRates() {
+  return fetchFastApi("/api/economy/exchange-rate/latest");
 }
 
 async function getFuelPrices() {
-  try {
-    const res = await fetch("http://backend:8000/api/economy/fuel-prices/latest", { cache: "no-store" });
-    if (!res.ok) return null;
-    return res.json();
-  } catch (error) {
-    console.error("Error fetching fuel prices:", error);
-    return null;
-  }
+  return fetchFastApi("/api/economy/fuel-prices/latest");
+}
+
+function articleMatchesId(article: { id?: number | string; slug?: string; documentId?: string }, id: string) {
+  return [article.id?.toString(), article.slug, article.documentId].filter(Boolean).includes(id);
+}
+
+function articleRouteId(article: { id?: number | string; slug?: string; documentId?: string }) {
+  return article.slug || article.documentId || article.id;
 }
 
 async function getRelatedArticles(type: string, excludeId: string) {
-  try {
-    const res = await fetch(`http://backend:8000/api/articles/?type=${type}&limit=4`, { cache: "no-store" });
-    if (!res.ok) return [];
-    const articles = await res.json();
-    return Array.isArray(articles) ? articles.filter((article: { id?: number | string }) => article.id?.toString() !== excludeId).slice(0, 3) : [];
-  } catch (error) {
-    console.error("Error fetching related articles:", error);
-    return [];
-  }
+  const articles = await getHomepageArticles();
+  return articles
+    .filter((article) => article.type === type && !articleMatchesId(article, excludeId))
+    .slice(0, 3);
 }
 
-async function getAdjacentNavigation(publishedAt: string) {
-  try {
-    // Next article (published AFTER current)
-    const nextRes = await fetch(`http://backend:8000/api/articles/?status=published&published_after=${encodeURIComponent(publishedAt)}&limit=1`, { cache: "no-store" });
-    const nextList = nextRes.ok ? await nextRes.json() : [];
+async function getAdjacentNavigation(publishedAt: string, currentId: string) {
+  const articles = await getHomepageArticles();
+  const sorted = articles
+    .filter((article) => article.published_at)
+    .sort((a, b) => new Date(a.published_at).getTime() - new Date(b.published_at).getTime());
+  const currentIndex = sorted.findIndex((article) => articleMatchesId(article, currentId) || article.published_at === publishedAt);
 
-    // Previous article (published BEFORE current)
-    const prevRes = await fetch(`http://backend:8000/api/articles/?status=published&published_before=${encodeURIComponent(publishedAt)}&limit=1`, { cache: "no-store" });
-    const prevList = prevRes.ok ? await prevRes.json() : [];
-
-    return {
-      next: nextList.length > 0 ? nextList[0] : null,
-      prev: prevList.length > 0 ? prevList[0] : null,
-    };
-  } catch (error) {
-    console.error("Error fetching navigation articles:", error);
-    return { next: null, prev: null };
-  }
+  return {
+    next: currentIndex >= 0 ? sorted[currentIndex + 1] || null : null,
+    prev: currentIndex >= 0 ? sorted[currentIndex - 1] || null : null,
+  };
 }
 
 function absoluteUrl(pathOrUrl: string | null | undefined) {
@@ -134,8 +130,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
     notFound();
   }
 
-  const relatedArticles = await getRelatedArticles(article.type, String(article.id || id));
-  const navigation = await getAdjacentNavigation(article.published_at);
+  const relatedArticles = await getRelatedArticles(article.type, id);
+  const navigation = await getAdjacentNavigation(article.published_at, id);
   const articleUrl = `${BASE_URL}/noticias/${id}`;
   const imageUrl = absoluteUrl(article.image_url);
   const commentArticleId = article.id ?? Number(id);
@@ -262,7 +258,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
               <div className="flex gap-2">
                 {navigation.prev && (
                   <Link
-                    href={`/noticias/${navigation.prev.id}`}
+                    href={`/noticias/${articleRouteId(navigation.prev)}`}
                     className="p-2 border border-border hover:bg-primary hover:text-white transition-colors rounded-sm"
                     title="Anterior"
                   >
@@ -271,7 +267,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
                 )}
                 {navigation.next && (
                   <Link
-                    href={`/noticias/${navigation.next.id}`}
+                    href={`/noticias/${articleRouteId(navigation.next)}`}
                     className="p-2 border border-border hover:bg-primary hover:text-white transition-colors rounded-sm"
                     title="Siguiente"
                   >
@@ -281,8 +277,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {relatedArticles.map((rel: { id: number | string; image_url?: string; title: string; type: string }) => (
-                <Link key={rel.id} href={`/noticias/${rel.id}`} className="group space-y-3">
+              {relatedArticles.map((rel) => (
+                <Link key={articleRouteId(rel)} href={`/noticias/${articleRouteId(rel)}`} className="group space-y-3">
                   <div className="aspect-video bg-muted overflow-hidden border border-border-light dark:border-border-dark">
                     {/* eslint-disable-next-line @next/next/no-img-element -- Project still uses raw image tags until Next remote image config is implemented. */}
                     <img
