@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useCallback } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import AdBanner from "@/app/components/AdBanner";
 import AdGuard from "@/app/components/AdGuard";
 
-interface Article {
+export interface Article {
   id?: number;
   documentId?: string;
   title: string;
@@ -17,6 +17,21 @@ interface Article {
   author?: string;
   subtitle?: string;
   content: string;
+}
+
+export function hasCompleteInitialArticles(initialArticles: Article[], totalArticles: number) {
+  return initialArticles.length >= Math.max(0, totalArticles - 1);
+}
+
+export function getPageArticles(initialArticles: Article[], page: number, pageSize: number) {
+  const start = page === 1 ? 0 : 4 + (page - 2) * pageSize;
+  const limit = page === 1 ? 4 : pageSize;
+  return initialArticles.slice(start, start + limit);
+}
+
+export function articleHref(article: Article) {
+  const identifier = article.slug || article.documentId || (article.id != null ? article.id : undefined);
+  return identifier ? `/noticias/${identifier}` : '#';
 }
 
 interface NewsGridProps {
@@ -39,21 +54,15 @@ function NewsGridContent({ mainArticle, initialArticles, totalArticles, pageSize
   const searchParams = useSearchParams();
   const pageFromUrl = parseInt(searchParams.get('p') || '1');
 
-  const [articles, setArticles] = useState<Article[]>(initialArticles);
+  const canPaginateLocally = hasCompleteInitialArticles(initialArticles, totalArticles);
+
+  const [articles, setArticles] = useState<Article[]>(() => (
+    canPaginateLocally ? getPageArticles(initialArticles, pageFromUrl, pageSize) : initialArticles
+  ));
   const [currentPage, setCurrentPage] = useState(pageFromUrl);
   const [loading, setLoading] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
-
-  const articleHref = (article: Article) => `/noticias/${article.slug || article.documentId || article.id}`;
-
-  // Sync with URL on mount or back navigation
-  useEffect(() => {
-    if (pageFromUrl !== currentPage) {
-      setCurrentPage(pageFromUrl);
-      fetchArticles(pageFromUrl, false);
-    }
-  }, [pageFromUrl]);
 
   // Detect mobile view and prevent hydration mismatch
   useEffect(() => {
@@ -70,7 +79,7 @@ function NewsGridContent({ mainArticle, initialArticles, totalArticles, pageSize
   // totalPages = 1 + Math.ceil(Math.max(0, totalArticles - 5) / pageSize)
   const totalPages = 1 + Math.ceil(Math.max(0, totalArticles - 5) / pageSize);
 
-  const fetchArticles = async (page: number, append = false) => {
+  const fetchArticles = useCallback(async (page: number, append = false) => {
     setLoading(true);
     try {
       // Offset calculation for "DAgendaNG":
@@ -94,18 +103,39 @@ function NewsGridContent({ mainArticle, initialArticles, totalArticles, pageSize
     } finally {
       setLoading(false);
     }
-  };
+  }, [pageSize]);
+
+  // Sync with URL on mount or back navigation
+  useEffect(() => {
+    setCurrentPage(pageFromUrl);
+
+    if (canPaginateLocally) {
+      setArticles(getPageArticles(initialArticles, pageFromUrl, pageSize));
+      setLoading(false);
+      return;
+    }
+
+    if (pageFromUrl === 1) {
+      setArticles(initialArticles);
+      setLoading(false);
+      return;
+    }
+
+    fetchArticles(pageFromUrl, false);
+  }, [pageFromUrl, canPaginateLocally, initialArticles, pageSize, fetchArticles]);
 
   const handlePageChange = (newPage: number) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set('p', newPage.toString());
     router.push(`?${params.toString()}`, { scroll: false });
 
-    if (newPage === 1) {
+    setCurrentPage(newPage);
+
+    if (canPaginateLocally) {
+      setArticles(getPageArticles(initialArticles, newPage, pageSize));
+    } else if (newPage === 1) {
       setArticles(initialArticles);
-      setCurrentPage(1);
     } else {
-      setCurrentPage(newPage);
       fetchArticles(newPage, false);
     }
     // Scroll to top of grid
@@ -115,7 +145,12 @@ function NewsGridContent({ mainArticle, initialArticles, totalArticles, pageSize
   const handleLoadMore = () => {
     const nextPage = currentPage + 1;
     setCurrentPage(nextPage);
-    fetchArticles(nextPage, true);
+
+    if (canPaginateLocally) {
+      setArticles(prev => [...prev, ...getPageArticles(initialArticles, nextPage, pageSize)]);
+    } else {
+      fetchArticles(nextPage, true);
+    }
   };
 
   return (
