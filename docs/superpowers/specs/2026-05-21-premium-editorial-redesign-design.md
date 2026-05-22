@@ -10,11 +10,13 @@ The visual source of truth is the Google Stitch export in `design/`:
 - `design/noticia_light_mode.md` — article detail light-mode composition.
 - `design/noticia_dark_mode.md` — article detail dark-mode composition.
 
-Implementation must follow that line instead of inventing a new visual direction.
+The data/API source of truth is `design/api.md` and the environment variables already placed in `frontend/.env`.
+
+Implementation must follow the Stitch visual line and consume the migrated Strapi database/assets instead of keeping placeholder content where real content exists.
 
 ## Goal
 
-Rebuild the public DAgendaNG experience so the current Next.js project matches the Stitch premium editorial newspaper design while adding two new homepage content modules and improved rotating advertising placements.
+Rebuild the public DAgendaNG experience so the current Next.js project matches the Stitch premium editorial newspaper design while consuming real migrated Strapi content/assets, adding real homepage modules for Tony D. Reyes and the daily challenge/poll, and improving rotating advertising placements.
 
 ## Design direction
 
@@ -86,21 +88,22 @@ Directly below the header:
 
 Approx. 2.5–3 columns wide.
 
-Initial content is fixed/static for the first implementation phase.
+Content comes from the real Strapi `Poll` model described in `design/api.md`.
 
 Content:
 
-- Label/title: `Reto Diario`
-- Supporting line: daily challenge/trivia/crossword style prompt.
-- Example copy: `¿Cuánto sabes sobre la actualidad de esta semana? Pon a prueba tus conocimientos.`
-- Primary CTA: `Jugar Ahora`, `Participar`, or `Responder reto`.
+- Label/title: `Reto Diario`.
+- Poll title/question/description from the active poll.
+- Options A–I, hiding empty options.
+- Primary CTA: `Votar`, `Jugar Ahora`, or `Responder reto` depending final UI wording.
 - Optional icon/visual treatment inspired by Stitch (`extension`, `psychology`, puzzle/crossword imagery).
 
-Behavior for phase one:
+Behavior:
 
-- No CMS model required yet.
-- The card is static and reusable.
-- CTA links to `#` in phase one and is styled as a real call to action without enabling game logic.
+- Fetch active polls from Strapi using the server-side readonly token.
+- Filter by `startsAt`/`endsAt` in Next.js when necessary.
+- Vote through an internal Next.js route so `POLL_VOTE_TOKEN` never reaches the browser.
+- After voting, show updated counts/percentages returned by Strapi.
 
 Below Reto Diario:
 
@@ -111,7 +114,7 @@ Below Reto Diario:
 
 Approx. 6–7 columns wide.
 
-Use existing article data and current `NewsGrid` behavior, but restyle to match Stitch:
+Use real migrated Strapi `Article` data and adapt current `NewsGrid` behavior to Strapi response shapes while restyling to match Stitch:
 
 - Featured article dominates page 1.
 - Image ratio 16:9, sharp edges, subtle hover scale.
@@ -128,23 +131,21 @@ Add one mid-content ad banner between featured story and secondary grid or after
 
 Approx. 2.5–3 columns wide.
 
-Initial content is fixed/static for the first implementation phase.
+Content comes from real Strapi `Daily Opinion` and `Personality` models described in `design/api.md`.
 
 Content:
 
-- Section label: `La Columna` or `Columna diaria`
-- Columnist name: `Tony D. Reyes`
-- Subtitle/role: `De Agenda` or `Columnista`
-- Image/avatar: use a grayscale placeholder, monogram `TDR`, or supplied portrait if available.
-- Column title placeholder: `La mirada del día` or Stitch example title.
-- Short excerpt.
-- CTA: `Leer columna` / `Leer artículo completo`.
+- Section label: `La Columna` or `Columna diaria`.
+- Columnist profile from `Personality`, preferably slug `tony-d-reyes`.
+- Columnist name, position/dedication, photo, and latest active daily opinion.
+- Opinion title, summary, date, image if present, and CTA `Leer columna` / `Leer artículo completo`.
 
-Behavior for phase one:
+Behavior:
 
-- No CMS model required yet.
-- The card is static and reusable.
-- Link can point to `#` or a future opinion route.
+- Fetch the latest active daily opinion from Strapi sorted by `date:desc`.
+- Populate `columnistProfile` and media.
+- Use S3/MinIO asset URLs through the media helper.
+- Link to a real opinion detail/list route when implemented; until then link can fall back to the opinion slug target planned in routing.
 
 Below Tony column:
 
@@ -169,9 +170,54 @@ Restyle `/noticias/[id]` to match the Stitch article templates:
   - Advertising placement with contact/rotation placeholder.
 - Keep existing premium content wrapper, comments, social share, related articles, and SEO metadata where compatible.
 
+## Data/API integration
+
+Use `design/api.md` as the integration guide.
+
+### Environment variables
+
+Read these from `frontend/.env` on the server side:
+
+- `STRAPI_API_URL`
+- `STRAPI_READONLY_TOKEN`
+- `POLL_VOTE_TOKEN`
+- `NEXT_PUBLIC_SITE_URL`
+- `NEXT_PUBLIC_STRAPI_ASSETS_URL`
+- `FASTAPI_API_URL` when dynamic economic data remains in FastAPI.
+
+Never expose readonly or poll vote tokens to browser code.
+
+### Strapi helper
+
+Create a server-only Strapi client/helper:
+
+- Adds `Authorization: Bearer ${STRAPI_READONLY_TOKEN}`.
+- Accepts Strapi paths like `/api/articles?populate=*`.
+- Uses reasonable Next.js caching/revalidation.
+- Normalizes Strapi v5 `documentId`.
+
+Create a media URL helper:
+
+- Returns absolute URLs unchanged.
+- Prefixes relative media paths with `NEXT_PUBLIC_STRAPI_ASSETS_URL`.
+
+### Homepage minimum queries
+
+- `GET /api/site-setting?populate=*`
+- `GET /api/categories?sort[0]=order:asc`
+- `GET /api/articles?sort[0]=publishedDate:desc&pagination[pageSize]=12&populate=*`
+- `GET /api/daily-opinions?filters[isActive][$eq]=true&sort[0]=date:desc&pagination[pageSize]=1&populate=*`
+- `GET /api/polls?filters[isActive][$eq]=true&sort[0]=order:asc&sort[1]=startsAt:desc&populate=*`
+- `GET /api/price-board-items?filters[isActive][$eq]=true&sort[0]=type:asc&sort[1]=order:asc`
+
+### Article detail minimum query
+
+- Prefer slug route: `GET /api/articles?filters[slug][$eq]=SLUG&populate=*`.
+- If legacy numeric IDs remain in routes temporarily, map or redirect to slug/document routes.
+
 ## Advertising functionality
 
-The existing `AdBanner` already fetches ads by position and rotates according to `rotation_seconds`. Extend the design and placement strategy rather than replacing the system.
+Prefer real migrated advertising data if available in Strapi/API. If the current ad API remains active, the existing `AdBanner` already fetches ads by position and rotates according to `rotation_seconds`. Extend the design and placement strategy rather than replacing rotation behavior.
 
 Required ad positions:
 
@@ -234,8 +280,8 @@ Create or update these public components:
 
 - `SiteHeader` — align with Stitch header/nav while preserving search, theme toggle, login/admin state.
 - `AdBanner` — add premium placeholder styling, contact text, optional rotation count, and layout-aware dimensions.
-- `DailyChallengeCard` — static Reto Diario module.
-- `TonyColumnCard` — static Tony D. Reyes module.
+- `DailyChallengeCard` — real Strapi Poll-based Reto Diario module.
+- `TonyColumnCard` — real Strapi Daily Opinion / Personality-based Tony D. Reyes module.
 - `NewsGrid` — restyle article cards and add optional in-content ad slot.
 - `SiteFooter` — align with Stitch footer.
 - `/app/page.tsx` — restructure homepage into 12-column premium editorial grid.
@@ -244,21 +290,20 @@ Create or update these public components:
 
 ## Non-goals for this phase
 
-- Do not build a full CMS model for Tony D. Reyes columns yet.
-- Do not build a full CMS model for Reto Diario yet.
-- Do not implement scoring/game mechanics for the daily challenge yet.
-- Do not change article fetching/backend article schema unless required by existing UI compatibility.
-- Do not replace existing auth, premium wrapper, comments, SEO, or ad APIs.
+- Do not create new Strapi content models; use the migrated models documented in `design/api.md`.
+- Do not implement advanced game mechanics beyond showing/voting on the active poll.
+- Do not expose Strapi readonly tokens or poll vote tokens to the browser.
+- Do not replace existing auth, premium wrapper, comments, SEO, or ad APIs unless required for Strapi compatibility.
 
 ## Acceptance criteria
 
 - Homepage visually follows `design/portada_light_mode.md` and `design/portada_dark_mode.md`.
 - Article pages visually follow `design/noticia_light_mode.md` and `design/noticia_dark_mode.md`.
 - Light and dark modes use the Stitch palette.
-- Left homepage column contains static Reto Diario.
-- Right homepage column contains static Tony D. Reyes column card.
+- Left homepage column contains real active Strapi poll as Reto Diario.
+- Right homepage column contains real latest Strapi daily opinion / Tony D. Reyes profile data.
 - Banners appear in top, left/sidebar, center/in-content, and right/sidebar locations.
 - Empty ad placeholders include `Anúnciate aquí` and contact number.
 - Active ads continue rotating by configured `rotation_seconds`.
 - Admin advertising page supports the new ad positions.
-- Existing article data, pagination, search, theme toggle, admin hiding, premium article behavior, social share, comments, and SEO remain functional.
+- Existing or migrated article data, pagination/search behavior, theme toggle, admin hiding, premium article behavior, social share, comments, and SEO remain functional with Strapi data.
