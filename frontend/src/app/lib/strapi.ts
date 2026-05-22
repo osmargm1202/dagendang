@@ -51,24 +51,29 @@ export async function strapiFetch<T>(path: string, init: RequestInit = {}): Prom
   return res.json() as Promise<T>;
 }
 
+function proxiedMediaUrl(url: string): string {
+  return `/api/media?url=${encodeURIComponent(url)}`;
+}
+
 export function mediaUrl(input?: string | null): string | null {
   if (!input) return null;
 
   if (input.startsWith("http://") || input.startsWith("https://")) {
-    if (!ASSETS_URL) return input;
+    if (!ASSETS_URL) return proxiedMediaUrl(input);
 
     try {
       const parsed = new URL(input);
       const uploadPath = parsed.pathname.match(/\/uploads\/.+$/)?.[0];
-      return uploadPath ? `${ASSETS_URL.replace(/\/$/, "")}${uploadPath}` : input;
+      const resolved = uploadPath ? `${ASSETS_URL.replace(/\/$/, "")}${uploadPath}` : input;
+      return proxiedMediaUrl(resolved);
     } catch {
-      return input;
+      return proxiedMediaUrl(input);
     }
   }
 
   if (!ASSETS_URL) return input;
   const normalizedPath = input.replace(/^\//, "").replace(/^dagendang-assets\//, "");
-  return `${ASSETS_URL.replace(/\/$/, "")}/${normalizedPath}`;
+  return proxiedMediaUrl(`${ASSETS_URL.replace(/\/$/, "")}/${normalizedPath}`);
 }
 
 export function mediaListFromStrapi(media: unknown): string[] {
