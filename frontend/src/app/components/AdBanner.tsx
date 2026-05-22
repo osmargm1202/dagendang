@@ -34,12 +34,15 @@ export default function AdBanner({ position, className = "" }: AdBannerProps) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    setCurrentIndex(0);
+
     const fetchAds = async () => {
       try {
         const res = await fetch(`/api/ads?position=${position}&active_only=true`);
         if (res.ok) {
           const data = await res.json();
           setAds(data);
+          setCurrentIndex(0);
         }
       } catch (error) {
         console.error(`Error fetching ads for ${position}:`, error);
@@ -54,7 +57,9 @@ export default function AdBanner({ position, className = "" }: AdBannerProps) {
   useEffect(() => {
     if (ads.length <= 1) return;
 
-    const currentAd = ads[currentIndex];
+    const currentAd = ads[currentIndex] || ads[0];
+    if (!currentAd) return;
+
     const intervalTime = (currentAd.rotation_seconds || 5) * 1000;
 
     const interval = setInterval(() => {
@@ -70,7 +75,9 @@ export default function AdBanner({ position, className = "" }: AdBannerProps) {
      return <div className={`w-full bg-muted animate-pulse rounded-sm ${position.includes("sidebar") ? "aspect-[300/600]" : "h-32"} ${className}`} />;
   }
 
-  if (ads.length === 0) {
+  const ad = ads[currentIndex] || ads[0];
+
+  if (!ad) {
     return (
       <div className={`w-full bg-surface-container-low dark:bg-dark-surface border border-dashed border-border-light dark:border-border-dark flex flex-col items-center justify-center text-center px-4 ${config.className} ${className}`}>
         <span className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground mb-2">{config.label}</span>
@@ -80,8 +87,6 @@ export default function AdBanner({ position, className = "" }: AdBannerProps) {
       </div>
     );
   }
-
-  const ad = ads[currentIndex];
   const imageUrl = ad.image_url.startsWith('http') 
     ? ad.image_url 
     : ad.image_url; // already a relative path like /uploads/... — served via Next.js rewrite proxy
