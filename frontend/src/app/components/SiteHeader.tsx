@@ -86,9 +86,12 @@ export default function SiteHeader() {
             {formattedDate}
           </div>
 
-          <Link href="/" className="flex items-center justify-center gap-3 md:flex-1">
+          <Link href="/" className="flex items-center justify-center gap-3 md:flex-1" aria-label="DAgendaNG inicio">
             {/* eslint-disable-next-line @next/next/no-img-element -- Existing public logo asset keeps header behavior unchanged. */}
-            <img src="/logo-header.png" alt="DAgendaNG" className="h-14 md:h-16 w-auto object-contain" />
+            <img src="/logo-header.png" alt="DAgendaNG" className="h-12 md:h-14 w-auto object-contain" />
+            <span className="hidden lg:inline-flex items-baseline font-serif text-2xl font-black tracking-tight text-primary dark:text-primary-fixed-dim">
+              DAgenda<span className="ml-0.5 text-[#9a7b16] dark:text-secondary-fixed-dim">NG</span>
+            </span>
           </Link>
 
           <div className="flex flex-1 items-center justify-end gap-3">
@@ -204,7 +207,7 @@ export default function SiteHeader() {
                   </button>
                 </div>
               ) : (
-                <Link href="/registro" className="block text-center bg-secondary text-white py-4 font-black tracking-[0.2em]">
+                <Link href="/registro" className="block text-center bg-secondary text-secondary-foreground py-4 font-black tracking-[0.2em]">
                   Suscribirse ahora
                 </Link>
               )}

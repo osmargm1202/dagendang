@@ -88,7 +88,7 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${playfair.variable} font-sans antialiased bg-background text-foreground dark:bg-background dark:text-foreground min-h-screen flex flex-col transition-colors duration-300`}
       >
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <SiteHeader />
           
           <main className="flex-1 w-full flex justify-center">

@@ -18,12 +18,12 @@ interface AdBannerProps {
 }
 
 const AD_POSITION_CONFIG: Record<string, { label: string; size: string; className: string }> = {
-  header: { label: "Publicidad", size: "728x90", className: "h-24 md:aspect-[728/90]" },
-  home_left: { label: "Espacio patrocinado", size: "300x250", className: "h-[250px]" },
-  home_middle: { label: "Publicidad", size: "728x90", className: "h-28 md:h-32" },
-  sidebar_top: { label: "Publicidad", size: "300x250", className: "h-[250px]" },
-  sidebar_bottom: { label: "Publicidad", size: "300x600", className: "min-h-[420px]" },
-  article_sidebar: { label: "Espacio patrocinado", size: "300x600", className: "min-h-[420px]" },
+  header: { label: "Publicidad", size: "728x90", className: "min-h-20 md:aspect-[728/90]" },
+  home_left: { label: "Espacio patrocinado", size: "300x250", className: "min-h-[220px] md:min-h-[250px]" },
+  home_middle: { label: "Publicidad", size: "728x90", className: "min-h-24 md:h-32" },
+  sidebar_top: { label: "Publicidad", size: "300x250", className: "min-h-[220px] md:min-h-[250px]" },
+  sidebar_bottom: { label: "Publicidad", size: "300x600", className: "min-h-[320px] md:min-h-[420px]" },
+  article_sidebar: { label: "Espacio patrocinado", size: "300x600", className: "min-h-[320px] md:min-h-[420px]" },
 };
 
 const CONTACT_NUMBER = "829-988-3375";
@@ -99,18 +99,18 @@ export default function AdBanner({ position, className = "" }: AdBannerProps) {
 
   // Strict dimensions for header to prevent layout shift
   const isHeader = position === 'header';
-  const containerClasses = isHeader 
-    ? "w-full aspect-[4/1] md:aspect-[728/90] mx-auto" 
-    : "w-full";
+  const containerClasses = isHeader
+    ? "w-full min-h-20 md:aspect-[728/90] mx-auto"
+    : `${config.className} w-full`;
 
   return (
     <div className={`overflow-hidden border border-border-light dark:border-border-dark bg-surface dark:bg-dark-surface shadow-sm relative group transition-all duration-1000 ${containerClasses} ${className}`}>
-      <Link href={ad.link_url} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
-        <img 
+      <Link href={ad.link_url || "#"} target="_blank" rel="noopener noreferrer" className="block w-full h-full p-2 md:p-0">
+        <img
           key={ad.id}
-          src={imageUrl} 
-          alt={ad.title} 
-          className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105 animate-in fade-in zoom-in-95 duration-700"
+          src={imageUrl}
+          alt={ad.title}
+          className="w-full h-full max-h-[320px] md:max-h-none object-contain md:object-cover transition-all duration-500 group-hover:scale-[1.02] animate-in fade-in zoom-in-95 duration-700"
         />
         <div className="absolute top-0 right-0 bg-black/50 text-[10px] text-white px-2 font-sans py-0.5 rounded-bl-sm">
             Publicidad
