@@ -14,7 +14,7 @@ export default function ThemeToggle() {
   }, []);
 
   if (!mounted) {
-    return <div className="p-2 w-10 h-10 border border-blue-400/30 rounded-full animate-pulse bg-blue-800/10" />;
+    return <div className="p-2 w-10 h-10 border border-border-light dark:border-border-dark rounded-full animate-pulse bg-surface-container-low dark:bg-dark-surface" />;
   }
 
   const toggleTheme = () => {
@@ -50,7 +50,7 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="group flex items-center justify-center h-10 rounded-full border border-white/20 bg-white/5 hover:border-white/50 hover:bg-white/10 transition-all duration-500 relative overflow-hidden w-10 hover:w-[120px] gap-0 hover:gap-2 px-3"
+      className="group flex items-center justify-center h-10 rounded-full border border-border-light dark:border-border-dark bg-surface dark:bg-dark-surface hover:border-primary/40 dark:hover:border-primary-fixed-dim/60 hover:bg-surface-container-low dark:hover:bg-dark-bg transition-all duration-500 relative overflow-hidden w-10 hover:w-[120px] gap-0 hover:gap-2 px-3 text-primary dark:text-primary-fixed-dim"
       title={`Cambiar Tema (Actual: ${getLabel()})`}
     >
       <div className="transition-transform group-active:scale-90 flex-shrink-0 flex items-center justify-center">

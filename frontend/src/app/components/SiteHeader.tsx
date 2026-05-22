@@ -16,9 +16,13 @@ export default function SiteHeader() {
   const [categories, setCategories] = useState<{ slug: string; name: string }[]>([]);
 
   useEffect(() => {
-    fetch("/api/articles/categories")
-      .then((res) => res.json())
-      .then((data) => setCategories(data))
+    fetch("/api/categories")
+      .then(async (res) => {
+        if (!res.ok) return [];
+        const contentType = res.headers.get("content-type") || "";
+        return contentType.includes("application/json") ? res.json() : [];
+      })
+      .then((data) => setCategories(Array.isArray(data) ? data : []))
       .catch((err) => console.error("Error fetching categories:", err));
   }, []);
 

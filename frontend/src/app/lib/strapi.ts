@@ -1,8 +1,12 @@
 import "server-only";
 
-const STRAPI_API_URL = process.env.STRAPI_API_URL;
-const STRAPI_READONLY_TOKEN = process.env.STRAPI_READONLY_TOKEN;
-const ASSETS_URL = process.env.NEXT_PUBLIC_STRAPI_ASSETS_URL;
+const STRAPI_API_URL = cleanEnv(process.env.STRAPI_API_URL);
+const STRAPI_READONLY_TOKEN = cleanEnv(process.env.STRAPI_READONLY_TOKEN);
+const ASSETS_URL = cleanEnv(process.env.NEXT_PUBLIC_STRAPI_ASSETS_URL);
+
+function cleanEnv(value?: string) {
+  return value?.trim().replace(/^['\"]|['\"]$/g, "");
+}
 
 export type StrapiEntity<T> = T & {
   id?: number;
@@ -49,15 +53,49 @@ export async function strapiFetch<T>(path: string, init: RequestInit = {}): Prom
 
 export function mediaUrl(input?: string | null): string | null {
   if (!input) return null;
-  if (input.startsWith("http://") || input.startsWith("https://")) return input;
+
+  if (input.startsWith("http://") || input.startsWith("https://")) {
+    if (!ASSETS_URL) return input;
+
+    try {
+      const parsed = new URL(input);
+      const uploadPath = parsed.pathname.match(/\/uploads\/.+$/)?.[0];
+      return uploadPath ? `${ASSETS_URL.replace(/\/$/, "")}${uploadPath}` : input;
+    } catch {
+      return input;
+    }
+  }
+
   if (!ASSETS_URL) return input;
-  return `${ASSETS_URL.replace(/\/$/, "")}/${input.replace(/^\//, "")}`;
+  const normalizedPath = input.replace(/^\//, "").replace(/^dagendang-assets\//, "");
+  return `${ASSETS_URL.replace(/\/$/, "")}/${normalizedPath}`;
 }
 
 export function mediaFromStrapi(media: unknown): string | null {
-  if (!media || typeof media !== "object") return null;
-  const maybe = media as { url?: string; data?: { url?: string; attributes?: { url?: string } }; attributes?: { url?: string } };
-  return mediaUrl(maybe.url || maybe.attributes?.url || maybe.data?.url || maybe.data?.attributes?.url || null);
+  if (!media) return null;
+
+  if (Array.isArray(media)) {
+    return mediaFromStrapi(media[0]);
+  }
+
+  if (typeof media !== "object") return null;
+
+  const maybe = media as {
+    url?: string;
+    data?: unknown;
+    attributes?: { url?: string; formats?: Record<string, { url?: string }> };
+    formats?: Record<string, { url?: string }>;
+  };
+
+  if (Array.isArray(maybe.data)) return mediaFromStrapi(maybe.data[0]);
+  if (maybe.data) return mediaFromStrapi(maybe.data);
+
+  const directUrl = maybe.url || maybe.attributes?.url;
+  if (directUrl) return mediaUrl(directUrl);
+
+  const formats = maybe.formats || maybe.attributes?.formats;
+  const formatUrl = formats?.large?.url || formats?.medium?.url || formats?.small?.url || formats?.thumbnail?.url;
+  return mediaUrl(formatUrl || null);
 }
 
 export function textOrEmpty(value: unknown): string {

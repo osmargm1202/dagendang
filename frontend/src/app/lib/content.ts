@@ -48,6 +48,19 @@ type RawCategory = Record<string, unknown>;
 type RawOpinion = Record<string, unknown>;
 type RawPoll = Record<string, unknown>;
 
+function unwrapRelation(value: unknown): Record<string, unknown> | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const relation = value as { data?: unknown; attributes?: unknown } & Record<string, unknown>;
+
+  if (Array.isArray(relation.data)) return unwrapRelation(relation.data[0]);
+  if (relation.data) return unwrapRelation(relation.data);
+  if (relation.attributes && typeof relation.attributes === "object") {
+    return { ...relation, ...(relation.attributes as Record<string, unknown>) };
+  }
+
+  return relation;
+}
+
 function normalizeCategory(item: RawCategory): Category {
   return {
     documentId: textOrEmpty(item.documentId),
@@ -58,7 +71,7 @@ function normalizeCategory(item: RawCategory): Category {
 }
 
 export function normalizeArticle(item: RawArticle): Article {
-  const category = item.category as { name?: string; slug?: string } | undefined;
+  const category = unwrapRelation(item.category);
   return {
     documentId: textOrEmpty(item.documentId),
     id: typeof item.legacyId === "number" ? item.legacyId : typeof item.id === "number" ? item.id : undefined,
@@ -75,7 +88,7 @@ export function normalizeArticle(item: RawArticle): Article {
 }
 
 function normalizeOpinion(item: RawOpinion): TonyOpinion {
-  const profile = item.columnistProfile as Record<string, unknown> | undefined;
+  const profile = unwrapRelation(item.columnistProfile);
   return {
     documentId: textOrEmpty(item.documentId),
     title: textOrEmpty(item.title),
@@ -126,7 +139,7 @@ export async function getArticleBySlugOrId(slugOrId: string): Promise<Article | 
 }
 
 export async function getLatestTonyOpinion(): Promise<TonyOpinion | null> {
-  const path = "/api/daily-opinions?filters[isActive][$eq]=true&sort[0]=date:desc&pagination[pageSize]=1&populate=*";
+  const path = "/api/daily-opinions?filters[isActive][$eq]=true&sort[0]=date:desc&pagination[pageSize]=1&populate[image]=true&populate[columnistProfile][populate][photo]=true";
   const data = await strapiFetch<StrapiCollection<RawOpinion>>(path);
   return data.data[0] ? normalizeOpinion(data.data[0]) : null;
 }

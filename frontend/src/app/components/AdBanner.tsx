@@ -26,7 +26,7 @@ const AD_POSITION_CONFIG: Record<string, { label: string; size: string; classNam
   article_sidebar: { label: "Espacio patrocinado", size: "300x600", className: "min-h-[420px]" },
 };
 
-const CONTACT_NUMBER = "809-555-0100";
+const CONTACT_NUMBER = "829-988-3375";
 
 export default function AdBanner({ position, className = "" }: AdBannerProps) {
   const [ads, setAds] = useState<Ad[]>([]);
@@ -40,9 +40,17 @@ export default function AdBanner({ position, className = "" }: AdBannerProps) {
       try {
         const res = await fetch(`/api/ads?position=${position}&active_only=true`);
         if (res.ok) {
+          const contentType = res.headers.get("content-type") || "";
+          if (!contentType.includes("application/json")) {
+            setAds([]);
+            return;
+          }
+
           const data = await res.json();
-          setAds(data);
+          setAds(Array.isArray(data) ? data : []);
           setCurrentIndex(0);
+        } else {
+          setAds([]);
         }
       } catch (error) {
         console.error(`Error fetching ads for ${position}:`, error);
@@ -87,9 +95,7 @@ export default function AdBanner({ position, className = "" }: AdBannerProps) {
       </div>
     );
   }
-  const imageUrl = ad.image_url.startsWith('http') 
-    ? ad.image_url 
-    : ad.image_url; // already a relative path like /uploads/... — served via Next.js rewrite proxy
+  const imageUrl = ad.image_url;
 
   // Strict dimensions for header to prevent layout shift
   const isHeader = position === 'header';
@@ -98,7 +104,7 @@ export default function AdBanner({ position, className = "" }: AdBannerProps) {
     : "w-full";
 
   return (
-    <div className={`overflow-hidden border border-border shadow-sm relative group transition-all duration-1000 ${containerClasses} ${className}`}>
+    <div className={`overflow-hidden border border-border-light dark:border-border-dark bg-surface dark:bg-dark-surface shadow-sm relative group transition-all duration-1000 ${containerClasses} ${className}`}>
       <Link href={ad.link_url} target="_blank" rel="noopener noreferrer" className="block w-full h-full">
         <img 
           key={ad.id}

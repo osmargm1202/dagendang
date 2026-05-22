@@ -79,7 +79,7 @@ export default function DailyChallengeCard({ poll }: { poll: Poll | null }) {
         <button
           onClick={vote}
           disabled={!selected || status === "saving" || status === "done"}
-          className="w-full bg-secondary text-white py-3 px-4 text-xs font-black uppercase tracking-widest disabled:opacity-50"
+          className="w-full bg-secondary text-secondary-foreground py-3 px-4 text-xs font-black uppercase tracking-widest disabled:opacity-50"
         >
           {status === "saving" ? "Enviando..." : status === "done" ? "Voto registrado" : "Responder reto"}
         </button>

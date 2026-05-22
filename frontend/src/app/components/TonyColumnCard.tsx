@@ -14,7 +14,7 @@ export default function TonyColumnCard({ opinion }: { opinion: TonyOpinion | nul
           // eslint-disable-next-line @next/next/no-img-element -- Project still uses raw image tags until Next remote image config is implemented.
           <img src={opinion.authorPhoto} alt={opinion.authorName} className="w-16 h-16 rounded-full object-cover grayscale border border-border dark:border-border-dark" />
         ) : (
-          <div className="w-16 h-16 rounded-full bg-primary text-white flex items-center justify-center font-serif font-bold">TDR</div>
+          <div className="w-16 h-16 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-serif font-bold">TDR</div>
         )}
         <div>
           <h3 className="font-serif text-xl font-bold text-primary dark:text-white">{opinion?.authorName || "Tony D. Reyes"}</h3>
