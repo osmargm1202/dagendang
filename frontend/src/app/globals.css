@@ -17,6 +17,7 @@
   --surface-container-low: #f6f3f4;
   --surface-container: #f0edee;
   --surface-container-highest: #e5e2e3;
+  --surface-variant: #e5e2e3;
   --on-surface-variant: #43474f;
   --dark-bg: #0B111B;
   --dark-surface: #161F2C;
@@ -39,6 +40,7 @@
   --primary-foreground: #001b3c;
   --secondary: #ffb3ac;
   --secondary-foreground: #410003;
+  --surface-variant: #e5e2e3;
 }
 
 @theme inline {
@@ -58,6 +60,7 @@
   --color-surface-container-low: var(--surface-container-low);
   --color-surface-container: var(--surface-container);
   --color-surface-container-highest: var(--surface-container-highest);
+  --color-surface-variant: var(--surface-variant);
   --color-on-surface-variant: var(--on-surface-variant);
   --color-dark-bg: var(--dark-bg);
   --color-dark-surface: var(--dark-surface);
@@ -86,6 +89,7 @@
     --primary-foreground: #001b3c;
     --secondary: #ffb3ac;
     --secondary-foreground: #410003;
+    --surface-variant: #e5e2e3;
   }
 }
 
