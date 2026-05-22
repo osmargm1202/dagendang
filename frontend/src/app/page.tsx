@@ -1,9 +1,11 @@
-import Link from "next/link";
 import AdBanner from "@/app/components/AdBanner";
 import AdGuard from "@/app/components/AdGuard";
+import DailyChallengeCard from "@/app/components/DailyChallengeCard";
+import TonyColumnCard from "@/app/components/TonyColumnCard";
 import type { Metadata } from 'next';
 import NewsGrid from "@/app/components/NewsGrid";
 import EconomyIndicators from "@/app/components/EconomyIndicators";
+import { getActivePoll, getHomepageArticles, getLatestTonyOpinion } from "@/app/lib/content";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://dagendang.com';
 
@@ -56,76 +58,44 @@ async function getFuelPrices() {
   }
 }
 
-async function getArticles() {
-  try {
-    const res = await fetch('http://backend:8000/api/articles/?status=published', { cache: 'no-store' });
-    if (!res.ok) return [];
-    return res.json();
-  } catch (error) {
-    console.error("Error fetching articles:", error);
-    return [];
-  }
-}
-
-async function getArticlesCount() {
-  try {
-    const res = await fetch('http://backend:8000/api/articles/count?status=published', { cache: 'no-store' });
-    if (!res.ok) return 0;
-    const data = await res.json();
-    return data.total;
-  } catch (error) {
-    console.error("Error fetching articles count:", error);
-    return 0;
-  }
-}
-
-
 export default async function Home() {
-  const rates = await getExchangeRates();
-  const fuel = await getFuelPrices();
-  const articles = await getArticles();
-  const totalArticles = await getArticlesCount();
-  
-  const mainArticle = articles.length > 0 ? articles[0] : null;
-  const secondaryArticles = articles.length > 1 ? articles.slice(1, 5) : [];
+  const [articles, poll, tonyOpinion, rates, fuel] = await Promise.all([
+    getHomepageArticles(),
+    getActivePoll(),
+    getLatestTonyOpinion(),
+    getExchangeRates(),
+    getFuelPrices(),
+  ]);
+
+  const mainArticle = articles[0] || null;
+  const secondaryArticles = articles.slice(1);
+  const totalArticles = articles.length;
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 py-8">
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        {/* Columna Principal - Noticias */}
-        <div className="lg:col-span-3 space-y-8">
-          
-          {/* Banner Superior Principal - Alineado con noticias */}
-          <AdGuard>
-            <AdBanner position="header" className="mb-2" />
-          </AdGuard>
+    <div className="w-full">
+      <AdGuard>
+        <AdBanner position="header" className="border-b border-border-light dark:border-border-dark" />
+      </AdGuard>
 
-        {/* Noticia Principal y Grid Controlado por NewsGrid */}
-        <NewsGrid 
-          mainArticle={mainArticle}
-          initialArticles={secondaryArticles} 
-          totalArticles={totalArticles} 
-          pageSize={8} 
-        />
+      <div className="w-full max-w-[1280px] mx-auto px-5 md:px-10 py-10 md:py-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <aside className="lg:col-span-3 xl:col-span-2 space-y-8 lg:border-r lg:border-border-light dark:lg:border-border-dark lg:pr-6">
+            <DailyChallengeCard poll={poll} />
+            <AdGuard><AdBanner position="home_left" /></AdGuard>
+          </aside>
+
+          <section className="lg:col-span-6 xl:col-span-7 lg:px-2">
+            <NewsGrid mainArticle={mainArticle} initialArticles={secondaryArticles} totalArticles={totalArticles} pageSize={8} />
+          </section>
+
+          <aside className="lg:col-span-3 space-y-8 lg:border-l lg:border-border-light dark:lg:border-border-dark lg:pl-6">
+            <TonyColumnCard opinion={tonyOpinion} />
+            <EconomyIndicators initialRates={rates} initialFuel={fuel} />
+            <AdGuard><AdBanner position="sidebar_top" /></AdGuard>
+            <AdGuard><AdBanner position="sidebar_bottom" /></AdGuard>
+          </aside>
+        </div>
       </div>
-
-      {/* Sidebar Derecha - Indicadores y Publicidad */}
-      <aside className="space-y-8">
-        
-        {/* Indicadores Económicos (Click para Histórico) */}
-        <EconomyIndicators initialRates={rates} initialFuel={fuel} />
-
-        {/* Publicidad Lateral */}
-        <AdGuard>
-          <AdBanner position="sidebar_top" className="mb-8" />
-        </AdGuard>
-
-        <AdGuard>
-          <AdBanner position="sidebar_bottom" />
-        </AdGuard>
-
-      </aside>
     </div>
-  </div>
   );
 }
