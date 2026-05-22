@@ -11,6 +11,7 @@ export default function TonyColumnCard({ opinion }: { opinion: TonyOpinion | nul
       </div>
       <div className="flex items-center gap-4 mb-4 relative z-10">
         {opinion?.authorPhoto ? (
+          // eslint-disable-next-line @next/next/no-img-element -- Project still uses raw image tags until Next remote image config is implemented.
           <img src={opinion.authorPhoto} alt={opinion.authorName} className="w-16 h-16 rounded-full object-cover grayscale border border-border dark:border-border-dark" />
         ) : (
           <div className="w-16 h-16 rounded-full bg-primary text-white flex items-center justify-center font-serif font-bold">TDR</div>
