@@ -216,10 +216,12 @@ export default function AdminAdsPage() {
                                             value={position}
                                             onChange={(e) => setPosition(e.target.value)}
                                         >
-                                            <option value="header">Superior (728x90)</option>
-                                            <option value="sidebar_top">Lateral Superior (300x250/600)</option>
-                                            <option value="sidebar_bottom">Lateral Inferior</option>
-                                            <option value="content_middle">Inferior</option>
+                                            <option value="header">Header superior 728x90</option>
+                                            <option value="home_left">Portada izquierda 300x250</option>
+                                            <option value="home_middle">Portada centro 728x90</option>
+                                            <option value="sidebar_top">Sidebar superior 300x250</option>
+                                            <option value="sidebar_bottom">Sidebar inferior 300x600</option>
+                                            <option value="article_sidebar">Artículo sidebar 300x600</option>
                                         </select>
                                     </div>
                                     <div>
