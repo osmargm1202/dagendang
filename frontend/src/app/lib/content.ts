@@ -1,5 +1,5 @@
 import "server-only";
-import { mediaFromStrapi, strapiFetch, StrapiCollection, StrapiSingle, textOrEmpty } from "./strapi";
+import { mediaFromStrapi, mediaListFromStrapi, strapiFetch, StrapiCollection, StrapiSingle, textOrEmpty } from "./strapi";
 
 export type Category = {
   documentId: string;
@@ -16,6 +16,8 @@ export type Article = {
   slug: string;
   type: string;
   image_url: string | null;
+  articleImages: string[];
+  adImages: string[];
   published_at: string;
   author?: string;
   content: string;
@@ -34,6 +36,16 @@ export type TonyOpinion = {
   authorPosition: string;
 };
 
+export type Advertisement = {
+  documentId: string;
+  title: string;
+  slug: string;
+  images: string[];
+  linkUrl: string;
+  position: string;
+  order: number;
+};
+
 export type PollOption = { key: string; label: string; count: number };
 export type Poll = {
   documentId: string;
@@ -47,6 +59,7 @@ type RawArticle = Record<string, unknown>;
 type RawCategory = Record<string, unknown>;
 type RawOpinion = Record<string, unknown>;
 type RawPoll = Record<string, unknown>;
+type RawAdvertisement = Record<string, unknown>;
 
 function unwrapRelation(value: unknown): Record<string, unknown> | undefined {
   if (!value || typeof value !== "object") return undefined;
@@ -72,6 +85,11 @@ function normalizeCategory(item: RawCategory): Category {
 
 export function normalizeArticle(item: RawArticle): Article {
   const category = unwrapRelation(item.category);
+  const articleImages = mediaListFromStrapi(item.articleImages);
+  const adImages = mediaListFromStrapi(item.adImages);
+  const coverUrl = mediaFromStrapi(item.coverImage);
+  const secondaryUrl = mediaFromStrapi(item.secondaryImage1) || mediaFromStrapi(item.secondaryImage2);
+
   return {
     documentId: textOrEmpty(item.documentId),
     id: typeof item.legacyId === "number" ? item.legacyId : typeof item.id === "number" ? item.id : undefined,
@@ -79,7 +97,9 @@ export function normalizeArticle(item: RawArticle): Article {
     subtitle: textOrEmpty(item.subtitle),
     slug: textOrEmpty(item.slug) || textOrEmpty(item.documentId),
     type: textOrEmpty(category?.name) || textOrEmpty(category?.slug) || "Noticias",
-    image_url: mediaFromStrapi(item.coverImage) || textOrEmpty(item.legacyImageUrl) || null,
+    image_url: coverUrl || articleImages[0] || secondaryUrl || textOrEmpty(item.legacyImageUrl) || null,
+    articleImages,
+    adImages,
     published_at: textOrEmpty(item.publishedDate) || textOrEmpty(item.publishedAt) || new Date().toISOString(),
     author: textOrEmpty(item.authorName),
     content: textOrEmpty(item.body) || textOrEmpty(item.legacyContent),
@@ -99,6 +119,18 @@ function normalizeOpinion(item: RawOpinion): TonyOpinion {
     authorName: textOrEmpty(profile?.fullName) || textOrEmpty(item.authorName) || "Tony D. Reyes",
     authorPhoto: mediaFromStrapi(profile?.photo),
     authorPosition: textOrEmpty(profile?.position) || textOrEmpty(profile?.dedication) || "Columnista",
+  };
+}
+
+function normalizeAdvertisement(item: RawAdvertisement): Advertisement {
+  return {
+    documentId: textOrEmpty(item.documentId),
+    title: textOrEmpty(item.title),
+    slug: textOrEmpty(item.slug),
+    images: mediaListFromStrapi(item.images),
+    linkUrl: textOrEmpty(item.linkUrl),
+    position: textOrEmpty(item.position),
+    order: typeof item.order === "number" ? item.order : 0,
   };
 }
 
@@ -124,6 +156,19 @@ export async function getHomepageArticles(): Promise<Article[]> {
   const path = "/api/articles?sort[0]=publishedDate:desc&pagination[pageSize]=12&populate=*";
   const data = await strapiFetch<StrapiCollection<RawArticle>>(path);
   return data.data.map(normalizeArticle).filter((article) => article.title);
+}
+
+export async function getArticlesByCategory(slug: string): Promise<Article[]> {
+  const path = `/api/articles?filters[category][slug][$eq]=${encodeURIComponent(slug)}&sort[0]=publishedDate:desc&pagination[pageSize]=50&populate=*`;
+  const data = await strapiFetch<StrapiCollection<RawArticle>>(path);
+  return data.data.map(normalizeArticle).filter((article) => article.title);
+}
+
+export async function getAdvertisements(position?: string): Promise<Advertisement[]> {
+  const filters = position ? `&filters[position][$eq]=${encodeURIComponent(position)}` : "";
+  const path = `/api/advertisements?filters[isActive][$eq]=true${filters}&sort[0]=order:asc&populate=*`;
+  const data = await strapiFetch<StrapiCollection<RawAdvertisement>>(path);
+  return data.data.map(normalizeAdvertisement).filter((ad) => ad.images.length > 0);
 }
 
 export async function getArticleBySlugOrId(slugOrId: string): Promise<Article | null> {

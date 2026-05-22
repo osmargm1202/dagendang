@@ -71,14 +71,14 @@ export function mediaUrl(input?: string | null): string | null {
   return `${ASSETS_URL.replace(/\/$/, "")}/${normalizedPath}`;
 }
 
-export function mediaFromStrapi(media: unknown): string | null {
-  if (!media) return null;
+export function mediaListFromStrapi(media: unknown): string[] {
+  if (!media) return [];
 
   if (Array.isArray(media)) {
-    return mediaFromStrapi(media[0]);
+    return media.flatMap((item) => mediaListFromStrapi(item));
   }
 
-  if (typeof media !== "object") return null;
+  if (typeof media !== "object") return [];
 
   const maybe = media as {
     url?: string;
@@ -87,15 +87,23 @@ export function mediaFromStrapi(media: unknown): string | null {
     formats?: Record<string, { url?: string }>;
   };
 
-  if (Array.isArray(maybe.data)) return mediaFromStrapi(maybe.data[0]);
-  if (maybe.data) return mediaFromStrapi(maybe.data);
+  if (Array.isArray(maybe.data)) return maybe.data.flatMap((item) => mediaListFromStrapi(item));
+  if (maybe.data) return mediaListFromStrapi(maybe.data);
 
   const directUrl = maybe.url || maybe.attributes?.url;
-  if (directUrl) return mediaUrl(directUrl);
+  if (directUrl) {
+    const resolved = mediaUrl(directUrl);
+    return resolved ? [resolved] : [];
+  }
 
   const formats = maybe.formats || maybe.attributes?.formats;
   const formatUrl = formats?.large?.url || formats?.medium?.url || formats?.small?.url || formats?.thumbnail?.url;
-  return mediaUrl(formatUrl || null);
+  const resolved = mediaUrl(formatUrl || null);
+  return resolved ? [resolved] : [];
+}
+
+export function mediaFromStrapi(media: unknown): string | null {
+  return mediaListFromStrapi(media)[0] || null;
 }
 
 export function textOrEmpty(value: unknown): string {

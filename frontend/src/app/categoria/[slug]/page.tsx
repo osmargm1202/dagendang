@@ -1,7 +1,7 @@
 import Link from "next/link";
 import AdBanner from "@/app/components/AdBanner";
 import type { Metadata } from "next";
-import { getCategories, getHomepageArticles } from "@/app/lib/content";
+import { getArticlesByCategory, getCategories } from "@/app/lib/content";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://dagendang.com";
 
@@ -17,17 +17,11 @@ function categoryFallbackName(slug: string) {
 }
 
 async function getCategoryData(slug: string) {
-  const [articles, categories] = await Promise.all([getHomepageArticles(), getCategories()]);
+  const [articles, categories] = await Promise.all([getArticlesByCategory(slug), getCategories()]);
   const category = categories.find((item) => item.slug === slug);
-  const normalizedSlug = slug.toLowerCase();
   const categoryName = category?.name || categoryFallbackName(slug);
 
-  const filteredArticles = articles.filter((article) => {
-    const articleType = article.type.toLowerCase();
-    return articleType === normalizedSlug || articleType === categoryName.toLowerCase();
-  });
-
-  return { articles: filteredArticles, categories, categoryName };
+  return { articles, categories, categoryName };
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
