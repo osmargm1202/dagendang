@@ -5,10 +5,10 @@ import TonyColumnCard from "@/app/components/TonyColumnCard";
 import type { Metadata } from 'next';
 import NewsGrid from "@/app/components/NewsGrid";
 import EconomyIndicators from "@/app/components/EconomyIndicators";
-import { getActivePoll, getHomepageArticles, getLatestTonyOpinion } from "@/app/lib/content";
+import { getActivePoll, getArticlesPage, getLatestTonyOpinion } from "@/app/lib/content";
+import { getExchangeRateData, getFuelPriceData } from "@/app/lib/economy";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://dagendang.com';
-const FASTAPI_API_URL = process.env.FASTAPI_API_URL;
 
 export const metadata: Metadata = {
   title: 'DAgendaNG | De Agenda con Nelson Gómez - Diario Digital Económico',
@@ -37,60 +37,37 @@ export const metadata: Metadata = {
 // Always fetch fresh data dynamically
 export const dynamic = 'force-dynamic';
 
-async function fetchFastApi(path: string) {
-  if (!FASTAPI_API_URL) return null;
-
-  try {
-    const res = await fetch(`${FASTAPI_API_URL}${path}`, { cache: 'no-store' });
-    if (!res.ok) return null;
-    return res.json();
-  } catch (error) {
-    console.error("Error fetching FastAPI data:", error);
-    return null;
-  }
-}
-
-async function getExchangeRates() {
-  return fetchFastApi('/api/economy/exchange-rate/latest');
-}
-
-async function getFuelPrices() {
-  return fetchFastApi('/api/economy/fuel-prices/latest');
-}
 
 export default async function Home() {
   const [articles, poll, tonyOpinion, rates, fuel] = await Promise.all([
-    getHomepageArticles(),
+    getArticlesPage(1, 5),
     getActivePoll(),
     getLatestTonyOpinion(),
-    getExchangeRates(),
-    getFuelPrices(),
+    getExchangeRateData(),
+    getFuelPriceData(),
   ]);
 
-  const mainArticle = articles[0] || null;
-  const secondaryArticles = articles.slice(1);
-  const totalArticles = mainArticle ? secondaryArticles.length + 1 : secondaryArticles.length;
+  const mainArticle = articles.articles[0] || null;
+  const secondaryArticles = articles.articles.slice(1);
+  const totalArticles = articles.total;
 
   return (
     <div className="w-full">
-      <AdGuard>
-        <AdBanner position="header" className="border-b border-border-light dark:border-border-dark" />
-      </AdGuard>
-
       <div className="w-full max-w-[1280px] mx-auto px-5 md:px-10 py-10 md:py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-[320px_minmax(0,1fr)_320px] gap-6">
-          <aside className="space-y-8 lg:border-r lg:border-border-light dark:lg:border-border-dark lg:pr-6">
-            <DailyChallengeCard poll={poll} />
-            <AdGuard><AdBanner position="home_left" /></AdGuard>
-          </aside>
-
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-6">
           <section className="lg:px-2">
+            <AdGuard>
+              <AdBanner position="header" className="border-b border-border-light dark:border-border-dark mb-6" />
+            </AdGuard>
+
             <NewsGrid mainArticle={mainArticle} initialArticles={secondaryArticles} totalArticles={totalArticles} pageSize={8} />
           </section>
 
           <aside className="space-y-8 lg:border-l lg:border-border-light dark:lg:border-border-dark lg:pl-6">
             <TonyColumnCard opinion={tonyOpinion} />
             <EconomyIndicators initialRates={rates} initialFuel={fuel} />
+            <DailyChallengeCard poll={poll} />
+            <AdGuard><AdBanner position="home_left" /></AdGuard>
             <AdGuard><AdBanner position="sidebar_top" /></AdGuard>
             <AdGuard><AdBanner position="sidebar_bottom" /></AdGuard>
           </aside>

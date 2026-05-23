@@ -44,12 +44,12 @@ export default function DailyChallengeCard({ poll }: { poll: Poll | null }) {
   }
 
   return (
-    <section className="bg-white border border-slate-200 dark:bg-dark-surface dark:border-border-dark rounded-lg p-6 text-center md:text-left">
+    <section className="bg-card border border-border rounded-lg p-6 text-center md:text-left">
       <span className="block text-[#b6171e] dark:text-[#b6171e] text-xs font-black uppercase tracking-[0.25em] mb-2">Reto Diario</span>
-      <h2 className="font-serif text-2xl font-bold text-primary dark:text-primary-fixed-dim mb-3">
+      <h2 className="font-serif text-2xl font-bold text-dr-blue dark:text-primary-fixed-dim mb-3">
         {poll?.title || "Participa en el reto de hoy"}
       </h2>
-      <p className="text-on-surface-variant dark:text-surface-variant mb-5 leading-relaxed">
+      <p className="text-muted-foreground dark:text-surface-variant mb-5 leading-relaxed">
         {poll?.question || "Muy pronto tendremos un nuevo reto diario para nuestros lectores."}
       </p>
       {poll?.description && <p className="text-sm text-on-surface-variant dark:text-surface-variant mb-4">{poll.description}</p>}
@@ -69,7 +69,7 @@ export default function DailyChallengeCard({ poll }: { poll: Poll | null }) {
             >
               <span className="font-bold mr-2">{option.key}.</span>
               {option.label}
-              {status === "done" && <span className="float-right font-bold text-primary dark:text-primary-fixed-dim">{percent}%</span>}
+              {status === "done" && <span className="float-right font-bold text-dr-blue dark:text-primary-fixed-dim">{percent}%</span>}
             </button>
           );
         })}

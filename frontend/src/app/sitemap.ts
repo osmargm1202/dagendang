@@ -1,9 +1,13 @@
+import { getCategories, getHomepageArticles } from '@/app/lib/content';
 import { MetadataRoute } from 'next';
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://dagendang.com';
 
+function articleRouteId(article: { id?: number | string; slug?: string; documentId?: string }) {
+  return article.slug || article.documentId || article.id;
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // 1. Static Routes
   const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: BASE_URL,
@@ -19,40 +23,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  // 2. Dynamic Categories
-  let categoryRoutes: MetadataRoute.Sitemap = [];
-  try {
-    const res = await fetch('http://backend:8000/api/articles/categories');
-    if (res.ok) {
-      const categories = await res.json();
-      categoryRoutes = categories.map((cat: any) => ({
-        url: `${BASE_URL}/categoria/${cat.slug}`,
-        lastModified: new Date(),
-        changeFrequency: 'daily',
-        priority: 0.8,
-      }));
-    }
-  } catch (error) {
-    console.error("Sitemap: Error fetching categories", error);
-  }
+  const [categories, articles] = await Promise.all([
+    getCategories().catch((error) => {
+      console.error('Sitemap: Error fetching Strapi categories', error);
+      return [];
+    }),
+    getHomepageArticles().catch((error) => {
+      console.error('Sitemap: Error fetching Strapi articles', error);
+      return [];
+    }),
+  ]);
 
-  // 3. Dynamic Articles (all published)
-  let articleRoutes: MetadataRoute.Sitemap = [];
-  try {
-    // Fetch all published articles (limit 1000 for safety)
-    const res = await fetch('http://backend:8000/api/articles/?status=published&limit=1000');
-    if (res.ok) {
-      const articles = await res.json();
-      articleRoutes = articles.map((article: any) => ({
-        url: `${BASE_URL}/noticias/${article.id}`,
-        lastModified: new Date(article.published_at),
-        changeFrequency: 'weekly',
-        priority: 0.7,
-      }));
-    }
-  } catch (error) {
-    console.error("Sitemap: Error fetching articles", error);
-  }
+  const categoryRoutes: MetadataRoute.Sitemap = categories.map((category) => ({
+    url: `${BASE_URL}/categoria/${category.slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'daily',
+    priority: 0.8,
+  }));
+
+  const articleRoutes: MetadataRoute.Sitemap = articles.map((article) => ({
+    url: `${BASE_URL}/noticias/${articleRouteId(article)}`,
+    lastModified: new Date(article.published_at),
+    changeFrequency: 'weekly',
+    priority: 0.7,
+  }));
 
   return [...staticRoutes, ...categoryRoutes, ...articleRoutes];
 }

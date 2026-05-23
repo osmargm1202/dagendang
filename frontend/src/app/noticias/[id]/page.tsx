@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import PremiumContentWrapper from "@/app/components/PremiumContentWrapper";
@@ -9,10 +10,11 @@ import DailyChallengeCard from "@/app/components/DailyChallengeCard";
 import EconomyIndicators from "@/app/components/EconomyIndicators";
 import TonyColumnCard from "@/app/components/TonyColumnCard";
 import { getActivePoll, getArticleBySlugOrId, getHomepageArticles, getLatestTonyOpinion } from "@/app/lib/content";
+import { getExchangeRateData, getFuelPriceData } from "@/app/lib/economy";
 import type { Metadata } from "next";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://dagendang.com";
-const FASTAPI_API_URL = process.env.FASTAPI_API_URL;
+const IMAGE_PLACEHOLDER = "/images/news-placeholder.png";
 
 // Always fetch fresh data dynamically
 export const dynamic = "force-dynamic";
@@ -21,26 +23,6 @@ async function getArticle(id: string) {
   return getArticleBySlugOrId(id);
 }
 
-async function fetchFastApi(path: string) {
-  if (!FASTAPI_API_URL) return null;
-
-  try {
-    const res = await fetch(`${FASTAPI_API_URL}${path}`, { cache: "no-store" });
-    if (!res.ok) return null;
-    return res.json();
-  } catch (error) {
-    console.error("Error fetching FastAPI data:", error);
-    return null;
-  }
-}
-
-async function getExchangeRates() {
-  return fetchFastApi("/api/economy/exchange-rate/latest");
-}
-
-async function getFuelPrices() {
-  return fetchFastApi("/api/economy/fuel-prices/latest");
-}
 
 function articleMatchesId(article: { id?: number | string; slug?: string; documentId?: string }, id: string) {
   return [article.id?.toString(), article.slug, article.documentId].filter(Boolean).includes(id);
@@ -122,8 +104,8 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
     getArticle(id),
     getActivePoll(),
     getLatestTonyOpinion(),
-    getExchangeRates(),
-    getFuelPrices(),
+    getExchangeRateData(),
+    getFuelPriceData(),
   ]);
 
   if (!article) {
@@ -185,34 +167,22 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
           )}
         </nav>
 
-        {/* Main Article Image */}
-        {article.image_url ? (
-          <div className="w-full aspect-video bg-muted mb-8 overflow-hidden border border-border-light dark:border-border-dark">
-            {/* eslint-disable-next-line @next/next/no-img-element -- Project still uses raw image tags until Next remote image config is implemented. */}
-            <img src={article.image_url} alt={article.title} className="w-full h-full object-cover" />
-          </div>
-        ) : (
-          <div className="w-full aspect-video bg-muted mb-8 flex items-center justify-center border border-border-light dark:border-border-dark">
-            <span className="text-muted-foreground">Sin Imagen</span>
-          </div>
-        )}
-
         {/* Header */}
         <header className="mb-8 overflow-hidden">
           <span className="bg-secondary text-white font-black uppercase text-[10px] tracking-[0.2em] px-3 py-1 inline-block mb-6">
             {article.type}
           </span>
-          <h1 className="font-serif text-4xl md:text-6xl font-bold text-dr-blue dark:text-white leading-tight mb-4">
+          <h1 className="font-serif text-4xl md:text-6xl font-bold text-[#001e40] dark:text-white leading-tight mb-4 tracking-tight">
             {article.title}
           </h1>
           {article.subtitle && (
-            <p className="text-xl text-on-surface-variant dark:text-surface-variant leading-relaxed mb-6">{article.subtitle}</p>
+            <p className="text-lg md:text-xl text-on-surface-variant dark:text-surface-variant leading-relaxed mb-6">{article.subtitle}</p>
           )}
 
-          <div className="mt-2 flex flex-col md:flex-row md:items-center justify-between gap-y-3 text-muted-foreground pt-2 border-t border-border-light dark:border-border-dark">
+          <div className="mt-2 flex flex-col md:flex-row md:items-center justify-between gap-y-3 text-muted-foreground py-3 border-y border-border-light dark:border-border-dark">
             <div className="flex items-center gap-3">
-              <span className="font-serif italic text-lg text-foreground/90">
-                Escrito por <span className="font-bold not-italic border-b border-secondary/30 pb-0.5">{article.author || "Redacción DAgendaNG"}</span>
+              <span className="font-sans text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                Por <span className="font-black text-primary">{article.author || "Redacción DAgendaNG"}</span>
               </span>
             </div>
 
@@ -221,13 +191,27 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
               <time className="font-sans text-sm font-semibold text-foreground/70" dateTime={article.published_at}>
                 {new Date(article.published_at).toLocaleDateString("es-DO", { day: "numeric", month: "long", year: "numeric" })}
               </time>
-              <span className="text-gray-300 mx-1">|</span>
+              <span className="text-muted-foreground mx-1">|</span>
               <time className="font-sans text-sm font-bold text-primary/70" dateTime={article.published_at}>
                 {new Date(article.published_at).toLocaleTimeString("es-DO", { hour: "2-digit", minute: "2-digit" })}
               </time>
             </div>
           </div>
         </header>
+
+        {/* Main Article Image */}
+        <figure className="w-full bg-muted mb-8 overflow-hidden border-b border-border-light dark:border-border-dark pb-2">
+          <div className="relative aspect-video overflow-hidden border border-border-light dark:border-border-dark bg-surface-container">
+            <Image
+              src={article.image_url || IMAGE_PLACEHOLDER}
+              alt={article.image_url ? article.title : "Imagen no disponible"}
+              fill
+              priority
+              sizes="(min-width: 1024px) 824px, calc(100vw - 40px)"
+              className="object-contain"
+            />
+          </div>
+        </figure>
 
         {/* Article Content with Premium logic and In-Content Ads */}
         <PremiumContentWrapper content={article.content} isPremium={Boolean(article.is_premium)} />
@@ -279,16 +263,22 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {relatedArticles.map((rel) => (
                 <Link key={articleRouteId(rel)} href={`/noticias/${articleRouteId(rel)}`} className="group space-y-3">
-                  <div className="aspect-video bg-muted overflow-hidden border border-border-light dark:border-border-dark">
-                    {/* eslint-disable-next-line @next/next/no-img-element -- Project still uses raw image tags until Next remote image config is implemented. */}
-                    <img
-                      src={rel.image_url || "/logo.png"}
-                      alt={rel.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  <div className="relative aspect-video bg-muted overflow-hidden border border-border-light dark:border-border-dark">
+                    <Image
+                      src={rel.image_url || IMAGE_PLACEHOLDER}
+                      alt={rel.image_url ? rel.title : "Imagen no disponible"}
+                      fill
+                      sizes="(min-width: 768px) 240px, calc(100vw - 40px)"
+                      className="object-contain transition-transform duration-500"
                     />
+                    {rel.is_premium && (
+                      <span className="absolute left-2 top-2 rounded-sm bg-yellow-400 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-black shadow-sm">
+                        PREMIUM
+                      </span>
+                    )}
                   </div>
                   <span className="block text-[10px] font-bold text-secondary uppercase tracking-widest">{rel.type}</span>
-                  <h4 className="font-bold text-sm leading-snug group-hover:text-dr-blue transition-colors line-clamp-2">
+                  <h4 className="font-bold text-sm leading-snug text-[#001e40] dark:text-white group-hover:text-secondary transition-colors line-clamp-2">
                     {rel.title}
                   </h4>
                 </Link>

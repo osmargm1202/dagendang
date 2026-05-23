@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import AdBanner from "@/app/components/AdBanner";
 import AdGuard from "@/app/components/AdGuard";
+import ArticleThumbnail from "@/app/components/ArticleThumbnail";
 
 export interface Article {
   id?: number;
@@ -17,6 +18,7 @@ export interface Article {
   author?: string;
   subtitle?: string;
   content: string;
+  is_premium?: boolean;
 }
 
 export function hasCompleteInitialArticles(initialArticles: Article[], totalArticles: number) {
@@ -43,7 +45,7 @@ interface NewsGridProps {
 
 export default function NewsGrid(props: NewsGridProps) {
   return (
-    <Suspense fallback={<div className="h-96 flex items-center justify-center animate-pulse bg-gray-100 rounded-sm">Cargando noticias...</div>}>
+    <Suspense fallback={<div className="h-96 flex items-center justify-center animate-pulse bg-muted rounded-sm">Cargando noticias...</div>}>
       <NewsGridContent {...props} />
     </Suspense>
   );
@@ -163,20 +165,17 @@ function NewsGridContent({ mainArticle, initialArticles, totalArticles, pageSize
           {mainArticle ? (
             <Link href={articleHref(mainArticle)} className="group cursor-pointer block transition-transform duration-500 hover:-translate-y-1">
               <article>
-                <div className="w-full aspect-video bg-muted mb-4 relative overflow-hidden flex items-center justify-center border border-border-light dark:border-border-dark">
-                  {mainArticle.image_url ? (
-                    <img 
-                      src={mainArticle.image_url} 
-                      alt={mainArticle.title} 
-                      className="w-full h-full object-cover" 
-                    />
-                  ) : (
-                    <span className="text-gray-400">Sin Imagen</span>
-                  )}
+                <div className="relative mb-4">
+                  <ArticleThumbnail
+                    imageUrl={mainArticle.image_url}
+                    title={mainArticle.title}
+                    isPremium={mainArticle.is_premium}
+                    sizes="(min-width: 1024px) 824px, calc(100vw - 40px)"
+                  />
                   <div className="absolute inset-0 bg-dr-blue/10 group-hover:bg-transparent transition duration-300"></div>
                 </div>
                 <span className="text-secondary dark:text-secondary-fixed-dim font-bold uppercase text-xs tracking-wider">{mainArticle.type}</span>
-                <h2 className="text-4xl md:text-5xl font-serif font-bold mt-3 leading-tight text-dr-blue dark:text-white group-hover:text-secondary transition-colors">
+                <h2 className="text-4xl md:text-5xl font-serif font-bold mt-3 leading-tight text-[#001e40] dark:text-white group-hover:text-secondary transition-colors">
                   {mainArticle.title}
                 </h2>
                 
@@ -213,19 +212,15 @@ function NewsGridContent({ mainArticle, initialArticles, totalArticles, pageSize
         {articles.map((article) => (
           <Link href={articleHref(article)} key={article.slug || article.documentId || article.id} className="group cursor-pointer block">
             <article>
-              <div className="w-full aspect-video bg-muted mb-3 overflow-hidden flex items-center justify-center border border-border-light dark:border-border-dark">
-                {article.image_url ? (
-                  <img 
-                    src={article.image_url} 
-                    alt={article.title} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
-                  />
-                ) : (
-                  <span className="text-gray-400 text-sm">Sin Imagen</span>
-                )}
-              </div>
+              <ArticleThumbnail
+                imageUrl={article.image_url}
+                title={article.title}
+                isPremium={article.is_premium}
+                sizes="(min-width: 768px) 388px, calc(100vw - 40px)"
+                className="mb-3"
+              />
               <span className="text-secondary dark:text-secondary-fixed-dim font-bold uppercase text-[10px] tracking-widest">{article.type}</span>
-              <h3 className="text-xl font-serif font-bold mt-2 leading-snug text-dr-blue dark:text-white group-hover:text-secondary transition-colors">
+              <h3 className="text-xl font-serif font-bold mt-2 leading-snug text-[#001e40] dark:text-white group-hover:text-secondary transition-colors">
                 {article.title}
               </h3>
             </article>
@@ -234,7 +229,7 @@ function NewsGridContent({ mainArticle, initialArticles, totalArticles, pageSize
       </div>
 
       {/* Pagination Controls */}
-      <div className="pt-8 border-t border-gray-100 flex justify-center">
+      <div className="pt-8 border-t border-border flex justify-center">
         {isMobile ? (
           // Mobile: Load More button
           currentPage < totalPages && (
@@ -263,7 +258,7 @@ function NewsGridContent({ mainArticle, initialArticles, totalArticles, pageSize
               <button
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1 || loading}
-                className="px-4 py-2 border border-gray-200 rounded hover:bg-gray-50 disabled:opacity-30 disabled:hover:bg-transparent font-bold transition-all"
+                className="px-4 py-2 border border-border rounded hover:bg-muted disabled:opacity-30 disabled:hover:bg-transparent font-bold transition-all"
               >
                 &larr;
               </button>
@@ -283,7 +278,7 @@ function NewsGridContent({ mainArticle, initialArticles, totalArticles, pageSize
                       className={`w-10 h-10 flex items-center justify-center rounded transition-all font-bold ${
                         currentPage === pageNum 
                           ? 'bg-dr-blue text-white shadow-md' 
-                          : 'hover:bg-gray-100 border border-transparent'
+                          : 'hover:bg-muted border border-transparent'
                       }`}
                     >
                       {pageNum}
@@ -293,7 +288,7 @@ function NewsGridContent({ mainArticle, initialArticles, totalArticles, pageSize
                   pageNum === currentPage - 2 || 
                   pageNum === currentPage + 2
                 ) {
-                  return <span key={pageNum} className="px-1 text-gray-400">...</span>;
+                  return <span key={pageNum} className="px-1 text-muted-foreground">...</span>;
                 }
                 return null;
               })}
@@ -301,7 +296,7 @@ function NewsGridContent({ mainArticle, initialArticles, totalArticles, pageSize
               <button
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages || loading}
-                className="px-4 py-2 border border-gray-200 rounded hover:bg-gray-50 disabled:opacity-30 disabled:hover:bg-transparent font-bold transition-all"
+                className="px-4 py-2 border border-border rounded hover:bg-muted disabled:opacity-30 disabled:hover:bg-transparent font-bold transition-all"
               >
                 &rarr;
               </button>

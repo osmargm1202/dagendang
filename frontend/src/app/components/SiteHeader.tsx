@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import ThemeToggle from "./ThemeToggle";
 
@@ -11,10 +11,15 @@ export default function SiteHeader() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isCategoryMenuOpen, setIsCategoryMenuOpen] = useState(false);
+  const [isCategoryMenuCollapsed, setIsCategoryMenuCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [formattedDate, setFormattedDate] = useState("");
   const [categories, setCategories] = useState<{ slug: string; name: string }[]>([]);
 
+  const categoryMenuRef = useRef<HTMLDivElement | null>(null);
+  const categoryMenuProbeRef = useRef<HTMLDivElement | null>(null);
+  const categoryMenuHostRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     fetch("/api/categories")
       .then(async (res) => {
@@ -39,9 +44,74 @@ export default function SiteHeader() {
   }, [pathname]);
 
   useEffect(() => {
-    const timeoutId = window.setTimeout(() => setIsMenuOpen(false), 0);
+    const timeoutId = window.setTimeout(() => {
+      setIsCategoryMenuOpen(false);
+      setIsMenuOpen(false);
+    }, 0);
     return () => window.clearTimeout(timeoutId);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!isCategoryMenuOpen) {
+      return;
+    }
+
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (!categoryMenuRef.current || !(event.target instanceof Node)) {
+        return;
+      }
+
+      if (!categoryMenuRef.current.contains(event.target)) {
+        setIsCategoryMenuOpen(false);
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsCategoryMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [isCategoryMenuOpen]);
+
+  useEffect(() => {
+    const evaluateCategoryMenu = () => {
+      if (typeof window === "undefined" || window.innerWidth < 768) {
+        setIsCategoryMenuCollapsed(false);
+        return;
+      }
+
+      const host = categoryMenuHostRef.current;
+      const probe = categoryMenuProbeRef.current;
+      if (!host || !probe) {
+        return;
+      }
+
+      const shouldCollapse = probe.scrollWidth > host.clientWidth;
+      setIsCategoryMenuCollapsed(shouldCollapse);
+      if (!shouldCollapse) {
+        setIsCategoryMenuOpen(false);
+      }
+    };
+
+    const rafId = window.requestAnimationFrame(evaluateCategoryMenu);
+    const handleResize = () => {
+      window.requestAnimationFrame(evaluateCategoryMenu);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [categories]);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -75,6 +145,7 @@ export default function SiteHeader() {
     if (searchQuery.trim()) {
       router.push(`/buscar?q=${encodeURIComponent(searchQuery.trim())}`);
       setIsMenuOpen(false);
+      setIsCategoryMenuOpen(false);
     }
   };
 
@@ -97,15 +168,15 @@ export default function SiteHeader() {
           <div className="flex flex-1 items-center justify-end gap-3">
             <form
               onSubmit={handleSearch}
-              className="hidden md:flex items-center border border-border dark:border-border-dark h-10 px-3 bg-surface dark:bg-dark-surface"
+              className="hidden md:flex items-center border border-border dark:border-border-dark h-10 px-3 bg-surface dark:bg-dark-surface text-foreground"
             >
               <input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Buscar"
-                className="bg-transparent outline-none text-sm w-32 text-foreground placeholder:text-muted-foreground"
+                className="bg-transparent outline-none text-sm w-32 text-foreground placeholder:text-muted-foreground font-sans"
               />
-              <button type="submit" className="text-primary dark:text-primary-fixed-dim" aria-label="Buscar">
+              <button type="submit" className="text-foreground font-sans" aria-label="Buscar">
                 ⌕
               </button>
             </form>
@@ -149,19 +220,72 @@ export default function SiteHeader() {
           </div>
         </div>
 
-        <nav className="hidden md:flex justify-center gap-6 border-t border-border-light dark:border-border-dark pt-3 overflow-x-auto">
-          <Link href="/" className="text-secondary text-sm font-bold uppercase tracking-widest border-b-2 border-secondary pb-1">
-            Inicio
-          </Link>
+        <div
+          ref={categoryMenuProbeRef}
+          aria-hidden="true"
+          className="fixed -left-[9999px] top-0 inline-flex items-center gap-4 text-sm font-bold uppercase tracking-[0.2em] whitespace-nowrap"
+        >
+          <span className="text-secondary border-b-2 border-secondary pb-1">Inicio</span>
           {categories.map((cat) => (
-            <Link
-              key={cat.slug}
-              href={`/categoria/${cat.slug}`}
-              className="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim text-sm font-bold uppercase tracking-widest pb-1 whitespace-nowrap"
+            <span
+              key={`probe-${cat.slug}`}
+              className="text-on-surface-variant dark:text-surface-variant"
             >
               {cat.name}
-            </Link>
+            </span>
           ))}
+        </div>
+
+        <nav ref={categoryMenuHostRef} className="hidden md:flex items-center gap-4 border-t border-border-light dark:border-border-dark pt-3">
+          <Link href="/" className="text-secondary text-sm font-black uppercase tracking-widest border-b-2 border-secondary pb-1 flex-shrink-0">
+            Inicio
+          </Link>
+
+          {isCategoryMenuCollapsed ? (
+            <div ref={categoryMenuRef} className="relative">
+              <button
+                type="button"
+                onClick={() => setIsCategoryMenuOpen((current) => !current)}
+                className="text-sm font-bold uppercase tracking-widest text-primary dark:text-primary-fixed-dim transition-colors inline-flex items-center gap-2"
+              >
+                Categorías
+                <span className={`text-[9px] transition-transform duration-300 ${isCategoryMenuOpen ? "rotate-180" : ""}`}>▾</span>
+              </button>
+
+              {isCategoryMenuOpen && (
+                <div className="absolute left-0 top-full mt-3 w-72 max-h-80 overflow-y-auto bg-background dark:bg-dark-surface border border-border dark:border-border-dark shadow-xl z-50">
+                  <div className="p-2 flex flex-col">
+                    {categories.length === 0 ? (
+                      <span className="text-sm text-muted-foreground px-2 py-2">Sin categorías</span>
+                    ) : (
+                      categories.map((cat) => (
+                        <Link
+                          key={cat.slug}
+                          href={`/categoria/${cat.slug}`}
+                          onClick={() => setIsCategoryMenuOpen(false)}
+                          className="px-3 py-2 text-xs font-bold uppercase tracking-[0.18em] text-on-surface-variant hover:bg-primary-container hover:text-dr-blue transition-colors"
+                        >
+                          {cat.name}
+                        </Link>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex items-center gap-4 overflow-hidden whitespace-nowrap">
+              {categories.map((cat) => (
+                <Link
+                  key={cat.slug}
+                  href={`/categoria/${cat.slug}`}
+                  className="text-on-surface-variant dark:text-surface-variant hover:text-primary dark:hover:text-primary-fixed-dim text-sm font-bold uppercase tracking-widest pb-1 whitespace-nowrap"
+                >
+                  {cat.name}
+                </Link>
+              ))}
+            </div>
+          )}
         </nav>
       </div>
 
@@ -177,7 +301,7 @@ export default function SiteHeader() {
               placeholder="¿Qué estás buscando?"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-surface dark:bg-dark-surface border border-border-light dark:border-border-dark w-full px-4 py-3 text-xs font-bold focus:outline-none focus:border-secondary transition-all placeholder:text-muted-foreground tracking-widest text-center"
+              className="bg-surface dark:bg-dark-surface border border-border-light dark:border-border-dark w-full px-4 py-3 text-xs text-foreground placeholder:text-muted-foreground font-bold focus:outline-none focus:border-secondary transition-all tracking-widest text-center font-sans"
             />
             <button type="submit" className="sr-only">
               Buscar

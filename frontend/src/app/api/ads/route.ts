@@ -2,21 +2,24 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAdvertisements } from "@/app/lib/content";
 
 const POSITION_ALIASES: Record<string, string[]> = {
-  header: ["header", "home_header", "top", "top_banner"],
-  home_left: ["home_left", "home_side", "left", "sidebar_left"],
-  home_middle: ["home_middle", "home_center", "middle", "in_content"],
-  sidebar_top: ["sidebar_top", "home_side", "right", "sidebar_right"],
-  sidebar_bottom: ["sidebar_bottom", "home_side", "right_bottom", "sidebar_right"],
-  article_sidebar: ["article_sidebar", "article_side", "sidebar_article"],
+  header: ["header"],
+  home_left: ["home_left"],
+  home_middle: ["home_middle"],
+  sidebar_top: ["sidebar_top"],
+  sidebar_bottom: ["sidebar_bottom"],
+  article_sidebar: ["article_sidebar"],
+  content_middle: ["content_middle"],
 };
+
+const MAX_ADS_PER_POSITION = 10;
 
 export async function GET(request: NextRequest) {
   const position = request.nextUrl.searchParams.get("position") || undefined;
 
   try {
     const requestedPositions = position ? POSITION_ALIASES[position] || [position] : [undefined];
-    const results = await Promise.all(requestedPositions.map((item) => getAdvertisements(item)));
-    const ads = results.flat();
+    const results = await Promise.all(requestedPositions.map((item) => getAdvertisements(item, MAX_ADS_PER_POSITION)));
+    const ads = results.flat().slice(0, MAX_ADS_PER_POSITION);
 
     return NextResponse.json(
       ads.flatMap((ad) =>
@@ -26,7 +29,12 @@ export async function GET(request: NextRequest) {
           image_url: imageUrl,
           link_url: ad.linkUrl || "#",
           position: ad.position,
-          rotation_seconds: 5,
+          rotation_seconds: ad.rotationSeconds || 5,
+          advertiser_name: ad.advertiserName,
+          site_name: ad.siteName,
+          site_url: ad.siteUrl,
+          contact_name: ad.contactName,
+          contact_phone: ad.contactPhone,
         })),
       ),
     );

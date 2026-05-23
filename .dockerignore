@@ -1,0 +1,17 @@
+.git
+.gitignore
+Dockerfile
+Justfile
+README.md
+backend
+backups
+uploads
+design
+docs
+sdd-orchestrator
+frontend/.next
+frontend/node_modules
+frontend/.env
+frontend/.env.*
+frontend/tsconfig.tsbuildinfo
+*.log

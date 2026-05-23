@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AdBanner from "@/app/components/AdBanner";
+import ArticleThumbnail from "@/app/components/ArticleThumbnail";
 import type { Metadata } from "next";
 import { getArticlesByCategory, getCategories } from "@/app/lib/content";
 
@@ -55,8 +56,8 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
       <AdBanner position="header" className="mb-10" />
 
       <header className="mb-10 text-center">
-        <span className="text-secondary dark:text-secondary-fixed-dim text-xs font-black uppercase tracking-[0.3em]">Categoría</span>
-        <h1 className="mt-3 text-4xl md:text-5xl font-serif font-black tracking-tight text-dr-blue dark:text-dr-blue border-b-2 border-secondary pb-4 inline-block">
+        <span className="block text-secondary dark:text-secondary-fixed-dim text-xs font-black uppercase tracking-[0.3em] mb-2">Categoría</span>
+        <h1 className="mt-1 text-4xl md:text-5xl font-serif font-black tracking-tight text-[#001e40] dark:text-white border-b-2 border-secondary pb-4 block max-w-fit mx-auto">
           {categoryName}
         </h1>
         <p className="mt-4 text-muted-foreground font-sans tracking-wide">Últimas noticias en {categoryName}</p>
@@ -66,17 +67,16 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
         {articles.length > 0 ? (
           articles.map((article) => (
             <Link href={`/noticias/${article.slug || article.documentId || article.id}`} key={article.documentId || article.id} className="group cursor-pointer block">
-              <article className="border border-slate-200 dark:border-border-dark bg-white dark:bg-dark-surface p-3 h-full">
-                <div className="w-full aspect-video bg-muted mb-3 overflow-hidden flex items-center justify-center">
-                  {article.image_url ? (
-                    // eslint-disable-next-line @next/next/no-img-element -- Strapi/S3 image URLs are already optimized by media formats.
-                    <img src={article.image_url} alt={article.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                  ) : (
-                    <span className="text-muted-foreground text-sm">Sin Imagen</span>
-                  )}
-                </div>
+              <article className="border border-border bg-card p-3 h-full">
+                <ArticleThumbnail
+                  imageUrl={article.image_url}
+                  title={article.title}
+                  isPremium={article.is_premium}
+                  sizes="(min-width: 1024px) 390px, (min-width: 768px) 50vw, calc(100vw - 40px)"
+                  className="mb-3"
+                />
                 <span className="text-secondary dark:text-secondary-fixed-dim font-bold uppercase text-xs tracking-wider">{article.type}</span>
-                <h3 className="text-xl font-serif font-bold mt-2 leading-snug text-dr-blue dark:text-white group-hover:text-secondary transition-colors">
+                <h3 className="text-xl font-serif font-bold mt-2 leading-snug text-[#001e40] dark:text-white group-hover:text-secondary transition-colors">
                   {article.title}
                 </h3>
                 <div className="mt-2 text-xs text-muted-foreground flex items-center gap-2">
@@ -86,7 +86,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
             </Link>
           ))
         ) : (
-          <div className="col-span-full text-center py-20 text-muted-foreground text-lg border border-slate-200 dark:border-border-dark bg-white dark:bg-dark-surface">
+          <div className="col-span-full text-center py-20 text-muted-foreground text-lg border border-border bg-card">
             No hay noticias publicadas en esta categoría aún.
           </div>
         )}

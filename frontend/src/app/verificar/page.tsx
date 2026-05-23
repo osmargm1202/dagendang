@@ -39,11 +39,11 @@ function VerifyContent() {
   }, [token]);
 
   return (
-    <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-lg border border-gray-100 text-center">
+    <div className="max-w-md w-full space-y-8 bg-card p-10 rounded-xl shadow-lg border border-border text-center">
       {status === "loading" && (
         <div className="space-y-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-dr-blue mx-auto"></div>
-          <p className="text-gray-600 font-medium whitespace-pre-wrap">Verificando tu cuenta...</p>
+          <p className="text-muted-foreground font-medium whitespace-pre-wrap">Verificando tu cuenta...</p>
         </div>
       )}
 
@@ -54,8 +54,8 @@ function VerifyContent() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900">¡Verificación Exitosa!</h2>
-          <p className="mt-4 text-gray-600 whitespace-pre-wrap">{message}</p>
+          <h2 className="text-2xl font-bold text-foreground">¡Verificación Exitosa!</h2>
+          <p className="mt-4 text-muted-foreground whitespace-pre-wrap">{message}</p>
           <div className="mt-8">
             <Link href="/login" className="inline-flex items-center justify-center px-8 py-3 border border-transparent text-sm font-bold rounded-sm text-white bg-dr-blue hover:bg-dr-blue/90 transition-all uppercase tracking-widest">
               Iniciar Sesión
@@ -71,10 +71,10 @@ function VerifyContent() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900">Error de Verificación</h2>
+          <h2 className="text-2xl font-bold text-foreground">Error de Verificación</h2>
           <p className="mt-4 text-red-600 font-medium whitespace-pre-wrap">{message}</p>
           <div className="mt-8">
-            <Link href="/registro" className="inline-flex items-center justify-center px-8 py-3 border border-gray-300 text-sm font-bold rounded-sm text-gray-700 bg-white hover:bg-gray-50 transition-all uppercase tracking-widest">
+            <Link href="/registro" className="inline-flex items-center justify-center px-8 py-3 border border-border text-sm font-bold rounded-sm text-foreground bg-card hover:bg-muted transition-all uppercase tracking-widest">
               Intentar Registrarse de Nuevo
             </Link>
           </div>
@@ -86,11 +86,11 @@ function VerifyContent() {
 
 export default function VerifyPage() {
   return (
-    <div className="w-full min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="w-full min-h-screen flex items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8 text-foreground">
       <Suspense fallback={
-        <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-lg border border-gray-100 text-center">
+        <div className="max-w-md w-full space-y-8 bg-card p-10 rounded-xl shadow-lg border border-border text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-dr-blue mx-auto"></div>
-          <p className="text-gray-600 font-medium">Cargando...</p>
+          <p className="text-muted-foreground font-medium">Cargando...</p>
         </div>
       }>
         <VerifyContent />

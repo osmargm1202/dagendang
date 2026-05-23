@@ -1,7 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import DefaultAd from "@/app/components/DefaultAd";
 
 interface Ad {
   id: string;
@@ -24,9 +26,10 @@ const AD_POSITION_CONFIG: Record<string, { label: string; size: string; classNam
   sidebar_top: { label: "Publicidad", size: "300x250", className: "min-h-[220px] md:min-h-[250px]" },
   sidebar_bottom: { label: "Publicidad", size: "300x600", className: "min-h-[320px] md:min-h-[420px]" },
   article_sidebar: { label: "Espacio patrocinado", size: "300x600", className: "min-h-[320px] md:min-h-[420px]" },
+  content_middle: { label: "Publicidad", size: "1600x500", className: "min-h-24 md:aspect-[16/5]" },
 };
 
-const CONTACT_NUMBER = "829-988-3375";
+const IMAGE_PLACEHOLDER = "/images/news-placeholder.png";
 
 export default function AdBanner({ position, className = "" }: AdBannerProps) {
   const [ads, setAds] = useState<Ad[]>([]);
@@ -54,6 +57,7 @@ export default function AdBanner({ position, className = "" }: AdBannerProps) {
         }
       } catch (error) {
         console.error(`Error fetching ads for ${position}:`, error);
+        setAds([]);
       } finally {
         setLoading(false);
       }
@@ -86,16 +90,9 @@ export default function AdBanner({ position, className = "" }: AdBannerProps) {
   const ad = ads[currentIndex] || ads[0];
 
   if (!ad) {
-    return (
-      <div className={`w-full bg-white dark:bg-dark-surface border border-dashed border-slate-200 dark:border-border-dark flex flex-col items-center justify-center text-center px-4 ${config.className} ${className}`}>
-        <span className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground mb-2">{config.label}</span>
-        <strong className="font-serif text-xl text-primary dark:text-primary-fixed-dim">Anúnciate aquí</strong>
-        <span className="text-sm text-on-surface-variant dark:text-surface-variant mt-2">{config.size}</span>
-        <span className="text-sm font-bold text-[#b6171e] dark:text-[#b6171e] mt-3">Contacto: {CONTACT_NUMBER}</span>
-      </div>
-    );
+    return <DefaultAd position={position} className={`${config.className} ${className}`} />;
   }
-  const imageUrl = ad.image_url;
+  const imageUrl = ad.image_url || IMAGE_PLACEHOLDER;
 
   // Strict dimensions for header to prevent layout shift
   const isHeader = position === 'header';
@@ -104,13 +101,15 @@ export default function AdBanner({ position, className = "" }: AdBannerProps) {
     : `${config.className} w-full`;
 
   return (
-    <div className={`overflow-hidden border border-slate-200 dark:border-border-dark bg-white dark:bg-dark-bg shadow-sm relative group transition-all duration-1000 ${containerClasses} ${className}`}>
-      <Link href={ad.link_url || "#"} target="_blank" rel="noopener noreferrer" className="block w-full h-full p-2 md:p-0">
-        <img
+    <div className={`overflow-hidden border border-border shadow-sm relative group transition-all duration-1000 ${containerClasses} ${className}`}>
+      <Link href={ad.link_url || "#"} target="_blank" rel="noopener noreferrer" className="relative block w-full h-full p-2 md:p-0">
+        <Image
           key={ad.id}
           src={imageUrl}
-          alt={ad.title}
-          className="w-full h-full max-h-[320px] md:max-h-none object-contain md:object-cover transition-all duration-500 group-hover:scale-[1.02] animate-in fade-in zoom-in-95 duration-700"
+          alt={ad.image_url ? ad.title : "Imagen no disponible"}
+          fill
+          sizes={isHeader ? "(min-width: 768px) 728px, calc(100vw - 40px)" : "300px"}
+          className="object-contain transition-all duration-500 group-hover:scale-[1.02] animate-in fade-in zoom-in-95 duration-700"
         />
         <div className="absolute top-0 right-0 bg-black/50 text-[10px] text-white px-2 font-sans py-0.5 rounded-bl-sm">
             Publicidad

@@ -1,29 +1,29 @@
+import { getHomepageArticles, type Article } from '@/app/lib/content';
 import { NextResponse } from 'next/server';
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'https://dagendang.com';
 
+function articleRouteId(article: { id?: number | string; slug?: string; documentId?: string }) {
+  return article.slug || article.documentId || article.id;
+}
+
 export async function GET() {
-  let articles = [];
+  let articles: Article[] = [];
   try {
-    // Fetch recent articles (last 48 hours roughly, but we'll fetch last 50 for safety)
-    const res = await fetch('http://backend:8000/api/articles/?status=published&limit=50', { cache: 'no-store' });
-    if (res.ok) {
-      const allArticles = await res.json();
-      const twoDaysAgo = new Date();
-      twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
-      
-      articles = allArticles.filter((a: any) => new Date(a.published_at) >= twoDaysAgo);
-    }
+    const allArticles = await getHomepageArticles();
+    const twoDaysAgo = new Date();
+    twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+    articles = allArticles.filter((article) => new Date(article.published_at) >= twoDaysAgo);
   } catch (error) {
-    console.error("News Sitemap Error:", error);
+    console.error('News Sitemap Error:', error);
   }
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
-  ${articles.map((article: any) => `
+  ${articles.map((article) => `
     <url>
-      <loc>${BASE_URL}/noticias/${article.id}</loc>
+      <loc>${BASE_URL}/noticias/${articleRouteId(article)}</loc>
       <news:news>
         <news:publication>
           <news:name>DAgendaNG</news:name>
@@ -45,14 +45,14 @@ export async function GET() {
 }
 
 function escapeXml(unsafe: string) {
-    return unsafe.replace(/[<>&"']/g, function (c) {
-        switch (c) {
-            case '<': return '&lt;';
-            case '>': return '&gt;';
-            case '&': return '&amp;';
-            case '"': return '&quot;';
-            case "'": return '&apos;';
-        }
-        return c;
-    });
+  return unsafe.replace(/[<>&"']/g, (char) => {
+    switch (char) {
+      case '<': return '&lt;';
+      case '>': return '&gt;';
+      case '&': return '&amp;';
+      case '"': return '&quot;';
+      case "'": return '&apos;';
+      default: return char;
+    }
+  });
 }

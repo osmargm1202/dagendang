@@ -1,16 +1,18 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #FCFBF9;
+  --background: #fcf8f9;
   --foreground: #1b1b1c;
   --muted: #f0edee;
   --muted-foreground: #43474f;
   --accent: #f6f3f4;
-  --border: #E5E3E0;
+  --border: #e5e3e0;
   --card: #fcf8f9;
   --card-foreground: #1b1b1c;
   --primary: #001e40;
-  --primary-container: #003366;
+  --primary-container: #d5e3ff;
   --primary-foreground: #ffffff;
   --secondary: #b6171e;
   --secondary-foreground: #ffffff;
@@ -21,6 +23,7 @@
   --surface-variant: #e5e2e3;
   --on-surface-variant: #43474f;
   --dark-bg: #0B111B;
+  --dr-blue: #001e40;
   --dark-surface: #161F2C;
   --border-light: #E5E3E0;
   --border-dark: #2D3748;
@@ -40,9 +43,10 @@
   --primary: #a7c8ff;
   --primary-container: #a7c8ff;
   --primary-foreground: #001b3c;
-  --secondary: #ffb3ac;
-  --secondary-foreground: #410003;
+  --secondary: #b6171e;
+  --secondary-foreground: #ffffff;
   --surface-variant: #e5e2e3;
+  --dr-blue: #7eaef8;
 }
 
 @theme inline {
@@ -71,8 +75,8 @@
   --color-border-dark: var(--border-dark);
   --color-primary-fixed-dim: var(--primary-fixed-dim);
   --color-secondary-fixed-dim: var(--secondary-fixed-dim);
-  --color-dr-blue: #002D62;
-  --color-dr-red: #C1121F;
+  --color-dr-blue: var(--dr-blue);
+  --color-dr-red: #b6171e;
   --color-dr-white: #FFFFFF;
   --font-sans: var(--font-inter);
   --font-serif: var(--font-playfair);
@@ -91,9 +95,10 @@
     --primary: #a7c8ff;
     --primary-container: #a7c8ff;
     --primary-foreground: #001b3c;
-    --secondary: #ffb3ac;
-    --secondary-foreground: #410003;
+    --secondary: #b6171e;
+    --secondary-foreground: #ffffff;
     --surface-variant: #e5e2e3;
+    --dr-blue: #7eaef8;
   }
 }
 

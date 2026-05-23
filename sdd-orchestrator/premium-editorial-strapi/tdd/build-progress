@@ -1,0 +1,33 @@
+{
+  "path": "sdd-orchestrator/premium-editorial-strapi/tdd/build-progress",
+  "group": "Task 11: Restyle article detail with Strapi data",
+  "status": "DONE",
+  "files_changed": [
+    "frontend/src/app/noticias/[id]/page.tsx"
+  ],
+  "tdd_applicability_reason": "No configured frontend test script or existing frontend test files are present; strict executable TDD was not applicable. RED was captured by pre-change inspection showing the article detail still fetched FastAPI directly, used the legacy max-w-7xl four-column layout, passed legacy ad fields to PremiumContentWrapper, and lacked Strapi sidebar fetches/components. Verification used targeted ESLint and production build.",
+  "verification": [
+    {
+      "command": "grep frontend/src/app/noticias/[id]/page.tsx for legacy FastAPI article fetch, max-w-7xl layout, legacy ad_image_url, and sidebar_top ad",
+      "result": "failed condition confirmed before edit"
+    },
+    {
+      "command": "cd frontend && bunx eslint src/app/noticias/[id]/page.tsx",
+      "result": "passed with no output"
+    },
+    {
+      "command": "cd frontend && bun run build",
+      "result": "passed; build logged pre-existing sitemap backend DNS fetch warnings (getaddrinfo ENOTFOUND backend) but completed successfully"
+    },
+    {
+      "command": "cd frontend && bun run lint",
+      "result": "failed due to pre-existing repository-wide lint errors outside frontend/src/app/noticias/[id]/page.tsx"
+    }
+  ],
+  "risks": [
+    "Full repository lint remains failing due to pre-existing errors outside frontend/src/app/noticias/[id]/page.tsx.",
+    "Build completed, but sitemap generation cannot reach backend hostname from this environment.",
+    "CommentsSection requires a numeric articleId; for slug-only Strapi articles without legacy id, comments are omitted to avoid passing an invalid id.",
+    "Progress artifact is intentionally uncommitted per instruction not to commit sdd artifacts."
+  ]
+}

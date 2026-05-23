@@ -104,10 +104,10 @@ export default function CommentsSection({ articleId }: { articleId: number }) {
       </h3>
 
       {/* Comment Form */}
-      <div className="mb-12 bg-gray-50 p-6 rounded-lg border border-gray-100">
+      <div className="mb-12 bg-muted p-6 rounded-lg border border-border">
         {!user ? (
           <div className="text-center py-4">
-            <p className="text-gray-600 mb-4">Inicia sesión para unirte a la conversación.</p>
+            <p className="text-muted-foreground mb-4">Inicia sesión para unirte a la conversación.</p>
             <div className="flex justify-center gap-4">
               <Link href="/login" className="px-6 py-2 bg-dr-blue text-white font-bold rounded-sm text-sm uppercase tracking-wider">Iniciar Sesión</Link>
               <Link href="/registro" className="px-6 py-2 border border-dr-blue text-dr-blue font-bold rounded-sm text-sm uppercase tracking-wider">Registrarse</Link>
@@ -131,7 +131,7 @@ export default function CommentsSection({ articleId }: { articleId: number }) {
         ) : (
           <form onSubmit={handlePostComment}>
             <textarea
-              className="w-full p-4 border border-gray-200 rounded-md focus:ring-dr-blue focus:border-dr-blue resize-none min-h-[100px] text-sm"
+              className="w-full p-4 border border-border rounded-md focus:ring-dr-blue focus:border-dr-blue resize-none min-h-[100px] text-sm bg-card text-foreground"
               placeholder="Escribe tu opinión con respeto..."
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
@@ -142,7 +142,7 @@ export default function CommentsSection({ articleId }: { articleId: number }) {
               <button
                 type="submit"
                 disabled={isPosting || !newComment.trim()}
-                className="px-8 py-3 bg-dr-blue text-white font-bold rounded-sm text-xs uppercase tracking-widest hover:bg-dr-blue/90 transition-all disabled:bg-gray-300"
+                className="px-8 py-3 bg-dr-blue text-white font-bold rounded-sm text-xs uppercase tracking-widest hover:bg-dr-blue/90 transition-all disabled:bg-muted-foreground/30"
               >
                 {isPosting ? "Publicando..." : "Publicar Comentario"}
               </button>
@@ -158,7 +158,7 @@ export default function CommentsSection({ articleId }: { articleId: number }) {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-dr-blue"></div>
           </div>
         ) : comments.length === 0 ? (
-          <p className="text-center text-gray-500 py-8 italic font-serif">Aún no hay comentarios en esta noticia. ¡Sé el primero en opinar!</p>
+          <p className="text-center text-muted-foreground py-8 italic font-serif">Aún no hay comentarios en esta noticia. ¡Sé el primero en opinar!</p>
         ) : (
           comments.map((comment) => (
             <div key={comment.id} className="flex gap-4 group">
@@ -167,12 +167,12 @@ export default function CommentsSection({ articleId }: { articleId: number }) {
               </div>
               <div className="flex-grow">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="font-bold text-sm text-gray-900">{comment.user_full_name}</span>
-                  <span className="text-[10px] text-gray-400 font-medium">
+                  <span className="font-bold text-sm text-foreground">{comment.user_full_name}</span>
+                  <span className="text-[10px] text-muted-foreground font-medium">
                     {new Date(comment.created_at).toLocaleDateString('es-DO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
-                <div className="text-sm text-gray-700 leading-relaxed bg-white p-4 rounded-lg rounded-tl-none border border-gray-100 shadow-sm group-hover:border-dr-blue/20 transition-all">
+                <div className="text-sm text-foreground leading-relaxed bg-card p-4 rounded-lg rounded-tl-none border border-border shadow-sm group-hover:border-dr-blue/20 transition-all">
                   {comment.content}
                 </div>
               </div>

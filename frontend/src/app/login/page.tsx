@@ -51,11 +51,11 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="w-full min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-lg border border-gray-100">
+    <div className="w-full min-h-screen flex items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8 text-foreground">
+      <div className="max-w-md w-full space-y-8 bg-card p-10 rounded-xl shadow-lg border border-border">
         <div className="text-center">
           <h2 className="text-3xl font-serif font-black text-dr-blue tracking-tighter">DAgendaNG</h2>
-          <h3 className="mt-4 text-xl font-bold text-gray-900">
+          <h3 className="mt-4 text-xl font-bold text-foreground">
             Iniciar Sesión
           </h3>
         </div>
@@ -69,24 +69,24 @@ export default function LoginPage() {
           
           <div className="rounded-md shadow-sm space-y-3">
             <div>
-              <label htmlFor="email-address" className="block text-xs font-bold text-gray-700 uppercase mb-1">Correo Electrónico</label>
+              <label htmlFor="email-address" className="block text-xs font-bold text-muted-foreground uppercase mb-1">Correo Electrónico</label>
               <input
                 id="email-address"
                 type="email"
                 required
-                className="appearance-none rounded-sm relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-dr-blue focus:border-dr-blue sm:text-sm"
+                className="appearance-none rounded-sm relative block w-full px-3 py-3 border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-dr-blue focus:border-dr-blue sm:text-sm"
                 placeholder="ejemplo@correo.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div>
-              <label htmlFor="password"  className="block text-xs font-bold text-gray-700 uppercase mb-1">Contraseña</label>
+              <label htmlFor="password"  className="block text-xs font-bold text-muted-foreground uppercase mb-1">Contraseña</label>
               <input
                 id="password"
                 type="password"
                 required
-                className="appearance-none rounded-sm relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-dr-blue focus:border-dr-blue sm:text-sm"
+                className="appearance-none rounded-sm relative block w-full px-3 py-3 border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-dr-blue focus:border-dr-blue sm:text-sm"
                 placeholder="********"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -98,14 +98,14 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-sm text-white bg-dr-blue hover:bg-dr-blue/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dr-blue transition-all uppercase tracking-widest disabled:bg-gray-400"
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-sm text-white bg-dr-blue hover:bg-dr-blue/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-dr-blue transition-all uppercase tracking-widest disabled:bg-muted-foreground/30"
             >
               {isLoading ? "Cargando..." : "Ingresar"}
             </button>
           </div>
 
           <div className="text-center pt-4">
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                   ¿No tienes cuenta?{" "}
                   <Link href="/registro" className="text-dr-blue font-bold hover:underline">
                       Regístrate aquí
