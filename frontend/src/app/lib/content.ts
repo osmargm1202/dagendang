@@ -152,7 +152,7 @@ export function normalizeArticle(item: RawArticle): Article {
     adImages,
     published_at: textOrEmpty(item.publishedDate) || textOrEmpty(item.publishedAt) || textOrEmpty(item.published_at) || new Date().toISOString(),
     author: textOrEmpty(item.authorName) || textOrEmpty(item.author),
-    content: textOrEmpty(item.body) || textOrEmpty(item.content) || textOrEmpty(item.legacyContent),
+    content: richTextToPlainText(item.body) || textOrEmpty(item.body) || textOrEmpty(item.content) || textOrEmpty(item.legacyContent),
     is_premium: Boolean((item.isPremium as boolean) ?? (item.is_premium as boolean)),
   };
 }
