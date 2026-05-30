@@ -258,19 +258,55 @@ export async function getHomepageArticles(): Promise<Article[]> {
   return (await getArticlesPage(1, 100)).articles;
 }
 
-export async function getArticlesByCategory(slug: string): Promise<Article[]> {
-  const target = normalizeSlug(slug);
-  const payload = await strapiFetch<StrapiCollection<RawArticle> | RawArticle[]>(`/api/articles?status=published&pagination[pageSize]=100&${ARTICLE_SORT}&${ARTICLE_POPULATE}`);
-  const data = toArray(payload);
+export async function getArticlesByCategoryPage(slug: string, page = 1, pageSize = 12, search = ""): Promise<ArticlePageResult> {
+  const safePage = Math.max(1, page);
+  const safePageSize = Math.max(1, pageSize);
+  const normalizedSearch = search.trim().toLowerCase();
+  const params = new URLSearchParams();
+  params.set("status", "published");
+  params.set("filters[category][slug][$eq]", slug);
 
-  return data
-    .map(normalizeArticle)
-    .filter((article) => {
-      const articleType = normalizeSlug(article.type);
-      const articleTitleAsCategory = normalizeSlug(article.slug);
-      return articleType === target || articleTitleAsCategory === target;
-    })
-    .filter((article) => article.title);
+  if (normalizedSearch) {
+    params.set("pagination[page]", "1");
+    params.set("pagination[pageSize]", "500");
+
+    const path = `/api/articles?${params.toString()}&${ARTICLE_SORT}&${ARTICLE_POPULATE}`;
+    const payload = await strapiFetch<StrapiCollection<RawArticle> | RawArticle[]>(path);
+    const articles = toArray(payload)
+      .map(normalizeArticle)
+      .filter((article) => article.title)
+      .filter((article) => [article.title, article.subtitle, article.content, article.author || "", article.type].join(" ").toLowerCase().includes(normalizedSearch));
+    const start = (safePage - 1) * safePageSize;
+
+    return {
+      articles: articles.slice(start, start + safePageSize),
+      total: articles.length,
+      page: safePage,
+      pageSize: safePageSize,
+      pageCount: Math.ceil(articles.length / safePageSize),
+    };
+  }
+
+  params.set("pagination[page]", String(safePage));
+  params.set("pagination[pageSize]", String(safePageSize));
+
+  const path = `/api/articles?${params.toString()}&${ARTICLE_SORT}&${ARTICLE_POPULATE}`;
+  const payload = await strapiFetch<StrapiCollection<RawArticle> | RawArticle[]>(path);
+  const data = toArray(payload);
+  const meta = !Array.isArray(payload) && payload?.meta && typeof payload.meta === "object" ? payload.meta as { pagination?: { total?: number; page?: number; pageSize?: number; pageCount?: number } } : {};
+  const pagination = meta.pagination || {};
+
+  return {
+    articles: data.map(normalizeArticle).filter((article) => article.title),
+    total: pagination.total || data.length,
+    page: pagination.page || safePage,
+    pageSize: pagination.pageSize || safePageSize,
+    pageCount: pagination.pageCount || 1,
+  };
+}
+
+export async function getArticlesByCategory(slug: string): Promise<Article[]> {
+  return (await getArticlesByCategoryPage(slug, 1, 100)).articles;
 }
 
 export async function getAdvertisements(position?: string, limit = 10): Promise<Advertisement[]> {
